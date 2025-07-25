@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TicketBox Clone</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/icons8-ticket-50.png') }}" type="image/png">
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        <a href="/"><img src="{{ url_for('static', filename='images/icons8-ticket-100.png') }}" alt="Ticketbox Logo"
+                         class="logo-img"></a>
+    </div>
+    <form class="search-bar" method="get" action="/">
+        <input type="text" name="q" value="{{ search }}" placeholder="Bạn tìm gì hôm nay?">
+        <button type="submit">Tìm kiếm</button>
+    </form>
+
+    <div class="header-actions">
+        <a href="/new-event" class="create-event">
+            <span>Tạo sự kiện</span>
+        </a>
+        <a href="/my-ticket" class="my-ticket">
+            <img src="{{ url_for('static', filename='images/icons8-ticket-30.png') }}" alt="ticket icon"
+                 class="ticket-icon">
+            <span>Vé của tôi</span>
+        </a>
+    </div>
+
+<div class="auth-links">
+    {% if current_user %}
+        👋 Xin chào, <strong>{{ current_user.username }}</strong> |
+        <a href="/logout">Đăng xuất</a>
+    {% else %}
+        <a href="/login">Đăng nhập</a> |
+        <a href="/register">Đăng ký</a>
+    {% endif %}
+</div>
+
+</header>
+
+<div class="nav">
+    <a href="#">Nhạc sống</a>
+    <a href="#">Sân khấu & Nghệ thuật</a>
+    <a href="#">Thể thao</a>
+    <a href="#">Khác</a>
+</div>
+
+<div class="container">
+    {% for event in events %}
+    <div class="event-card">
+        <div class="event-card">
+            <img src="{{ url_for('static', filename=event.image_url) }}" alt="Hình sự kiện">
+        </div>
+
+        <div class="content">
+            <div class="title">{{ event.name }}</div>
+            <div class="date">{{ event.date }} - {{ event.location }}</div>
+            <a href="{{ url_for('events.event_detail', event_id=event.id) }}">
+                <button>Xem chi tiết</button>
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+</body>
+</html>

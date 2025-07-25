@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ event.name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/icons8-ticket-50.png') }}" type="image/png">
+</head>
+<header>
+    <div class="logo">
+        <a href="/"><img src="{{ url_for('static', filename='images/icons8-ticket-100.png') }}" alt="Ticketbox Logo"
+                         class="logo-img"></a>
+    </div>
+    <form class="search-bar" method="get" action="/">
+        <input type="text" name="q" value="{{ search }}" placeholder="Bạn tìm gì hôm nay?">
+        <button type="submit">Tìm kiếm</button>
+    </form>
+
+    <div class="header-actions">
+        <a href="/new-event" class="create-event">
+            <span>Tạo sự kiện</span>
+        </a>
+        <a href="/my-ticket" class="my-ticket">
+            <img src="{{ url_for('static', filename='images/icons8-ticket-30.png') }}" alt="ticket icon"
+                 class="ticket-icon">
+            <span>Vé của tôi</span>
+        </a>
+    </div>
+
+<div class="auth-links">
+    {% if current_user %}
+        👋 Xin chào, <strong>{{ current_user.username }}</strong> |
+        <a href="/logout">Đăng xuất</a>
+    {% else %}
+        <a href="/login">Đăng nhập</a> |
+        <a href="/register">Đăng ký</a>
+    {% endif %}
+</div>
+
+</header>
+
+<div class="nav">
+    <a href="#">Nhạc sống</a>
+    <a href="#">Sân khấu & Nghệ thuật</a>
+    <a href="#">Thể thao</a>
+    <a href="#">Khác</a>
+</div>
+<body>
+
+<div class="event-detail-wrapper">
+    <div class="event-info">
+        <h1>{{ event.name }}</h1>
+
+        <div class="time">
+            <i>📅</i>
+            {{ event.date }}
+        </div>
+
+        <div class="location">
+            <i>📍</i>
+            {{ event.location }}
+        </div>
+
+        {% if min_price %}
+        <div class="price">Giá từ {{ "{:,.0f}".format(min_price) }} đ</div>
+        {% else %}
+        <div class="price">Hiện chưa có vé</div>
+        {% endif %}
+
+
+        <a href="#" class="buy-btn">Mua vé ngay</a>
+    </div>
+
+    <div class="event-image">
+        {% if event.image_url %}
+        <img src="{{ url_for('static', filename=event.image_url) }}" alt="Hình sự kiện">
+        {% else %}
+        <img src="{{ url_for('static', filename='static/images/default.jpg') }}" alt="Hình mặc định">
+        {% endif %}
+    </div>
+</div>
+<!-- CHUYỂN PHẦN GIỚI THIỆU RA NGOÀI, SAU KHỐI WRAPPER -->
+<div class="event-extra-info">
+    <h2>Giới thiệu chương trình</h2>
+    <p>{{ event.description }}</p>
+
+    <h2>Địa điểm</h2>
+    <p>{{ event.location_detail }}</p>
+
+    <h2>Thời gian</h2>
+    <p>{{ event.date }}</p>
+
+    <h2>Quy định chung</h2>
+    <ul>
+        {% for line in event.rules.split('\n') %}
+        <li>{{ line }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Nhóm tác giả</h2>
+    <p>{{ event.authors }}</p>
+
+    <h2>Nhà sản xuất</h2>
+    <p>{{ event.producers }}</p>
+</div>
+
+</body>
+</html>
