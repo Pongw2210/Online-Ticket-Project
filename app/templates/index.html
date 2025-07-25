@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ticketbox Clone</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="header">
+    <div class="logo">ticketbox</div>
+    <div class="search">
+      <input type="text" placeholder="Bạn tìm gì hôm nay?" />
+      <button>Tìm kiếm</button>
+    </div>
+    <div class="actions">
+      <a href="#">Tạo sự kiện</a>
+      <a href="#">Vé của tôi</a>
+      <a href="#">Đăng nhập | Đăng ký</a>
+    </div>
+  </header>
+
+  <nav class="navbar">
+    <a href="#">Nhạc sống</a>
+    <a href="#">Sân khấu & Nghệ thuật</a>
+    <a href="#">Thể thao</a>
+    <a href="#">Khác</a>
+  </nav>
+
+  <main class="main-content">
+   <img src="https://demoda.vn/wp-content/uploads/2022/02/background-banner.jpg" id="img" style="width: 200px; height: 200px;">
+
+   <section>
+  <h2>🔥 Sự kiện xu hướng</h2>
+  <div class="grid">
+    <img style="display: block;-webkit-user-select: none;margin: auto;cursor: zoom-in;background-color: hsl(0, 0%, 90%);transition: background-color 300ms;" src="https://vignette.wikia.nocookie.net/drama/images/e/eb/Hau_Due_Mat_Troi.jpg/revision/latest?cb=20191213185915&amp;path-prefix=es" width="450" height="450">
+    <div class="card">
+    <img src="https://pinoygamer.ph/attachments/kv_2023_hoyo-fest-png.16774/" id="img" style="width: 400px; height: 400px;">
+    </div>
+    <div class="card">
+     <img src="https://img-cdn.xemgame.com/2020/08/29/ao-shin-thanh-linh-thu-dau-truong-chan-ly-1.jpg" id="img" style="width: 400px; height: 400px;">
+    </div>
+    <div class="card">
+     <img src="https://thoibaonganhang.vn/stores/news_dataimages/2025/072025/09/16/image00120250709164246.png?rt=20250709164258?randTime=1752058267" id="img" style="width: 390px; height: 390px;">
+    </div>
+  </div>
+</section>
+
+
+
+    <section>
+  <h2>Dành cho bạn</h2>
+  <div class="grid">
+    <div class="card">
+     <img src="https://maytinhvui.com/wp-content/uploads/2020/11/hinh-nen-may-tinh-4k-game-lien-quan3-min.jpg" id="img" style="width: 396px; height: 396px;">
+      <p>Game 58 - 80.000đ</p>
+    </div>
+    <div class="card">
+      <img src="https://banhangvnpt.vn/Uploads/images/2021/2020012001.jpg" id="img" style="width: 390px; height: 390px;">
+      <p>The Men - 1.000.000đ</p>
+    </div>
+    <div class="card">
+      <img src="https://bazaarvietnam.vn/wp-content/uploads/2022/12/harper-bazaar-nhung-bo-phim-hoat-hinh-hay-nhat-cua-nhat-ban-1.jpeg" id="img" style="width: 388px; height: 388px;">
+      <p>Doraemon - 120.000đ</p>
+    </div>
+    <div class="card">
+      <img src="https://salt.tkbcdn.com/ts/ds/c3/26/77/a3320dbc30151eb7de584ebf41a4c71f.jpg" alt="The Wandering Rose 02.08" lazy="lazy" loading="lazy">
+      <p>The Wandering Rose - 800.000đ</p>
+    </div>
+  </div>
+</section>
+
+    <section>
+      <h2>Điểm đến thú vị</h2>
+      <div class="locations">
+        <button>Tp. Hồ Chí Minh</button>
+        <button>Hà Nội</button>
+        <button>Đà Lạt</button>
+        <button>Vị trí khác</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="left">Hotline: <strong>1900.6408</strong> (8:30 - 23:00)</div>
+    <div class="right">Văn phòng: Lầu 12, 17 Bà Huyện Thanh Quan, Quận 3, TP.HCM</div>
+  </footer>
+</body>
+</html>
