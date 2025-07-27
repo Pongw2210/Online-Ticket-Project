@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/icons8-ticket-50.png') }}" type="image/png">
+</head>
+<body>
+{% block header %}
+{% include 'layout/header.html' %}
+{% endblock %}
+
+<div class="container">
+    {% block content %}
+
+    {% endblock %}
+</div>
+
+{% block footer %}
+{% include 'layout/footer.html' %}
+{% endblock %}
+</body>
+</html>

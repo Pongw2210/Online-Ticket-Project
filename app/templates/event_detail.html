@@ -1,0 +1,70 @@
+{%extends 'layout/base.html'%}
+{% block title %}Trang chủ{% endblock %}
+
+{% block content %}
+<div class="event-detail-wrapper">
+    <div class="event-info">
+        <h1>{{ event.name }}</h1>
+
+        <div class="start_time">
+            <i>📅</i>
+            {{ event.start_datetime }}
+        </div>
+
+        <div class="end_time">
+            <i>📅</i>
+            {{ event.end_datetime }}
+        </div>
+
+        <div class="location">
+            <i>📍</i>
+            {{ event.location }}
+        </div>
+
+        {% if min_price %}
+        <div class="price">Giá từ {{ "{:,.0f}".format(min_price) }} đ</div>
+        {% else %}
+        <div class="price">Hiện chưa có vé</div>
+        {% endif %}
+
+
+        <a href="#" class="buy-btn">Mua vé ngay</a>
+    </div>
+
+    <div class="event-image">
+        {% if event.image_url %}
+        <img src="{{ event.image_url }}" alt="Hình sự kiện">
+        {% else %}
+        <img src="{{ url_for('static', filename='static/images/default.jpg') }}" alt="Hình mặc định">
+        {% endif %}
+    </div>
+</div>
+
+<!-- CHUYỂN PHẦN GIỚI THIỆU RA NGOÀI, SAU KHỐI WRAPPER -->
+<div class="event-extra-info">
+    <h2>Giới thiệu chương trình</h2>
+    <p>{{ event.description }}</p>
+
+    <h2>Địa điểm</h2>
+    <p>{{ event.location }}</p>
+
+    <h2>Thời gian bắt đầu</h2>
+    <p>{{ event.start_datetime }}</p>
+
+    <h2>Thời gian kết thúc</h2>
+    <p>{{ event.end_datetime }}</p>
+
+    <h2>Quy định chung</h2>
+    <ul>
+        {% for line in event.rules.split('\n') %}
+        <li>{{ line }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Nhóm tác giả</h2>
+    <p>{{ event.authors }}</p>
+
+    <h2>Nhà sản xuất</h2>
+    <p>{{ event.producers }}</p>
+</div>
+{% endblock %}

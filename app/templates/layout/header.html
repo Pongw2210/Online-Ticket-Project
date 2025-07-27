@@ -1,0 +1,31 @@
+<header>
+    <div class="logo">
+        <a href="/"><img src="{{ url_for('static', filename='images/icons8-ticket-100.png') }}" alt="Ticketbox Logo"
+                         class="logo-img"></a>
+    </div>
+    <form class="search-bar" method="get" action="/">
+        <input type="text" name="q" value="{{ search }}" placeholder="Bạn tìm gì hôm nay?">
+        <button type="submit">Tìm kiếm</button>
+    </form>
+
+    <div class="header-actions">
+        <a href="/new-event" class="create-event">
+            <span>Tạo sự kiện</span>
+        </a>
+        <a href="/my-ticket" class="my-ticket">
+            <img src="{{ url_for('static', filename='images/icons8-ticket-30.png') }}" alt="ticket icon"
+                 class="ticket-icon">
+            <span>Vé của tôi</span>
+        </a>
+    </div>
+
+    <div class="auth-links">
+        {% if current_user.is_authenticated %}
+            👋 Xin chào, <strong>{{ current_user.fullname }}</strong> |
+            <a href="/logout">Đăng xuất</a>
+        {% else %}
+            <a href="/login">Đăng nhập</a> |
+            <a href="/register">Đăng ký</a>
+        {% endif %}
+    </div>
+</header>

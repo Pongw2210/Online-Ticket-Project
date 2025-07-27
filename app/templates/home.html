@@ -1,0 +1,17 @@
+{%extends 'layout/base.html'%}
+{% block title %}Trang chủ{% endblock %}
+
+{% block content %}
+    {% for event in events %}
+    <div class="event-card">
+        <img src="{{ event.image_url }}" alt="Hình sự kiện">
+        <div class="content">
+            <div class="title">{{ event.name }}</div>
+            <div class="date">{{ event.start_datetime }} - {{ event.location }}</div>
+            <a href="{{ url_for('events.event_detail', event_id=event.id) }}">
+                <button>Xem chi tiết</button>
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+{% endblock %}
