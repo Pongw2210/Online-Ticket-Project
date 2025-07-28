@@ -8,6 +8,7 @@
         <button type="submit">Tìm kiếm</button>
     </form>
 
+    {% if current_user.is_authenticated %}
     <div class="header-actions">
         <a href="/new-event" class="create-event">
             <span>Tạo sự kiện</span>
@@ -18,14 +19,13 @@
             <span>Vé của tôi</span>
         </a>
     </div>
-
     <div class="auth-links">
-        {% if current_user.is_authenticated %}
-            👋 Xin chào, <strong>{{ current_user.fullname }}</strong> |
-            <a href="/logout">Đăng xuất</a>
+        👋 Xin chào, <strong>{{ current_user.username }}</strong> |
+        <a href="/logout">Đăng xuất</a>
         {% else %}
-            <a href="/login">Đăng nhập</a> |
-            <a href="/register">Đăng ký</a>
-        {% endif %}
+        <a href="/login">Đăng nhập</a> |
+        <a href="/register">Đăng ký</a>
     </div>
+    {% endif %}
+
 </header>

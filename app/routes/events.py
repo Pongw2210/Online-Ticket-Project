@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, session
 from app.data.models import EventOffline,User
+from flask_login import current_user
 
 events_bp = Blueprint("events", __name__)
 
@@ -10,10 +11,6 @@ def home():
         events = EventOffline.query.filter(EventOffline.name.ilike(f"%{search}%")).all()
     else:
         events = EventOffline.query.all()
-
-    current_user = None
-    if "user_id" in session:
-        current_user = User.query.get(session["user_id"])
 
     return render_template("home.html", events=events, search=search, current_user=current_user)
 
