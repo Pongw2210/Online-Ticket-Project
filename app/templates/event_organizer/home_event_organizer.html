@@ -1,0 +1,32 @@
+{% extends "event_organizer/layout_event_organizer/base.html" %}
+
+{% block title %}Trang chủ - Organizer{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <h2>{% block header %}{% endblock %}</h2>
+    <div class="topbar-right">
+        <a class="btn-create" href="{{ url_for('event_organizer.create_event') }}">
+            + Tạo sự kiện
+        </a>
+        <div class="account">Tài khoản <i class="fa fa-caret-down"></i></div>
+    </div>
+</div>
+
+<div class="search-bar">
+    <input type="text" placeholder="Tìm kiếm sự kiện...">
+    <button>Tìm kiếm</button>
+</div>
+
+<div class="tabs">
+    <button class="active">Sắp tới</button>
+    <button>Đã qua</button>
+    <button>Chờ duyệt</button>
+    <button>Nháp</button>
+</div>
+
+<div class="no-data">
+    <i class="fa fa-box-open"></i>
+    <p>Không có dữ liệu</p>
+</div>
+{% endblock %}

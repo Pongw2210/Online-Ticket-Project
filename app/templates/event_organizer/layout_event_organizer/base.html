@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Organizer Center - Ticketbox{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles_event_organizer.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+<div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <img src="https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612717/icons8-ticket-50_yn9dlx.png"
+                 alt="logo">
+            <h2>Organizer Center</h2>
+        </div>
+        <ul>
+            <li class="{% if request.endpoint == 'event_organizer.home' %}active{% endif %}">
+                <a href="{{ url_for('event_organizer.home') }}">
+                    <i class="fa fa-calendar"></i> Sự kiện của tôi
+                </a>
+            </li>
+            <li><a href="#"><i class="fa fa-file-alt"></i> Quản lý báo cáo</a></li>
+            <li><a href="#"><i class="fa fa-file-contract"></i> Điều khoản cho Ban tổ chức</a></li>
+        </ul>
+        <div class="lang">
+            <span>Ngôn ngữ</span>
+            <button class="lang-btn">Vie 🇻🇳</button>
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+
+        {% block content %}
+
+        {% endblock %}
+    </div>
+</div>
+<script src="{{url_for('static', filename='js/script.js')}}" ></script>
+</body>
+</html>

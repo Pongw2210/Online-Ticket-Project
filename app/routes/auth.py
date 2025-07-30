@@ -50,9 +50,9 @@ def login():
             if user.role == UserEnum.ADMIN:
                 return redirect('/admin')
             elif user.role == UserEnum.NGUOI_TO_CHUC:
-                return redirect('/event_organizer')
-            else:
-                return redirect(url_for("events.home"))
+                return redirect(url_for('event_organizer.home'))
+
+            return redirect(url_for("events.home"))
         else:
             flash("Tên đăng nhập hoặc mật khẩu không đúng!")
 

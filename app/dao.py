@@ -1,5 +1,5 @@
 import hashlib
-from app.data.models import User
+from app.data.models import User,EventTypeEnum
 
 def get_user_by_id(user_id):
     return User.query.get(user_id)
@@ -17,8 +17,16 @@ def auth_user(username,password,role=None):
 
     return query.first()
 
+
+def load_event_type_enum():
+    return {
+        etype.name: etype.value
+        for etype in EventTypeEnum
+    }
+
 # from app import create_app
 # app =create_app()
 # if __name__ =="__main__":
 #     with app.app_context():
-#         print(auth_user('userAdmin','123'))
+#         # print(auth_user('userAdmin','123'))
+#         load_event_type_enum()

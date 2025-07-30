@@ -1,0 +1,153 @@
+{% extends "event_organizer/layout_event_organizer/base.html" %}
+
+{% block title %}Tạo sự kiện mới{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <h2>{% block header %}{% endblock %}</h2>
+    <div class="topbar-right">
+        <div class="account">Tài khoản <i class="fa fa-caret-down"></i></div>
+    </div>
+</div>
+<div class="container">
+
+    <!-- Thanh tiến trình -->
+    <div class="step-progress">
+        <div class="step active">
+            <div class="circle">1</div>
+            <div class="label">Thông tin sự kiện</div>
+        </div>
+        <div class="step">
+            <div class="circle">2</div>
+            <div class="label">Thời gian & Loại vé</div>
+        </div>
+        <div class="step">
+            <div class="circle">3</div>
+            <div class="label">Cài đặt</div>
+        </div>
+        <div class="step">
+            <div class="circle">4</div>
+            <div class="label">Thông tin thanh toán</div>
+        </div>
+        <div class="step-buttons">
+            <button class="btn btn-prev" onclick="goToPrevStep()">Quay lại</button>
+            <button class="btn btn-next" onclick="goToNextStep()">Tiếp tục</button>
+        </div>
+    </div>
+
+    <!-- Nội dung chính có thể cuộn -->
+    <div class="main-content-scrollable content-center ">
+        <div class="content-center">
+            <div class="event-form-wrapper">
+                <div class="event-form-section step-section step-1 active">
+                    <div class="upload-box" onclick="document.getElementById('imageUpload').click();">
+                        <input type="file" id="imageUpload" accept="image/*" style="display: none;"
+                               onchange="previewImage(event)">
+                        <div id="upload-preview">
+                            <div>
+                                <div class="icon">📷</div>
+                                <p>Thêm ảnh sự kiện</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tên sự kiện -->
+                    <div class="form-group">
+                        <label class="required-label">
+                            <span class="text-danger">*</span> Tên sự kiện </label>
+                        <input type="text" maxlength="100" placeholder="Tên sự kiện">
+                        <div class="text-counter">0 / 100</div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="required-label">* Hình thức sự kiện</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="event_format" checked onchange="handleEventFormatChange()">
+                                Sự kiện Offline</label>
+                            <label><input type="radio" name="event_format" onchange="handleEventFormatChange()"> Sự kiện
+                                Online</label>
+                        </div>
+                    </div>
+
+                    <div class="form-info-event-offline">
+                        <div class="form-group">
+                            <label class="required-label">
+                                <span class="text-danger">*</span> Tên địa điểm
+                            </label>
+                            <input type="text" maxlength="80" placeholder="Tên địa điểm">
+                            <div class="text-counter">0 / 80</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="required-label">
+                                <span class="text-danger">*</span> Địa chỉ cụ thể
+                            </label>
+                            <input type="text" placeholder="Địa chỉ cụ thể">
+                        </div>
+                    </div>
+
+                    <div class="form-info-event-online">
+                        <div class="form-group">
+                            <label class="required-label">
+                                <span class="text-danger">*</span> Link tham gia sự kiện
+                            </label>
+                            <input type="text" maxlength="80" placeholder="Link tham gia sự kiện">
+                            <div class="text-counter">0 / 80</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group form-row">
+                        <div>
+                            <label class="required-label">
+                                <span class="text-danger">*</span> Thể loại sự kiện
+                            </label>
+                            <select>
+                                {% for key, label in event_type.items() %}
+                                <option value="{{ key }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="required-label">
+                            <span class="text-danger">*</span> Thông tin sự kiện
+                        </label>
+                        <textarea rows="4" placeholder="Nhập thông tin..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="required-label">
+                            <span class="text-danger">*</span> Luật lệ sự kiện
+                        </label>
+                        <textarea rows="4" placeholder="Nhập thông tin..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="required-label">
+                            <span class="text-danger">*</span> Thông tin người biểu diễn sự kiện
+                        </label>
+                        <textarea rows="4" placeholder="Nhập thông tin..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="required-label">
+                            <span class="text-danger">*</span> Thông tin người tổ chức
+                        </label>
+                        <textarea rows="4" placeholder="Nhập thông tin..."></textarea>
+                    </div>
+                </div>
+                <div class="event-form-section step-section step-2 ">
+
+                </div>
+
+                <div class="event-form-section step-section step-3 ">
+
+                </div>
+
+                <div class="event-form-section step-section step-4">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endblock %}

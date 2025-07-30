@@ -3,6 +3,7 @@ from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 import cloudinary
 
+
 db = SQLAlchemy()
 login = LoginManager()
 
@@ -31,5 +32,8 @@ def create_app():
 
     from app.routes import auth
     app.register_blueprint(auth.auth_bp)
+
+    from app.routes import event_organizer
+    app.register_blueprint(event_organizer.event_organizer_bp)
 
     return app
