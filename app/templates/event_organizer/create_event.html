@@ -135,8 +135,64 @@
                         <textarea rows="4" placeholder="Nhập thông tin..."></textarea>
                     </div>
                 </div>
-                <div class="event-form-section step-section step-2 ">
+                <div class="event-form-section step-section step-2">
+                    <h3>Thời gian sự kiện</h3>
+                    <div class="form-group form-row">
+                        <div>
+                            <label class="required-label">
+                                <span class="text-danger">*</span> Ngày bắt đầu
+                            </label>
+                            <input type="datetime-local" name="start_time" required>
+                        </div>
+                        <div>
+                            <label class="required-label">
+                                <span class="text-danger">*</span> Ngày kết thúc
+                            </label>
+                            <input type="datetime-local" name="end_time" required>
+                        </div>
+                    </div>
 
+                    <h3>Thời gian mở bán vé</h3>
+                    <div class="form-group form-row">
+                        <div>
+                            <label class="required-label">
+                                <span class="text-danger">*</span> Ngày bắt đầu bán
+                            </label>
+                            <input type="datetime-local" name="sale_start">
+                        </div>
+                        <div>
+                            <label class="required-label">
+                                <span class="text-danger">*</span> Ngày kết thúc bán
+                            </label>
+                            <input type="datetime-local" name="sale_end">
+                        </div>
+                    </div>
+
+                    <h3>Thông tin các loại vé</h3>
+                    <div id="ticket-types">
+                        <div class="ticket-type form-group form-row">
+                            <div>
+                                <label class="required-label">
+                                    <span class="text-danger">*</span> Tên vé
+                                </label>
+                                <input type="text" name="ticket_name[]" placeholder="Ví dụ: Vé thường">
+                            </div>
+                            <div>
+                                <label class="required-label">
+                                    <span class="text-danger">*</span> Giá vé(VNĐ)
+                                </label>
+                                <input type="number" name="ticket_price[]" min="0" placeholder="100000">
+                            </div>
+                            <div>
+                                <label class="required-label">
+                                    <span class="text-danger">*</span> Số lượng
+                                </label>
+                                <input type="number" name="ticket_quantity[]" min="1" placeholder="50">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-save" onclick="addTicketType()">+ Thêm loại vé</button>
                 </div>
 
                 <div class="event-form-section step-section step-3 ">

@@ -27,42 +27,63 @@ function handleEventFormatChange(){
 document.addEventListener("DOMContentLoaded", handleEventFormatChange);
 
 function goToNextStep() {
-    const currentStep = document.querySelector('.step-section.active');
-    const nextStep = currentStep.nextElementSibling;
+    const allSteps = document.querySelectorAll('.step-section');
+    const currentIndex = Array.from(allSteps).findIndex(el => el.classList.contains('active'));
 
-    if (nextStep && nextStep.classList.contains('step-section')) {
-        // Ẩn bước hiện tại
-        currentStep.classList.remove('active');
+    if (currentIndex < allSteps.length - 1) {
+        allSteps[currentIndex].classList.remove('active');
+        allSteps[currentIndex + 1].classList.add('active');
 
-        // Hiện bước tiếp theo
-        nextStep.classList.add('active');
-
-        // Cập nhật thanh tiến trình
-        const steps = document.querySelectorAll('.step-progress .step');
-        const allSections = document.querySelectorAll('.step-section');
-        const stepIndex = Array.from(allSections).indexOf(nextStep);
-
-        steps.forEach((step, i) => {
-            if (i <= stepIndex) step.classList.add('active');
+        const stepsProgress = document.querySelectorAll('.step-progress .step');
+        stepsProgress.forEach((step, i) => {
+            if (i <= currentIndex + 1) step.classList.add('active');
             else step.classList.remove('active');
         });
     }
 }
 
 function goToPrevStep() {
-    const currentStep = document.querySelector('.step-section.active');
-    const prevStep = currentStep.previousElementSibling;
-    if (prevStep && prevStep.classList.contains('step-section')) {
-        currentStep.classList.remove('active');
-        prevStep.classList.add('active');
+    const allSteps = document.querySelectorAll('.step-section');
+    const currentIndex = Array.from(allSteps).findIndex(el => el.classList.contains('active'));
 
-        const steps = document.querySelectorAll('.step-progress .step');
-        const stepIndex = Array.from(document.querySelectorAll('.step-section')).indexOf(prevStep);
-        steps.forEach((step, i) => {
-            if (i <= stepIndex) step.classList.add('active');
+    if (currentIndex > 0) {
+        allSteps[currentIndex].classList.remove('active');
+        allSteps[currentIndex - 1].classList.add('active');
+
+        const stepsProgress = document.querySelectorAll('.step-progress .step');
+        stepsProgress.forEach((step, i) => {
+            if (i <= currentIndex - 1) step.classList.add('active');
             else step.classList.remove('active');
         });
     }
+}
+
+function addTicketType() {
+    const container = document.getElementById("ticket-types");
+
+    // Tạo một div mới cho loại vé
+    const newTicket = document.createElement("div");
+    newTicket.classList.add("ticket-type", "form-group", "form-row");
+
+    newTicket.innerHTML = `
+        <div>
+            <label class="required-label"><span class="text-danger">*</span> Tên vé</label>
+            <input type="text" name="ticket_name[]" placeholder="Ví dụ: Vé thường">
+        </div>
+        <div>
+            <label class="required-label"><span class="text-danger">*</span> Giá vé(VNĐ)</label>
+            <input type="number" name="ticket_price[]" min="0" placeholder="100000">
+        </div>
+        <div>
+           <label class="required-label"><span class="text-danger">*</span> Số lượng</label>
+            <input type="number" name="ticket_quantity[]" min="1" placeholder="50">
+        </div>
+        <div>
+            <button type="button" class="btn btn-danger remove-ticket" onclick="this.parentElement.parentElement.remove()">X</button>
+        </div>
+    `;
+
+    container.appendChild(newTicket);
 }
 
 
