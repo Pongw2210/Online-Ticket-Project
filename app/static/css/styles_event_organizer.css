@@ -798,4 +798,18 @@ textarea {
     background: #ff4d4d;
 }
 
+.form-error {
+    color: #ff6b6b;
+    font-size: 13px;
+    margin-top: 4px;
+}
+input.error, textarea.error, select.error {
+    border-color: #ff6b6b;
+}
+
+@keyframes fadeInOut {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
 

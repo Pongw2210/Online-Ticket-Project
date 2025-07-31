@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy.orm import relationship
 from app import db
-from sqlalchemy import Column, Integer,String,DateTime,ForeignKey,Enum,Text,Time
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, Text, Time, Float
 from enum import Enum as RoleEnum
 from flask_login import UserMixin
 
@@ -77,9 +77,10 @@ class User(Base, UserMixin):
 
 class TicketType(Base):
     __tablename__ = 'ticket_type'
-    name = db.Column(db.String(50))
-    price = db.Column(db.Float)
-    event_id = db.Column(db.Integer, db.ForeignKey("event.id"), nullable=False)
+    name = Column(String(50))
+    price = Column(Float)
+    quantity = Column(Integer, nullable= False)
+    event_id = Column(Integer, ForeignKey("event.id"), nullable=False)
 
 class EventOffline(Base):
     __tablename__ = 'event_offline'

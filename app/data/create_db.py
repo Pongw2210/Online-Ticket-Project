@@ -213,12 +213,12 @@ def seed_event_offline():
 
 def seed_ticket_type():
     ticket_types = [
-        TicketType(name='Vé Thường', price=250000, event_id=1),
-        TicketType(name='Vé VIP', price=500000, event_id=1),
-        TicketType(name='Vé Standing', price=300000, event_id=2),
-        TicketType(name='Vé VIP', price=650000, event_id=2),
-        TicketType(name='Vé Thường', price=200000, event_id=3),
-        TicketType(name='Vé Premium', price=400000, event_id=3),
+        TicketType(name='Vé Thường', price=250000, quantity=50 , event_id=1),
+        TicketType(name='Vé VIP', price=500000, quantity=50,  event_id=1),
+        TicketType(name='Vé Standing', price=300000, quantity=50, event_id=2),
+        TicketType(name='Vé VIP', price=650000, quantity=50, event_id=2),
+        TicketType(name='Vé Thường', price=200000, quantity=50, event_id=3),
+        TicketType(name='Vé Premium', price=400000,quantity=50, event_id=3),
     ]
 
     db.session.add_all(ticket_types)
@@ -227,13 +227,13 @@ def seed_ticket_type():
 if __name__ == "__main__":
     with app.app_context():
         # db.drop_all()
-        db.create_all()
-
-        seed_customer_user()
-        seed_admin_user()
-        seed_event_organizer_user()
-
-        seed_event_offline()
+        # db.create_all()
+        #
+        # seed_customer_user()
+        # seed_admin_user()
+        # seed_event_organizer_user()
+        #
+        # seed_event_offline()
         seed_ticket_type()
 
 
