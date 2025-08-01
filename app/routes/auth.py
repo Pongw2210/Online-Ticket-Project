@@ -48,7 +48,7 @@ def login():
         if user:
             login_user(user)
             if user.role == UserEnum.ADMIN:
-                return redirect('/admin')
+                return redirect(url_for("admin.approve_events"))
             elif user.role == UserEnum.NGUOI_TO_CHUC:
                 return redirect('/event_organizer')
             else:
