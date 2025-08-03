@@ -32,4 +32,7 @@ def create_app():
     from app.routes import auth
     app.register_blueprint(auth.auth_bp)
 
+    from app.routes import admin
+    app.register_blueprint(admin.admin_bp)
+
     return app
