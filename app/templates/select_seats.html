@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chọn Ghế Ngồi</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+    const selectedTickets = {{ selected_tickets | tojson }};
+    </script>
+
+    <style>
+        .seat-map {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            margin: 20px auto;
+        }
+        .seat-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        .seat {
+            width: 35px;
+            height: 35px;
+            background-color: #ccc;
+            border: 1px solid #999;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            line-height: 35px;
+            font-weight: bold;
+        }
+        .seat.vip { background-color: #ffd700; }   /* VIP ghế vàng */
+        .seat.standard { background-color: #90ee90; } /* Thường ghế xanh nhạt */
+        .seat.selected { outline: 3px solid #2196f3; } /* Ghế được chọn */
+        .screen {
+            width: 80%;
+            background-color: #444;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            margin: 20px 0;
+        }
+        .confirm-btn {
+            margin-top: 30px;
+            padding: 10px 20px;
+            background-color: #28a745;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+        .confirm-btn:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+
+<h2 style="text-align: center;">🎫 Chọn ghế của bạn</h2>
+<div class="screen">MÀN HÌNH</div>
+
+<div class="seat-map">
+    <!-- Ghế VIP -->
+    {% for row in range(1, 3) %}
+    <div class="seat-row">
+        {% for col in range(1, 11) %}
+        <div class="seat vip" data-type="VIP" data-seat="V{{ row }}-{{ col }}">V{{ row }}-{{ col }}</div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+
+    <!-- Ghế Thường -->
+    {% for row in range(1, 5) %}
+    <div class="seat-row">
+        {% for col in range(1, 11) %}
+        <div class="seat standard" data-type="Thường" data-seat="T{{ row }}-{{ col }}">T{{ row }}-{{ col }}</div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+
+<div style="text-align: center;">
+    <button id="confirm-btn" class="confirm-btn" disabled>Tiếp tục</button>
+</div>
+
+<script>
+    const selectedTickets = {{ selected_tickets | tojson }};  // ví dụ: { "VIP": 2, "Thường": 3 }
+    const seatElements = document.querySelectorAll('.seat');
+    const confirmBtn = document.getElementById('confirm-btn');
+    const selectedSeats = [];
+
+    function updateSelection(seatEl) {
+        const seatType = seatEl.dataset.type;
+        const seatId = seatEl.dataset.seat;
+
+        const selectedOfType = selectedSeats.filter(s => s.type === seatType);
+        const maxAllowed = selectedTickets[seatType] || 0;
+
+        if (seatEl.classList.contains('selected')) {
+            // bỏ chọn
+            seatEl.classList.remove('selected');
+            const index = selectedSeats.findIndex(s => s.id === seatId);
+            if (index > -1) selectedSeats.splice(index, 1);
+        } else {
+            // chọn mới
+            if (selectedOfType.length < maxAllowed) {
+                seatEl.classList.add('selected');
+                selectedSeats.push({ id: seatId, type: seatType });
+            } else {
+                alert(`Chỉ được chọn ${maxAllowed} ghế loại ${seatType}`);
+            }
+        }
+
+        // kiểm tra nếu đủ số ghế đã đặt thì bật nút tiếp tục
+        let totalRequired = Object.values(selectedTickets).reduce((a, b) => a + b, 0);
+        confirmBtn.disabled = selectedSeats.length !== totalRequired;
+    }
+
+    seatElements.forEach(seat => {
+        seat.addEventListener('click', () => updateSelection(seat));
+    });
+
+    confirmBtn.addEventListener('click', () => {
+        // gửi danh sách ghế về backend
+        fetch("/confirm-seats", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ seats: selectedSeats })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert("Đã lưu ghế!");
+                window.location.href = "/my-ticket";  // hoặc đến trang thanh toán
+            } else {
+                alert("Lỗi: " + data.message);
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ event.name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/icons8-ticket-50.png') }}" type="image/png">
+    <script src="{{ url_for('static', filename='scripts/ticket.js') }}" defer></script>
+</head>
+<body>
+<header>
+    <div class="logo">
+        <a href="/"><img src="{{ url_for('static', filename='images/icons8-ticket-100.png') }}" alt="Ticketbox Logo"
+                         class="logo-img"></a>
+    </div>
+    <form class="search-bar" method="get" action="/">
+        <input type="text" name="q" value="{{ search }}" placeholder="Bạn tìm gì hôm nay?">
+        <button type="submit">Tìm kiếm</button>
+    </form>
+
+    <div class="header-actions">
+        <a href="/new-event" class="create-event">
+            <span>Tạo sự kiện</span>
+        </a>
+        <a href="/my-ticket" class="my-ticket">
+            <img src="{{ url_for('static', filename='images/icons8-ticket-30.png') }}" alt="ticket icon"
+                 class="ticket-icon">
+            <span>Vé của tôi</span>
+        </a>
+    </div>
+
+    <div class="auth-links">
+        {% if current_user %}
+        👋 Xin chào, <strong>{{ current_user.username }}</strong> |
+        <a href="/logout">Đăng xuất</a>
+        {% else %}
+        <a href="/login">Đăng nhập</a> |
+        <a href="/register">Đăng ký</a>
+        {% endif %}
+    </div>
+</header>
+
+<div class="nav">
+    <a href="#">Nhạc sống</a>
+    <a href="#">Sân khấu & Nghệ thuật</a>
+    <a href="#">Thể thao</a>
+    <a href="#">Khác</a>
+</div>
+
+<h2 class="section-title">🎟 Chọn vé</h2>
+<div class="ticket-booking-container">
+    <div class="ticket-selection">
+        {% for ticket in ticket_types %}
+        <div class="ticket-card">
+            <div class="ticket-left">
+                <div class="ticket-name">{{ ticket.name }}</div>
+                <ul class="ticket-benefits">
+                    {% if ticket.name == 'Vé VIP' %}
+                    <li>Khu vực checkin riêng, không phải xếp hàng</li>
+                    <li>Ghế ngồi gần sân khấu, quà tặng đặc biệt</li>
+                    <li>Dịch vụ ăn uống, quà tặng, giao lưu nghệ sĩ</li>
+                    {% else %}
+                    <li>Đảm bảo quyền lợi tham gia sự kiện</li>
+                    <li>Ghế ngồi sắp xếp ngẫu nhiên</li>
+                    <li>Ghế ngồi xa sân khấu</li>
+                    {% endif %}
+                </ul>
+                <div class="ticket-price">Giá vé: {{ "{:,.0f}".format(ticket.price) }}đ</div>
+                <div class="ticket-stock">Số vé còn lại: {{ ticket.stock }}</div>
+
+                <div class="quantity-selector">
+                    <button class="decrease" data-ticket-id="{{ ticket.id }}">-</button>
+                    <input type="number" min="0" value="0" name="quantity_{{ ticket.id }}" class="quantity-input"
+                           data-ticket-id="{{ ticket.id }}" data-price="{{ ticket.price }}"
+                           data-name="{{ ticket.name }}">
+                    <button class="increase" data-ticket-id="{{ ticket.id }}">+</button>
+                </div>
+            </div>
+            <div class="ticket-right">
+                <img src="{{ url_for('static', filename='images/ticketGAVIP.png') }}" class="ticket-image">
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="ticket-summary">
+        <h4 style="">Tổng vé:</h4>
+        <ul id="summary-list"></ul>
+        <p class="total" id="summary-total"><strong>🎟 x0</strong></p>
+        <a class="continue-btn" id="continue-btn" href="#" data-event-id="{{ event.id }}">Tiếp tục >></a>
+    </div>
+</div>
+</body>
+</html>

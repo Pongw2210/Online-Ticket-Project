@@ -136,15 +136,17 @@ VALUES
 );
 
 
+-- Thêm loại vé với số lượng ngẫu nhiên
+INSERT INTO ticket_type (name, price, stock, event_id) VALUES
+('Vé Thường', 250000, FLOOR(50 + RAND() * 151), 1),
+('Vé VIP', 500000, FLOOR(50 + RAND() * 151), 1),
 
--- Thêm loại vé cho từng sự kiện
-INSERT INTO ticket_type (name, price, event_id) VALUES
-('Vé Thường', 250000, 1),
-('Vé VIP', 500000, 1),
-('Vé Standing', 300000, 2),
-('Vé VIP', 650000, 2),
-('Vé Thường', 200000, 3),
-('Vé Premium', 400000, 3);
+('Vé Standing', 300000, FLOOR(50 + RAND() * 151), 2),
+('Vé VIP', 650000, FLOOR(50 + RAND() * 151), 2),
+
+('Vé Thường', 200000, FLOOR(50 + RAND() * 151), 3),
+('Vé Premium', 400000, FLOOR(50 + RAND() * 151), 3);
+
 
 INSERT INTO user (username, email, password_hash) VALUES
 ('nguyenphuoc', 'nguyenphuoc@example.com', 'pbkdf2:sha256:260000$4CzGIE4U9tsdUb8U$ca5e306276e6d3ad60c4c2175b1575dd71dc4f11a6b7a33125a8e35dd8814fc3'),

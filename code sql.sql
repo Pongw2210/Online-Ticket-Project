@@ -19,6 +19,7 @@ CREATE TABLE ticket_type (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50),
     price FLOAT,
+    stock INT DEFAULT 0,         -- Số lượng vé còn lại
     event_id INT,
     FOREIGN KEY (event_id) REFERENCES event(id)
 );
@@ -30,8 +31,5 @@ CREATE TABLE user (
     password_hash VARCHAR(256) NOT NULL
 );
 
-ALTER TABLE user MODIFY password_hash VARCHAR(256);
 
 
--- ALTER TABLE ticket_type DROP FOREIGN KEY ticket_type_ibfk_1; Xoa rang buoc
-DROP TABLE event;

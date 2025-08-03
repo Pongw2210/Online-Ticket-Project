@@ -67,7 +67,8 @@
         {% endif %}
 
 
-        <a href="#" class="buy-btn">Mua vé ngay</a>
+        <a href="{{ url_for('events.buy_ticket', event_id=event.id) }}" class="buy-btn">Mua vé ngay</a>
+
     </div>
 
     <div class="event-image">
