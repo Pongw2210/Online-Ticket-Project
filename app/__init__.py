@@ -27,13 +27,16 @@ def create_app():
     login.login_view = "auth.login"
 
     # Đăng ký các blueprint
-    from app.routes import events
-    app.register_blueprint(events.events_bp)
-
     from app.routes import auth
     app.register_blueprint(auth.auth_bp)
 
+    from app.routes import events
+    app.register_blueprint(events.events_bp)
+
     from app.routes import event_organizer
     app.register_blueprint(event_organizer.event_organizer_bp)
+
+    from app.routes import admin
+    app.register_blueprint(admin.admin_bp)
 
     return app

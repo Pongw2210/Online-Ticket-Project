@@ -227,21 +227,11 @@ def seed_ticket_type():
 if __name__ == "__main__":
     with app.app_context():
         # db.drop_all()
-        # db.create_all()
-        #
-        # seed_customer_user()
-        # seed_admin_user()
-        # seed_event_organizer_user()
-        #
-        # seed_event_offline()
+        db.create_all()
+
+        seed_customer_user()
+        seed_admin_user()
+        seed_event_organizer_user()
+
+        seed_event_offline()
         seed_ticket_type()
-
-
-
-
-
-
-
-
-
-

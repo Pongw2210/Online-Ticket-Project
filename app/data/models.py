@@ -103,7 +103,7 @@ class Event(Base):
     authors = Column(Text)
     producers = Column(Text)
     image_url = Column(String(255))
-    status = Column(Enum(StatusEventEnum),default=StatusEventEnum.DANG_DUYET)
+    status = Column(Enum(StatusEventEnum), default=StatusEventEnum.DANG_DUYET)
     event_format = Column(Enum(EventFormatEnum), nullable=False)
     event_type = Column(Enum(EventTypeEnum), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -115,5 +115,14 @@ class Event(Base):
     event_offline = relationship(EventOffline, uselist=False, backref="event", cascade="all, delete")
     event_online = relationship(EventOnline, uselist=False, backref="event", cascade="all, delete")
 
+    # Thêm quan hệ với bảng ghi lý do từ chối
+    rejection_logs = relationship("EventRejectionLog", backref="event", cascade="all, delete")
 
+
+class EventRejectionLog(Base):
+    __tablename__ = 'event_rejection_log'
+
+    event_id = Column(Integer, ForeignKey('event.id'), nullable=False)
+    reason = Column(Text, nullable=False)
+    rejected_at = Column(DateTime, default=datetime.utcnow)
 
