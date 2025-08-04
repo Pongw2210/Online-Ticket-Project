@@ -4,12 +4,18 @@
 
 {% block content %}
 <div class="topbar">
-    <h2>{% block header %}{% endblock %}</h2>
-    <div class="topbar-right">
-        <div class="account">Tài khoản <i class="fa fa-caret-down"></i></div>
-    </div>
+    <h2>{% block header %}Tạo sự kiện {% endblock %}</h2>
+   <div class="account-wrapper">
+            <div class="account" onclick="toggleDropdown()">
+                Tài khoản <i class="fa fa-caret-down"></i>
+            </div>
+            <div class="dropdown" id="accountDropdown">
+                <a>Thông tin cá nhân</a>
+                <a>Đăng xuất</a>
+            </div>
+        </div>
 </div>
-<div class="container">
+<div class="form-wrapper">
 
     <!-- Thanh tiến trình -->
     <div class="step-progress">
@@ -241,3 +247,4 @@
     <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
 
     {% endblock %}
+</div>

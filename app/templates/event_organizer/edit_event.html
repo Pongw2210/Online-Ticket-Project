@@ -1,0 +1,317 @@
+{% extends "event_organizer/layout_event_organizer/base.html" %}
+
+{% block title %}Chỉnh sửa sự kiện{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <h2>{% block header %} Chỉnh sửa sự kiện {% endblock %}</h2>
+    <div class="account-wrapper">
+        <div class="account" onclick="toggleDropdown()">
+            Tài khoản <i class="fa fa-caret-down"></i>
+        </div>
+        <div class="dropdown" id="accountDropdown">
+            <a>Thông tin cá nhân</a>
+            <a>Đăng xuất</a>
+        </div>
+    </div>
+</div>
+<div class="form-wrapper">
+
+    <!-- Thanh tiến trình -->
+    <div class="step-progress">
+        <div class="step active">
+            <div class="circle">1</div>
+            <div class="label">Thông tin sự kiện</div>
+        </div>
+        <div class="step">
+            <div class="circle">2</div>
+            <div class="label">Thời gian & Loại vé</div>
+        </div>
+        <div class="step">
+            <div class="circle">3</div>
+            <div class="label">Thông tin thanh toán</div>
+        </div>
+        <div class="step-buttons">
+            <button class="btn btn-prev" onclick="goToPrevStep()">Quay lại</button>
+            <button class="btn btn-next" onclick="goToNextStep()">Tiếp tục</button>
+        </div>
+    </div>
+
+    <!-- Nội dung chính có thể cuộn -->
+    <div class="main-content-scrollable content-center ">
+        <div class="content-center">
+            <div class="event-form-wrapper">
+                <div class="event-form-section step-section step-1 active">
+                    <label class="required-label">
+                        <span class="text-danger">*</span> Hình ảnh sự kiện
+                    </label>
+
+                    <div class="upload-box" onclick="document.getElementById('imageUpload').click();">
+                        <input type="file" id="imageUpload" name="event_image" accept="image/*" style="display: none;"
+                               onchange="previewImage(event)">
+
+                        <div id="upload-preview">
+                            {% if event and event.image_url %}
+                            <img id="preview-img" src="{{ event.image_url }}"
+                                 style="max-width: 100%; max-height: 100%; border-radius: 10px;">
+                            {% else %}
+                            <div>
+                                <div class="icon">📷</div>
+                                <p>Thêm ảnh sự kiện</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+                    <label class="required-label"><span class="text-danger">*</span> Tên sự kiện</label>
+                    <input type="text" name="name_event" id="name_event" maxlength="100" placeholder="Tên sự kiện"
+                           value="{{ event.name }}">
+                    <div class="text-counter">0 / 100</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="required-label">* Hình thức sự kiện</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="event_format" value="OFFLINE"
+                                   {% if is_offline %}checked{% endif %}
+                                   onchange="handleEventFormatChange()"> Sự kiện Offline
+                        </label>
+                        <label>
+                            <input type="radio" name="event_format" value="ONLINE"
+                                   {% if not is_offline %}checked{% endif %}
+                                   onchange="handleEventFormatChange()"> Sự kiện Online
+                        </label>
+                    </div>
+                </div>
+
+
+                <div class="form-info-event-offline">
+                    <div class="form-group">
+                        <label class="required-label"><span class="text-danger">*</span> Tên địa điểm</label>
+                        <input type="text" name="venue_name" id="venue_name" maxlength="80"
+                               placeholder="Tên địa điểm"
+                               value="{{ event.event_offline.venue_name if event.event_offline else '' }}">
+                        <div class="text-counter">
+                            {{ event.event_offline.venue_name|length if event.event_offline and
+                            event.event_offline.venue_name else 0 }} / 80
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="required-label"><span class="text-danger">*</span> Địa chỉ cụ thể</label>
+                        <input type="text" name="address" id="address"
+                               placeholder="Địa chỉ cụ thể"
+                               value="{{ event.event_offline.location if event.event_offline else '' }}">
+                    </div>
+                </div>
+
+                <div class="form-info-event-online">
+                    <div class="form-group">
+                        <label class="required-label"><span class="text-danger">*</span> Link tham gia sự kiện</label>
+                        <input type="text" name="livestream_url" id="livestream_url" maxlength="80"
+                               placeholder="Link tham gia sự kiện"
+                               value="{{ event.event_online.livestream_url if event.event_online else '' }}">
+                        <div class="text-counter">
+                            {{ event.event_online.livestream_url|length if event.event_online and
+                            event.event_online.livestream_url else 0 }} / 80
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group form-row">
+                    <div>
+                        <label class="required-label"><span class="text-danger">*</span> Thể loại sự kiện</label>
+                        <select name="event_type" id="event_type">
+                            {% for key, label in event_type.items() %}
+                            <option value="{{ key }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="required-label"><span class="text-danger">*</span> Thông tin sự kiện</label>
+                    <textarea name="description" id="description" rows="4"
+                              placeholder="Nhập thông tin...">{{ event.description if event.description else '' }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="required-label"><span class="text-danger">*</span> Luật lệ sự kiện</label>
+                    <textarea name="rules" id="rules" rows="4"
+                              placeholder="Nhập thông tin...">{{ event.rules if event.rules else '' }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="required-label"><span class="text-danger">*</span> Thông tin người biểu diễn sự
+                        kiện</label>
+                    <textarea name="performers" id="performers" rows="4"
+                              placeholder="Nhập thông tin...">{{ event.authors if event.authors else '' }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="required-label"><span class="text-danger">*</span> Thông tin người tổ chức</label>
+                    <textarea name="organizer" id="organizer" rows="4"
+                              placeholder="Nhập thông tin...">{{ event.producers if event.producers else '' }}</textarea>
+                </div>
+
+            </div>
+
+            <div class="event-form-section step-section step-2">
+                <h3>Thời gian sự kiện</h3>
+                <div class="form-group form-row">
+                    <div>
+                        <label class="required-label">
+                            <span class="text-danger">*</span> Ngày bắt đầu
+                        </label>
+                        <input type="datetime-local" id="start_time" name="start_time"
+                                value="{{ event.start_time.strftime('%Y-%m-%dT%H:%M') if event.start_time else '' }}"
+                               required>
+                    </div>
+                    <div>
+                        <label class="required-label">
+                            <span class="text-danger">*</span> Ngày kết thúc
+                        </label>
+                        <input type="datetime-local" id="end_time" name="end_time"
+                               value="{{ event.end_time.strftime('%Y-%m-%dT%H:%M') if event.end_time else '' }}"
+                               required>
+                    </div>
+                </div>
+
+                <h3>Thông tin các loại vé</h3>
+                <div id="ticket-types">
+                    {% if ticket_types %}
+                    {% for ticket in ticket_types %}
+                    <div class="ticket-type form-group form-row">
+                        <div>
+                            <label class="required-label">
+                                <span class="text-danger">*</span> Tên vé
+                            </label>
+                            <input type="text" class="ticket_name" name="ticket_name" value="{{ ticket.name }}"
+                                   placeholder="Ví dụ: Vé thường">
+                        </div>
+                        <div>
+                            <label class="required-label">
+                                <span class="text-danger">*</span> Giá vé (VNĐ)
+                            </label>
+                            <input type="number" class="ticket_price" name="ticket_price" min="0"
+                                   value="{{ ticket.price }}" placeholder="100000">
+                        </div>
+                        <div>
+                            <label class="required-label">
+                                <span class="text-danger">*</span> Số lượng
+                            </label>
+                            <input type="number" class="ticket_quantity" name="ticket_quantity" min="1"
+                                   value="{{ ticket.quantity }}" placeholder="50">
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <!-- Nếu chưa có vé nào, hiển thị 1 dòng trống để người dùng nhập -->
+                    <div class="ticket-type form-group form-row">
+                        <div>
+                            <label class="required-label">
+                                <span class="text-danger">*</span> Tên vé
+                            </label>
+                            <input type="text" class="ticket_name" name="ticket_name" placeholder="Ví dụ: Vé thường">
+                        </div>
+                        <div>
+                            <label class="required-label">
+                                <span class="text-danger">*</span> Giá vé (VNĐ)
+                            </label>
+                            <input type="number" class="ticket_price" name="ticket_price" min="0" placeholder="100000">
+                        </div>
+                        <div>
+                            <label class="required-label">
+                                <span class="text-danger">*</span> Số lượng
+                            </label>
+                            <input type="number" class="ticket_quantity" name="ticket_quantity" min="1"
+                                   placeholder="50">
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <button type="button" class="btn btn-save" onclick="addTicketType()">+ Thêm loại vé</button>
+            </div>
+
+            <div class="event-form-section step-section step-3">
+                <h3>Thông tin thanh toán</h3>
+
+                <div class="form-group">
+                    <label class="required-label">Chọn phương thức thanh toán</label>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="payment_method" value="bank" checked
+                                   onchange="handlePaymentMethodChange()">
+                            Chuyển khoản ngân hàng
+                        </label>
+                        <label>
+                            <input type="radio" name="payment_method" value="momo"
+                                   onchange="handlePaymentMethodChange()">
+                            Ví MoMo
+                        </label>
+                        <label>
+                            <input type="radio" name="payment_method" value="vnpay"
+                                   onchange="handlePaymentMethodChange()">
+                            VNPay
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Ngân hàng -->
+                <div class="payment-bank">
+                    <div class="form-group">
+                        <label class="required-label">Ngân hàng nhận tiền</label>
+                        <select name="bank">
+                            <option value="vcb">Vietcombank</option>
+                            <option value="mb">MB Bank</option>
+                            <option value="tcb">Techcombank</option>
+                            <option value="agribank">Agribank</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="required-label">Số tài khoản</label>
+                        <input type="text" name="account_number" placeholder="Ví dụ: 0123456789">
+                    </div>
+                    <div class="form-group">
+                        <label class="required-label">Chủ tài khoản</label>
+                        <input type="text" name="account_holder" placeholder="Tên chủ tài khoản">
+                    </div>
+                </div>
+
+                <!-- MoMo -->
+                <div class="payment-momo" style="display: none;">
+                    <div class="form-group">
+                        <label class="required-label">Số điện thoại MoMo</label>
+                        <input type="text" name="momo_number" placeholder="Nhập số ĐT liên kết MoMo">
+                    </div>
+                    <div class="form-group">
+                        <label>Tên chủ tài khoản MoMo</label>
+                        <input type="text" name="momo_name" placeholder="Tên MoMo">
+                    </div>
+                </div>
+
+                <!-- VNPay -->
+                <div class="payment-vnpay" style="display: none;">
+                    <div class="form-group">
+                        <label class="required-label">Mã Merchant VNPay</label>
+                        <input type="text" name="vnpay_merchant" placeholder="Nhập mã merchant ID VNPay">
+                    </div>
+                    <div class="form-group">
+                        <label class="required-label">URL callback VNPay</label>
+                        <input type="text" name="vnpay_return_url"
+                               placeholder="https://yourdomain.com/vnpay-return">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+
+{% endblock %}
+</div>

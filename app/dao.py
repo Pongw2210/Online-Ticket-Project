@@ -1,5 +1,5 @@
 import hashlib
-from app.data.models import User,EventTypeEnum
+from app.data.models import User,EventTypeEnum,Event,StatusEventEnum
 
 def get_user_by_id(user_id):
     return User.query.get(user_id)
@@ -24,9 +24,32 @@ def load_event_type_enum():
         for etype in EventTypeEnum
     }
 
-# from app import create_app
-# app =create_app()
-# if __name__ =="__main__":
-#     with app.app_context():
-#         # print(auth_user('userAdmin','123'))
-#         load_event_type_enum()
+def load_approved_events(organizer_id):
+    events = Event.query.filter(
+        Event.organizer_id == organizer_id,
+        Event.status == StatusEventEnum.DA_DUYET
+    )
+    return events.all()
+
+def load_pending_events(organizer_id):
+    return Event.query.filter_by(
+        organizer_id=organizer_id,
+        status=StatusEventEnum.DANG_DUYET
+    ).all()
+
+def load_rejected_events (organizer_id):
+    events = Event.query.filter(
+        Event.organizer_id == organizer_id,
+        Event.status == StatusEventEnum.TU_CHOI)
+
+    return events.all()
+
+def load_hidden_events (organizer_id):
+    events = Event.query.filter(
+        Event.organizer_id == organizer_id,
+        Event.status == StatusEventEnum.DA_AN)
+
+    return events.all()
+
+def get_event_by_id(event_id):
+    return Event.query.get(event_id)

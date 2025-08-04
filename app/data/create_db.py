@@ -186,6 +186,8 @@ def seed_event_offline():
         }
     ]
 
+    organizer = EventOrganizer.query.filter_by(fullname="Trần Bảo Ngọc").first()
+
     for data in offline_events_data:
         event = Event(
             name=data["name"],
@@ -197,7 +199,8 @@ def seed_event_offline():
             producers=data["producers"],
             image_url=data["image_url"],
             event_format = EventFormatEnum.OFFLINE,
-            event_type = EventTypeEnum.NGHE_THUAT
+            event_type = EventTypeEnum.NGHE_THUAT,
+            organizer_id = organizer.id
         )
         db.session.add(event)
         db.session.flush()  # để có event.id

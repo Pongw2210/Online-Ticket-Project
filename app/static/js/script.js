@@ -269,7 +269,6 @@ function showToast(message, duration = 3000) {
     }, duration);
 }
 
-
 function submitEventForm() {
     const imageInput = document.getElementById("imageUpload");
     const formData = new FormData();
@@ -322,5 +321,112 @@ function submitEventForm() {
     .catch(() => showToast("Lỗi kết nối máy chủ"));
 }
 
+function toggleDropdown() {
+        const dropdown = document.getElementById("accountDropdown");
+        dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+    }
 
+    // Ẩn dropdown nếu bấm ra ngoài
+    window.onclick = function(event) {
+        if (!event.target.closest('.account-wrapper')) {
+            const dropdown = document.getElementById("accountDropdown");
+            if (dropdown) dropdown.style.display = "none";
+        }
+    }
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        // Bỏ active tất cả
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        // Ẩn tất cả nội dung
+        document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
+
+        // Active tab hiện tại
+        btn.classList.add('active');
+        const tabId = btn.getAttribute('data-tab');
+        document.getElementById(tabId).style.display = 'block';
+    });
+});
+
+let selectedEventId = null;
+
+function showConfirmForm(eventId) {
+    selectedEventId = eventId;
+    document.getElementById("confirmForm").style.display = "flex";
+}
+
+function hideConfirmForm() {
+    selectedEventId = null;
+    document.getElementById("confirmForm").style.display = "none";
+}
+
+function confirmHide() {
+    if (!selectedEventId) return;
+
+    fetch(`/organizer/api/${selectedEventId}/hide`, {
+        method: "POST"
+    })
+    .then(res => {
+        if (res.ok) {
+            alert("Ẩn sự kiện thành công.");
+            location.reload();
+        } else {
+            alert("Ẩn sự kiện thất bại.");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Có lỗi xảy ra khi gửi yêu cầu.");
+    });
+
+    hideConfirmForm();
+}
+
+function showEvent(eventId) {
+    if (!eventId) return;
+
+    fetch(`/organizer/api/${eventId}/show`, {
+        method: "POST"
+    })
+    .then(res => {
+        if (res.ok) {
+            alert("Công khai sự kiện thành công.");
+            location.reload();
+        } else {
+            alert("Công khai sự kiện thất bại.");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Có lỗi xảy ra khi gửi yêu cầu.");
+    });
+}
+
+function viewRejectionReason( eventId){
+    selectedEventId = eventId;
+    document.getElementById("rejectModal").style.display = "flex";
+
+    if (!eventId) return;
+
+    fetch(`/organizer/api/${eventId}/rejected_reason`)
+        .then(response => response.json())
+        .then(data => {
+            console.log("Response từ server:", data);
+            if (data.reason) {
+                document.getElementById("rejectedReasonText").innerText = data.reason;
+            } else {
+                document.getElementById("rejectedReasonText").innerText = "Không tìm thấy lý do.";
+            }
+            document.getElementById("rejectModal").style.display = "flex";
+        })
+        .catch(err => {
+            document.getElementById("rejectedReasonText").innerText = "Không thể tải lý do.";
+            document.getElementById("rejectModal").style.display = "flex";
+        });
+}
+
+function hideRejectModal() {
+    selectedEventId = null;
+    document.getElementById("rejectModal").style.display = "none";
+}
 

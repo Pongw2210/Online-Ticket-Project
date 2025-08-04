@@ -1,7 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for,request, jsonify
 from flask_login import login_required, current_user
 from app import dao,db
-from app.data.models import UserEnum,Event, EventOffline, EventOnline, TicketType, EventFormatEnum, EventTypeEnum
+from app.data.models import UserEnum, Event, EventOffline, EventOnline, TicketType, EventFormatEnum, EventTypeEnum, \
+    StatusEventEnum, EventRejectionLog
 import cloudinary.uploader
 from datetime import datetime
 
@@ -13,8 +14,20 @@ def home():
     # Chỉ cho phép người tổ chức vào
     if current_user.role != UserEnum.NGUOI_TO_CHUC:
         return redirect(url_for("events.home"))
-    return render_template("event_organizer/home_event_organizer.html", current_user=current_user)
 
+    organizer_id = current_user.event_organizer.id
+
+    approved_events = dao.load_approved_events(organizer_id)
+    pending_events  = dao.load_pending_events(organizer_id)
+    hidden_events  = dao.load_hidden_events(organizer_id)
+    rejected_events  = dao.load_rejected_events(organizer_id)
+
+    return render_template("event_organizer/home_event_organizer.html",
+                           current_user=current_user,
+                           approved_events = approved_events,
+                           pending_events = pending_events,
+                           hidden_events = hidden_events,
+                           rejected_events = rejected_events)
 
 @event_organizer_bp.route("/new-event")
 @login_required
@@ -104,3 +117,52 @@ def create_event_api():
         db.session.rollback()
         print("Error:", e)
         return jsonify({"success": False, "message": "Lỗi khi tạo sự kiện."}), 500
+
+@event_organizer_bp.route('/api/<int:event_id>/hide',methods=['POST'])
+def hide_event_api(event_id):
+    event = Event.query.get(event_id)
+
+    if not event:
+        return jsonify({"message": "Không tìm thấy sự kiện."}), 404
+
+    event.status= StatusEventEnum.DA_AN
+    db.session.commit()
+
+    return jsonify({"message": "Ẩn sự kiện thành công."}), 200
+
+@event_organizer_bp.route('/api/<int:event_id>/show',methods=['POST'])
+def show_event_api(event_id):
+    event = Event.query.get(event_id)
+
+    if not event:
+        return jsonify({"message": "Không tìm thấy sự kiện."}), 404
+
+    event.status= StatusEventEnum.DA_DUYET
+    db.session.commit()
+
+    return jsonify({"message": "Công khai sự kiện thành công."}), 200
+
+@event_organizer_bp.route('/api/<int:event_id>/rejected_reason')
+def get_rejected_reason_api(event_id):
+    rejection_log = EventRejectionLog.query.filter_by(event_id=event_id).first()
+    print(rejection_log)
+    if rejection_log:
+        return jsonify({"reason": rejection_log.reason})
+    return jsonify({"reason": None})
+
+@event_organizer_bp.route("/edit-event/<int:event_id>")
+@login_required
+def edit_event(event_id):
+    if current_user.role != UserEnum.NGUOI_TO_CHUC:
+        return redirect(url_for("events.home"))
+
+    event = dao.get_event_by_id(event_id)
+    event_type = dao.load_event_type_enum()
+    is_offline = event.event_format == EventFormatEnum.OFFLINE
+
+    return render_template("event_organizer/edit_event.html",
+                           current_user=current_user,
+                           event_type=event_type,
+                           event=event,
+                           is_offline=is_offline)
+
