@@ -4,7 +4,7 @@ from app import db
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, Text, Time, Float
 from enum import Enum as RoleEnum
 from flask_login import UserMixin
-
+import enum
 class UserEnum(RoleEnum):
     KHACH_HANG = "Khách hàng "
     NGUOI_TO_CHUC = "Người tổ chức"
@@ -125,4 +125,3 @@ class EventRejectionLog(Base):
     event_id = Column(Integer, ForeignKey('event.id'), nullable=False)
     reason = Column(Text, nullable=False)
     rejected_at = Column(DateTime, default=datetime.utcnow)
-
