@@ -3,74 +3,8 @@
 <head>
     <title>Yêu cầu đăng nhập</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='auth_pages.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='images/icons8-ticket-50.png') }}" type="image/png">
-    <style>
-        .login-required-container {
-            max-width: 600px;
-            margin: 100px auto;
-            padding: 40px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            text-align: center;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-        .login-required-icon {
-            font-size: 80px;
-            margin-bottom: 20px;
-        }
-        .login-required-title {
-            color: #ffd700;
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-        .login-required-message {
-            color: #ccc;
-            font-size: 18px;
-            margin-bottom: 30px;
-            line-height: 1.6;
-        }
-        .login-required-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        .login-required-btn {
-            background: #007bff;
-            color: white;
-            padding: 15px 30px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        .login-required-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-            background: #0056b3;
-        }
-        .login-required-btn.secondary {
-            background: #6c757d;
-        }
-        .login-required-btn.secondary:hover {
-            background: #545b62;
-        }
-        .home-link {
-            margin-top: 30px;
-        }
-        .home-link a {
-            color: #ffd700;
-            text-decoration: none;
-            font-size: 16px;
-        }
-        .home-link a:hover {
-            text-decoration: underline;
-        }
-    </style>
 </head>
 <body>
     <div class="login-required-container">

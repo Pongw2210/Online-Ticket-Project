@@ -3,61 +3,9 @@
 <head>
     <title>{{ event.name }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='auth_pages.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='images/icons8-ticket-50.png') }}" type="image/png">
     <script src="{{ url_for('static', filename='scripts/ticket.js') }}" defer></script>
-    <style>
-        .no-tickets-container {
-            background: rgba(255, 193, 7, 0.2);
-            border: 1px solid #FFC107;
-            border-radius: 8px;
-            padding: 30px;
-            margin: 20px 0;
-            text-align: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-        .no-tickets-icon {
-            font-size: 60px;
-            margin-bottom: 20px;
-        }
-        .no-tickets-title {
-            color: #FFC107;
-            font-weight: bold;
-            font-size: 24px;
-            margin-bottom: 15px;
-        }
-        .no-tickets-message {
-            font-size: 16px;
-            margin-bottom: 25px;
-            color: #ccc;
-            line-height: 1.5;
-        }
-        .no-tickets-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        .no-tickets-btn {
-            background: #007bff;
-            color: white;
-            padding: 12px 25px;
-            border-radius: 6px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-        }
-        .no-tickets-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-        .no-tickets-btn.secondary {
-            background: #6c757d;
-        }
-        .no-tickets-btn.secondary:hover {
-            background: #545b62;
-        }
-    </style>
 </head>
 <body>
 <header>
