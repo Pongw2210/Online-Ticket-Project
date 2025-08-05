@@ -5,6 +5,59 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='images/icons8-ticket-50.png') }}" type="image/png">
     <script src="{{ url_for('static', filename='scripts/ticket.js') }}" defer></script>
+    <style>
+        .no-tickets-container {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid #FFC107;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 20px 0;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .no-tickets-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        .no-tickets-title {
+            color: #FFC107;
+            font-weight: bold;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+        .no-tickets-message {
+            font-size: 16px;
+            margin-bottom: 25px;
+            color: #ccc;
+            line-height: 1.5;
+        }
+        .no-tickets-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .no-tickets-btn {
+            background: #007bff;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        .no-tickets-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        .no-tickets-btn.secondary {
+            background: #6c757d;
+        }
+        .no-tickets-btn.secondary:hover {
+            background: #545b62;
+        }
+    </style>
 </head>
 <body>
 <header>
@@ -21,7 +74,7 @@
         <a href="/new-event" class="create-event">
             <span>Tạo sự kiện</span>
         </a>
-        <a href="/my-ticket" class="my-ticket">
+                    <a href="/my-tickets" class="my-ticket">
             <img src="{{ url_for('static', filename='images/icons8-ticket-30.png') }}" alt="ticket icon"
                  class="ticket-icon">
             <span>Vé của tôi</span>
@@ -47,6 +100,31 @@
 </div>
 
 <h2 class="section-title">🎟 Chọn vé</h2>
+{% if current_user %}
+<div style="background: rgba(76, 175, 80, 0.2); border: 1px solid #4CAF50; border-radius: 8px; padding: 15px; margin: 20px 0; text-align: center;">
+    <div style="color: #4CAF50; font-weight: bold; margin-bottom: 5px;">✅ Đã đăng nhập</div>
+    <div style="font-size: 14px;">Xin chào <strong>{{ current_user.username }}</strong>, bạn có thể tiếp tục mua vé!</div>
+</div>
+{% endif %}
+
+{% if not has_tickets %}
+<div class="no-tickets-container">
+    <div class="no-tickets-icon">🎫</div>
+    <div class="no-tickets-title">Hiện tại chưa có vé cho chương trình</div>
+    <div class="no-tickets-message">
+        Chương trình <strong>"{{ event.name }}"</strong> hiện chưa có vé được phát hành.<br>
+        Vui lòng quay lại sau hoặc liên hệ với chúng tôi để biết thêm thông tin.
+    </div>
+    <div class="no-tickets-buttons">
+        <a href="/" class="no-tickets-btn">
+            ← Về trang chủ
+        </a>
+        <a href="/event/{{ event.id }}" class="no-tickets-btn secondary">
+            ← Quay lại chi tiết sự kiện
+        </a>
+    </div>
+</div>
+{% else %}
 <div class="ticket-booking-container">
     <div class="ticket-selection">
         {% for ticket in ticket_types %}
@@ -86,8 +164,33 @@
         <h4 style="">Tổng vé:</h4>
         <ul id="summary-list"></ul>
         <p class="total" id="summary-total"><strong>🎟 x0</strong></p>
-        <a class="continue-btn" id="continue-btn" href="#" data-event-id="{{ event.id }}">Tiếp tục >></a>
+        <a href="#" class="continue-btn" id="continue-btn" data-event-id="{{ event.id }}">Tiếp tục >></a>
     </div>
 </div>
+{% endif %}
+
+<!-- Footer với bản quyền -->
+<footer class="footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>TicketBox Clone</h3>
+            <p>Hệ thống đặt vé sự kiện trực tuyến</p>
+        </div>
+        <div class="footer-section">
+            <h4>Liên hệ</h4>
+            <p>Email: info@ticketboxclone.com</p>
+            <p>Điện thoại: 1900-xxxx</p>
+        </div>
+        <div class="footer-section">
+            <h4>Theo dõi</h4>
+            <p>Facebook | Instagram | Twitter</p>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2024 TicketBox Clone. Tất cả quyền được bảo lưu.</p>
+        <p>Phát triển bởi QLDAPM Team</p>
+    </div>
+</footer>
+
 </body>
 </html>

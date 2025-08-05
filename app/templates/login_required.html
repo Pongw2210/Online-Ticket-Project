@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Yêu cầu đăng nhập</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/icons8-ticket-50.png') }}" type="image/png">
+    <style>
+        .login-required-container {
+            max-width: 600px;
+            margin: 100px auto;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .login-required-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        .login-required-title {
+            color: #ffd700;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .login-required-message {
+            color: #ccc;
+            font-size: 18px;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .login-required-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .login-required-btn {
+            background: #007bff;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .login-required-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            background: #0056b3;
+        }
+        .login-required-btn.secondary {
+            background: #6c757d;
+        }
+        .login-required-btn.secondary:hover {
+            background: #545b62;
+        }
+        .home-link {
+            margin-top: 30px;
+        }
+        .home-link a {
+            color: #ffd700;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        .home-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-required-container">
+        <div class="login-required-icon">🔐</div>
+        <div class="login-required-title">Yêu cầu đăng nhập</div>
+        <div class="login-required-message">
+            {{ message }}
+        </div>
+        <div class="login-required-buttons">
+            <a href="/login" class="login-required-btn">Đăng nhập</a>
+            <a href="/register" class="login-required-btn secondary">Đăng ký</a>
+        </div>
+        <div class="home-link">
+            <a href="/">← Về trang chủ</a>
+        </div>
+    </div>
+
+<!-- Footer với bản quyền -->
+<footer class="footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>TicketBox Clone</h3>
+            <p>Hệ thống đặt vé sự kiện trực tuyến</p>
+        </div>
+        <div class="footer-section">
+            <h4>Liên hệ</h4>
+            <p>Email: info@ticketboxclone.com</p>
+            <p>Điện thoại: 1900-xxxx</p>
+        </div>
+        <div class="footer-section">
+            <h4>Theo dõi</h4>
+            <p>Facebook | Instagram | Twitter</p>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2024 TicketBox Clone. Tất cả quyền được bảo lưu.</p>
+        <p>Phát triển bởi QLDAPM Team</p>
+    </div>
+</footer>
+
+</body>
+</html> 

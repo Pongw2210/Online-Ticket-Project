@@ -49,14 +49,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const quantities = document.querySelectorAll('.quantity-input');
             let tickets = [];
+            let ticketMap = {};  // Để lưu vào localStorage
 
             quantities.forEach(input => {
                 const quantity = parseInt(input.value);
+                const ticketName = input.dataset.name;  // Sử dụng tên vé trực tiếp từ database
+
                 if (quantity > 0) {
                     tickets.push({
                         id: parseInt(input.dataset.ticketId),
                         quantity: quantity
                     });
+
+                    ticketMap[ticketName] = quantity;
                 }
             });
 
@@ -65,8 +70,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
+            // Lưu vào localStorage để sử dụng ở trang chọn ghế
+            localStorage.setItem("selectedTickets", JSON.stringify(ticketMap));
+            console.log("Saved to localStorage:", ticketMap); // Debug log
+
             const eventId = parseInt(continueBtn.dataset.eventId);
 
+            // Gửi vé lên server
             fetch('/process-order', {
                 method: 'POST',
                 headers: {
@@ -79,7 +89,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (data.success) {
                     window.location.href = `/select-seats/${eventId}`;
                 } else {
-                    alert(data.message || "Đặt vé thất bại.");
+                    if (data.message && data.message.includes('đăng nhập')) {
+                        // Nếu lỗi đăng nhập, chuyển hướng đến trang đăng nhập
+                        alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+                        window.location.href = '/login';
+                    } else {
+                        alert(data.message || "Đặt vé thất bại.");
+                    }
                 }
             })
             .catch(err => {
@@ -89,5 +105,5 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    updateSummary(); // Khởi tạo phần tổng vé
+    updateSummary(); // Cập nhật ban đầu
 });

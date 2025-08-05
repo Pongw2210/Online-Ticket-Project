@@ -5,27 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8d0c4b63-701d-4b74-94ee-fe119ec79d3c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/ticketing_system.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/create_db.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/routes/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/routes/auth.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/routes/events.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/static/scripts/ticket.js" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/static/styles.css" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/templates/auth.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/templates/buy_ticket.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/templates/event_detail.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/templates/home.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/templates/select_seats.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/run.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/create_db.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/create_db.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/events.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/events.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/scripts/ticket.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/scripts/ticket.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/styles.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/auth.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/auth.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/buy_ticket.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/buy_ticket.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/event_detail.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/event_detail.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/select_seats.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/select_seats.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code sql.sql" beforeDir="false" afterPath="$PROJECT_DIR$/code sql.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,8 +54,8 @@
     &quot;Python.run.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/QLDAPM/ticketing_system&quot;
+    &quot;git-widget-placeholder&quot;: &quot;dev&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/QTDAPM2/OnlineTicketProject&quot;
   }
 }</component>
   <component name="RunManager" selected="Python.run">

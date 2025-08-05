@@ -31,5 +31,19 @@ CREATE TABLE user (
     password_hash VARCHAR(256) NOT NULL
 );
 
+CREATE TABLE booking (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    event_id INT NOT NULL,
+    ticket_type_id INT NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    selected_seats TEXT,
+    total_price FLOAT NOT NULL,
+    booking_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(20) DEFAULT 'confirmed',
+    FOREIGN KEY (user_id) REFERENCES user(id),
+    FOREIGN KEY (event_id) REFERENCES event(id),
+    FOREIGN KEY (ticket_type_id) REFERENCES ticket_type(id)
+);
 
 

@@ -1,5 +1,5 @@
 from app import create_app, db
-from app.models import Event, TicketType
+from app.models import Event, TicketType, Booking
 
 app = create_app()
 with app.app_context():

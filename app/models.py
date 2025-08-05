@@ -39,3 +39,22 @@ class User(db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+    bookings = db.relationship("Booking", backref="user", lazy=True)
+
+
+# ================== Booking ==================
+class Booking(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    event_id = db.Column(db.Integer, db.ForeignKey("event.id"), nullable=False)
+    ticket_type_id = db.Column(db.Integer, db.ForeignKey("ticket_type.id"), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False, default=1)
+    selected_seats = db.Column(db.Text)  # JSON string lưu danh sách ghế đã chọn
+    total_price = db.Column(db.Float, nullable=False)
+    booking_date = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
+    status = db.Column(db.String(20), default="confirmed")  # confirmed, cancelled, refunded
+    
+    # Relationships
+    event = db.relationship("Event", backref="bookings")
+    ticket_type = db.relationship("TicketType", backref="bookings")

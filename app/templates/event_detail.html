@@ -11,7 +11,7 @@
                          class="logo-img"></a>
     </div>
     <form class="search-bar" method="get" action="/">
-        <input type="text" name="q" value="{{ search }}" placeholder="Bạn tìm gì hôm nay?">
+        <input type="text" name="q" value="" placeholder="Bạn tìm gì hôm nay?">
         <button type="submit">Tìm kiếm</button>
     </form>
 
@@ -19,7 +19,7 @@
         <a href="/new-event" class="create-event">
             <span>Tạo sự kiện</span>
         </a>
-        <a href="/my-ticket" class="my-ticket">
+                    <a href="/my-tickets" class="my-ticket">
             <img src="{{ url_for('static', filename='images/icons8-ticket-30.png') }}" alt="ticket icon"
                  class="ticket-icon">
             <span>Vé của tôi</span>
@@ -103,6 +103,29 @@
     <h2>Nhà sản xuất</h2>
     <p>{{ event.producers }}</p>
 </div>
+
+<!-- Footer với bản quyền -->
+<footer class="footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>TicketBox Clone</h3>
+            <p>Hệ thống đặt vé sự kiện trực tuyến</p>
+        </div>
+        <div class="footer-section">
+            <h4>Liên hệ</h4>
+            <p>Email: info@ticketboxclone.com</p>
+            <p>Điện thoại: 1900-xxxx</p>
+        </div>
+        <div class="footer-section">
+            <h4>Theo dõi</h4>
+            <p>Facebook | Instagram | Twitter</p>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2024 TicketBox Clone. Tất cả quyền được bảo lưu.</p>
+        <p>Phát triển bởi QLDAPM Team</p>
+    </div>
+</footer>
 
 </body>
 </html>

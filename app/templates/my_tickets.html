@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vé của tôi</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/icons8-ticket-50.png') }}" type="image/png">
+    <style>
+        .my-tickets-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .my-tickets-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .my-tickets-title {
+            color: #28a745;
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .my-tickets-subtitle {
+            color: #555;
+            font-size: 18px;
+        }
+        .ticket-card {
+            display: flex;
+            flex-wrap: wrap;
+            background: #fff;
+            border-radius: 16px;
+            padding: 28px 32px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 16px rgba(40, 167, 69, 0.08);
+            border: 2px solid #28a745;
+            transition: box-shadow 0.2s;
+        }
+        .ticket-card:hover {
+            box-shadow: 0 8px 32px rgba(40, 167, 69, 0.18);
+        }
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+        .ticket-info-left {
+            flex: 2;
+            min-width: 260px;
+            margin-right: 32px;
+        }
+        .ticket-info-right {
+            flex: 1;
+            min-width: 220px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 18px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .event-name {
+            color: #28a745;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 18px;
+        }
+        .info-row {
+            margin-bottom: 10px;
+        }
+        .info-label {
+            color: #28a745;
+            font-weight: bold;
+            font-size: 15px;
+            margin-right: 8px;
+        }
+        .info-value {
+            color: #222;
+            font-size: 16px;
+        }
+        .seats-info {
+            background: #f8f9fa;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        .seats-title {
+            color: #28a745;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 15px;
+            text-align: center;
+        }
+        .seat-tag {
+            display: inline-block;
+            background: #28a745;
+            color: #fff;
+            padding: 6px 14px;
+            border-radius: 16px;
+            margin: 2px 4px 2px 0;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+        .qr-code {
+            margin-top: 18px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(40,167,69,0.08);
+        }
+        .no-tickets {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        .no-tickets-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        .no-tickets h2 {
+            color: #28a745;
+            font-size: 28px;
+            margin-bottom: 15px;
+        }
+        .no-tickets p {
+            color: #ccc;
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+        .back-btn {
+            background: #28a745;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .back-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        .status-badge {
+            padding: 6px 16px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: bold;
+            text-transform: uppercase;
+            background: #28a745;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        .ticket-card.cancelled .status-badge {
+            background: #dc3545;
+        }
+        .ticket-card.refunded .status-badge {
+            background: #6c757d;
+        }
+        @media (max-width: 900px) {
+            .ticket-card { flex-direction: column; }
+            .ticket-info-left, .ticket-info-right { margin-right: 0; min-width: 0; }
+            .ticket-info-right { margin-top: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <a href="/"><img src="{{ url_for('static', filename='images/icons8-ticket-100.png') }}" alt="Ticketbox Logo"
+                             class="logo-img"></a>
+        </div>
+        <form class="search-bar" method="get" action="/">
+            <input type="text" name="q" value="" placeholder="Bạn tìm gì hôm nay?">
+            <button type="submit">Tìm kiếm</button>
+        </form>
+
+        <div class="header-actions">
+            <a href="/new-event" class="create-event">
+                <span>Tạo sự kiện</span>
+            </a>
+            <a href="/my-tickets" class="my-ticket">
+                <img src="{{ url_for('static', filename='images/icons8-ticket-30.png') }}" alt="ticket icon"
+                     class="ticket-icon">
+                <span>Vé của tôi</span>
+            </a>
+        </div>
+
+        <div class="auth-links">
+            {% if user %}
+                👋 Xin chào, <strong>{{ user.username }}</strong> |
+                <a href="/logout">Đăng xuất</a>
+            {% else %}
+                <a href="/login">Đăng nhập</a> |
+                <a href="/register">Đăng ký</a>
+            {% endif %}
+        </div>
+    </header>
+
+    <div class="nav">
+        <a href="#">Nhạc sống</a>
+        <a href="#">Sân khấu & Nghệ thuật</a>
+        <a href="#">Thể thao</a>
+        <a href="#">Khác</a>
+    </div>
+
+    <div class="my-tickets-container">
+        <div class="my-tickets-header">
+            <h1 class="my-tickets-title">🎫 Vé của tôi</h1>
+            <p class="my-tickets-subtitle">Xem tất cả vé đã đặt của bạn</p>
+        </div>
+
+        {% if bookings %}
+            {% for booking in bookings %}
+            <div class="ticket-card {{ booking.status }}">
+                <div class="ticket-info-left">
+                    <div class="event-name">{{ booking.event.name }}</div>
+                    <div class="info-row"><span class="info-label">Loại vé:</span><span class="info-value">{{ booking.ticket_type.name }}</span></div>
+                    <div class="info-row"><span class="info-label">Số lượng:</span><span class="info-value">{{ booking.quantity }} vé</span></div>
+                    <div class="info-row"><span class="info-label">Tổng tiền:</span><span class="info-value">{{ "{:,.0f}".format(booking.total_price) }} đ</span></div>
+                    <div class="info-row"><span class="info-label">Địa điểm:</span><span class="info-value">{{ booking.event.location }}</span></div>
+                    <div class="info-row"><span class="info-label">Ngày diễn ra:</span><span class="info-value">{{ booking.event.date }}</span></div>
+                    <div class="info-row"><span class="info-label">Trạng thái:</span><span class="status-badge status-{{ booking.status }}">{{ booking.status }}</span></div>
+                    <div class="info-row"><span class="info-label">Ngày đặt:</span><span class="info-value">{{ booking.booking_date if booking.booking_date else 'Chưa có thông tin' }}</span></div>
+                </div>
+                <div class="ticket-info-right">
+                    <div class="seats-title">🎯 Ghế đã chọn:</div>
+                    <div style="margin-bottom:10px;">
+                        {% set seats = booking.selected_seats|from_json %}
+                        {% if seats and seats|length > 0 %}
+                            {% for seat in seats %}
+                                <span class="seat-tag">{{ seat.id }}</span>
+                            {% endfor %}
+                        {% else %}
+                            <span style="color:#888;">Chưa chọn ghế</span>
+                        {% endif %}
+                    </div>
+                    <div class="qr-code" id="qr-{{ booking.id }}">
+                        <img src="{{ booking.qr_img_url }}" alt="QR Code vé" style="width: 200px; height: 200px;"/>
+                    </div>
+                </div>
+            </div>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+            <script>
+                (function() {
+                    var qr = new QRious({
+                        element: document.getElementById('qr-{{ booking.id }}'),
+                        value: 'Sự kiện: {{ booking.event.name }} | Loại vé: {{ booking.ticket_type.name }} | Số lượng: {{ booking.quantity }} | Ghế: {% for seat in seats %}{{ seat.id }}{% if not loop.last %}, {% endif %}{% endfor %} | Ngày: {{ booking.event.date }}',
+                        size: 120
+                    });
+                })();
+            </script>
+            {% endfor %}
+        {% else %}
+            <div class="no-tickets">
+                <div class="no-tickets-icon">🎫</div>
+                <h2>Bạn chưa có vé nào</h2>
+                <p>Hãy khám phá các sự kiện thú vị và đặt vé ngay!</p>
+                <a href="/" class="back-btn">← Về trang chủ</a>
+            </div>
+        {% endif %}
+    </div>
+
+<!-- Footer với bản quyền -->
+<footer class="footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>TicketBox Clone</h3>
+            <p>Hệ thống đặt vé sự kiện trực tuyến</p>
+        </div>
+        <div class="footer-section">
+            <h4>Liên hệ</h4>
+            <p>Email: info@ticketboxclone.com</p>
+            <p>Điện thoại: 1900-xxxx</p>
+        </div>
+        <div class="footer-section">
+            <h4>Theo dõi</h4>
+            <p>Facebook | Instagram | Twitter</p>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2024 TicketBox Clone. Tất cả quyền được bảo lưu.</p>
+        <p>Phát triển bởi QLDAPM Team</p>
+    </div>
+</footer>
+
+</body>
+</html> 
