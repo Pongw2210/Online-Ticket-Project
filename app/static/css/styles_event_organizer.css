@@ -1101,3 +1101,53 @@ input.error, textarea.error, select.error {
     color: #000;
 }
 
+/* Căn hàng ngang cho các nút trong thẻ sự kiện */
+.event-card .action-buttons {
+    display: flex;
+    gap: 10px; /* khoảng cách giữa các nút */
+    flex-wrap: wrap; /* nếu màn hình hẹp thì nút có thể xuống dòng */
+    margin-top: 10px;
+}
+
+/* Căn chỉnh kích thước nút */
+.event-card .action-buttons button {
+    padding: 8px 14px;
+    font-size: 13px;
+    border-radius: 6px;
+    white-space: nowrap;
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.event-card .action-buttons button:hover {
+    background-color: #27ae60;
+}
+
+.btn-danger {
+    background-color: #e74c3c !important;
+}
+
+.btn-danger:hover {
+    background-color: #c0392b !important;
+}
+
+.btn-warning {
+    background-color: #f39c12 !important;
+}
+
+.btn-warning:hover {
+    background-color: #e67e22 !important;
+}
+
+.btn-confirm {
+    background-color: #3498db;
+}
+
+.btn-confirm:hover {
+    background-color: #2980b9;
+}
+
+

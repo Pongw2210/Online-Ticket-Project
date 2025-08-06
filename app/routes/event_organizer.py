@@ -160,9 +160,109 @@ def edit_event(event_id):
     event_type = dao.load_event_type_enum()
     is_offline = event.event_format == EventFormatEnum.OFFLINE
 
+    ticket_types = TicketType.query.filter_by(event_id=event_id)
+
     return render_template("event_organizer/edit_event.html",
                            current_user=current_user,
                            event_type=event_type,
                            event=event,
-                           is_offline=is_offline)
+                           is_offline=is_offline,
+                           ticket_types=ticket_types)
+
+@event_organizer_bp.route('/api/<int:event_id>/edit', methods=['POST'])
+def edit_event_api(event_id):
+    try:
+        # Tìm sự kiện cũ
+        event = Event.query.get(event_id)
+        if not event:
+            return jsonify({"success": False, "message": "Không tìm thấy sự kiện"}), 404
+
+        # Lấy ảnh mới (nếu có)
+        image_file = request.files.get("image")
+        existing_image_url = request.form.get("existing_image_url")
+        if image_file:
+            upload_result = cloudinary.uploader.upload(image_file)
+            event.image_url = upload_result.get("secure_url")
+        elif existing_image_url:
+            event.image_url = existing_image_url
+
+        # Trích xuất các giá trị trước để vừa cập nhật vừa debug
+        name = request.form.get("name_event")
+        description = request.form.get("description")
+        rules = request.form.get("rules")
+        performers = request.form.get("performers")
+        organizer = request.form.get("organizer")
+        event_format = request.form.get("event_format")
+        event_type = request.form.get("event_type")
+        start_time = request.form.get("start_time")
+        end_time = request.form.get("end_time")
+
+        # Cập nhật vào DB
+        event.name = name
+        event.description = description
+        event.rules = rules
+        event.authors = performers
+        event.producers = organizer
+        event.event_format = EventFormatEnum[event_format.upper()]
+        event.event_type = EventTypeEnum[event_type]
+        event.start_datetime = datetime.fromisoformat(start_time)
+        event.end_datetime = datetime.fromisoformat(end_time)
+        event.status = StatusEventEnum.DANG_DUYET
+
+        # Cập nhật offline/online
+        if event.event_format == EventFormatEnum.OFFLINE:
+            venue_name = request.form.get("venue_name")
+            address = request.form.get("address")
+
+            if not venue_name or not address:
+                return jsonify({"success": False, "message": "Vui lòng điền đầy đủ địa điểm sự kiện"}), 400
+
+            if event.event_offline:
+                event.event_offline.venue_name = venue_name
+                event.event_offline.location = address
+            else:
+                new_offline = EventOffline(venue_name=venue_name, location=address, event_id=event.id)
+                db.session.add(new_offline)
+        else:
+            livestream_url = request.form.get("livestream_url")
+            if event.event_online:
+                event.event_online.livestream_url = livestream_url
+            else:
+                new_online = EventOnline(livestream_url=livestream_url, event_id=event.id)
+                db.session.add(new_online)
+
+        # Cập nhật các loại vé (xoá hết tạo lại đơn giản nhất)
+        import json
+        tickets = json.loads(request.form.get("tickets", "[]"))
+
+        TicketType.query.filter_by(event_id=event.id).delete()
+        for t in tickets:
+            ticket = TicketType(
+                name=t['name'],
+                price=float(t['price']),
+                quantity=int(t['quantity']),
+                event_id=event.id
+            )
+            db.session.add(ticket)
+
+        db.session.commit()
+        return jsonify({"success": True})
+
+    except Exception as e:
+        db.session.rollback()
+        import traceback
+        traceback.print_exc()
+        return jsonify({"success": False, "message": "Lỗi khi cập nhật sự kiện."}), 500
+
+@event_organizer_bp.route('/api/<int:event_id>/delete',methods=['DELETE'])
+def delete_event_api(event_id):
+    event = Event.query.get(event_id)
+
+    if not event:
+        return jsonify({"message": "Không tìm thấy sự kiện."}), 404
+
+    db.session.delete(event)
+    db.session.commit()
+
+    return jsonify({"message": "Xóa sự kiện thành công."}), 200
 

@@ -53,6 +53,9 @@
                     <a>
                         <button onclick="showConfirmForm({{ event.id }})">Ẩn sự kiện</button>
                     </a>
+                    <a>
+                        <button onclick="showConfirmDeleteForm({{ event.id }})">Xóa</button>
+                    </a>
                 </div>
 
             </div>
@@ -80,9 +83,14 @@
                     {{ event.start_datetime.strftime('%d/%m/%Y %H:%M') }} -
                     {{ event.event_offline.location if event.event_offline else 'Trực tuyến' }}
                 </div>
-                <a href="{{ url_for('events.event_detail', event_id=event.id) }}">
-                    <button>Xem chi tiết</button>
-                </a>
+                <div class="action-buttons">
+                    <a href="{{ url_for('events.event_detail', event_id=event.id) }}">
+                        <button>Xem chi tiết</button>
+                    </a>
+                    <a>
+                        <button class="btn-danger" onclick="showConfirmDeleteForm({{ event.id }})">Xóa</button>
+                    </a>
+                </div>
             </div>
         </div>
         {% endfor %}
@@ -121,6 +129,9 @@
                             Xem lý do
                         </button>
                     </a>
+                    <a>
+                        <button onclick="showConfirmDeleteForm({{ event.id }})">Xóa</button>
+                    </a>
                 </div>
 
             </div>
@@ -150,10 +161,13 @@
                 </div>
                 <div class="action-buttons">
                     <a href="{{ url_for('events.event_detail', event_id=event.id) }}">
-                        <button>Xem chi tiết</button>
+                        <button class="btn-confirm">Xem chi tiết</button>
                     </a>
                     <a>
                         <button onclick="showEvent({{ event.id }})"> Công khai</button>
+                    </a>
+                    <a>
+                        <button class="btn-danger" onclick="showConfirmDeleteForm({{ event.id }})">Xóa</button>
                     </a>
                 </div>
             </div>
@@ -174,7 +188,7 @@
         <p>Bạn chắc chắn muốn ẩn sự kiện này?</p>
         <div class="modal-buttons">
             <button class="btn-confirm" onclick="confirmHide()">Đồng ý</button>
-            <button class="btn-cancel" onclick="hideConfirmForm()">Huỷ</button>
+            <button class="btn-cancel" onclick="hideConfirmForm('confirmForm')">Huỷ</button>
         </div>
     </div>
 </div>
@@ -186,6 +200,17 @@
 
         <div class="modal-buttons">
             <button class="btn-cancel" onclick="hideRejectModal()">Đã hiểu</button>
+        </div>
+    </div>
+</div>
+
+<div id="confirmDeleteForm" class="modal-overlay" style="display: none;">
+    <div class="modal-box">
+        <p>Bạn chắc chắn muốn xóa sự kiện này?</p>
+        <div class="modal-buttons">
+            <button class="btn-confirm" onclick="confirmDelete()">Đồng ý</button>
+            <button class="btn-cancel" onclick="hideConfirmForm('confirmDeleteForm')">Huỷ</button>
+
         </div>
     </div>
 </div>

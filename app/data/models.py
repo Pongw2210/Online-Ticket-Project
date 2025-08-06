@@ -117,6 +117,7 @@ class Event(Base):
 
     # Thêm quan hệ với bảng ghi lý do từ chối
     rejection_logs = relationship("EventRejectionLog", backref="event", cascade="all, delete")
+    ticket_types = relationship("TicketType", backref="event", cascade="all, delete")
 
 
 class EventRejectionLog(Base):
