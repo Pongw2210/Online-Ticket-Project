@@ -44,14 +44,14 @@
         <div class="payment-options">
 
             <div class="payment-option" data-method="bank">
-                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjMzQ5OGRiIi8+CjxwYXRoIGQ9Ik0xMCAxNUg1MFYyNUgxMFYxNVoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xMCAzMEg1MFY0MEgxMFYzMFoiIGZpbGw9IndoaXRlIi8+CjxjaXJjbGUgY3g9IjMwIiBjeT0iMjAiIHI9IjMiIGZpbGw9IiMzNDk4ZGIiLz4KPGNpcmNsZSBjeD0iMzAiIGN5PSIzNSIgcj0iMyIgZmlsbD0iIzM0OThkYiIvPgo8L3N2Zz4K"
+                <img src="{{ url_for('static', filename='images/icons8-bank-96.png') }}"
                      alt="Bank Transfer">
                 <h4>Chuyển Khoản Ngân Hàng</h4>
                 <p>Chuyển khoản trực tiếp qua ngân hàng</p>
             </div>
 
             <div class="payment-option" data-method="momo">
-                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjQzYxNEY2Ii8+CjxwYXRoIGQ9Ik0zMCAxNUMyMS43MTYgMTUgMTUgMjEuNzE2IDE1IDMwQzE1IDM4LjI4NCAyMS43MTYgNDUgMzAgNDVDMzguMjg0IDQ1IDQ1IDM4LjI4NCA0NSAzMEM0NSAyMS43MTYgMzguMjg0IDE1IDMwIDE1Wk0zMCA0MEMyNC40NzcgNDAgMjAgMzUuNTIzIDIwIDMwQzIwIDI0LjQ3NyAyNC40NzcgMjAgMzAgMjBDMzUuNTIzIDIwIDQwIDI0LjQ3NyA0MCAzMEM0MCAzNS41MjMgMzUuNTIzIDQwIDMwIDQwWiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTI1IDI1SDM1VjM1SDI1VjI1WiIgZmlsbD0iI0M2MTRGNiIvPgo8L3N2Zz4K"
+                <img src="{{ url_for('static', filename='images/momo.png') }}"
                      alt="MOMO">
                 <h4>MOMO</h4>
                 <p>Thanh toán qua ví điện tử MOMO</p>
@@ -74,19 +74,19 @@
         <div class="qr-code">
             <img src="{{ qr_img_url }}" alt="QR Code thanh toán" style="width: 200px; height: 200px;"/>
         </div>
-        <p><strong>Lưu ý:</strong> Sau khi thanh toán thành công, vé sẽ được gửi đến email của bạn</p>
+        <p><strong>Lưu ý:</strong> Sau khi thanh toán thành công, vé sẽ được cập nhật trong Vé của tôi</p>
     </div>
 
     <!-- Bank Transfer Section -->
     <div class="bank-info" id="bank-info">
-        <h3>🏦 Thông Tin Chuyển Khoản</h3>
+        <h3>Thông Tin Chuyển Khoản</h3>
         <div class="payment-instructions">
             <h4>Hướng dẫn chuyển khoản:</h4>
             <ul>
                 <li>Sao chép thông tin tài khoản bên dưới</li>
                 <li>Chuyển khoản chính xác số tiền: {{ "{:,.0f}".format(total_amount) }} VNĐ</li>
                 <li>Nội dung chuyển khoản: "VE_{{ event.id }}_{{ current_user.id }}"</li>
-                <li>Sau khi chuyển khoản, vé sẽ được gửi đến email của bạn</li>
+                <li>Sau khi chuyển khoản, vé sẽ được cập nhật trong Vé của tôi</li>
             </ul>
         </div>
         <div class="bank-details">
@@ -121,10 +121,10 @@
 
     <!-- MOMO Section -->
     <div class="qr-section" id="momo-section">
-        <h3>💜 Thanh Toán Qua MOMO</h3>
+        <h3>Thanh Toán Qua MOMO</h3>
         <div class="payment-instructions">
             <h4>Hướng dẫn thanh toán:</h4>
-            <ul>
+            <ul style="text-align: left;">
                 <li>Mở ứng dụng MOMO trên điện thoại</li>
                 <li>Chọn "Quét mã QR" hoặc "Thanh toán"</li>
                 <li>Quét mã QR bên dưới</li>
@@ -134,7 +134,7 @@
         <div class="qr-code">
             <img src="{{ qr_img_url_momo }}" alt="QR Code MOMO" style="width: 200px; height: 200px;"/>
         </div>
-        <p><strong>Lưu ý:</strong> Sau khi thanh toán thành công, vé sẽ được gửi đến email của bạn</p>
+        <p><strong>Lưu ý:</strong> Sau khi thanh toán thành công, vé sẽ được cập nhật trong Vé của tôi</p>
     </div>
 
     <div class="payment-actions">
@@ -207,7 +207,7 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Thanh toán thành công! Vé đã được gửi đến email của bạn.');
+                alert('Thanh toán thành công! Vé sẽ được cập nhật trong Vé của tôi.');
                 window.location.href = '{{ url_for("events.my_tickets") }}';
             } else {
                 alert('Lỗi: ' + data.message);

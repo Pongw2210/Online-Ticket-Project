@@ -190,7 +190,8 @@
     
     const confirmBtn = document.getElementById('confirm-btn');
     const selectedSeats = [];
-    let ticketInfoFromDB = {}; // Sẽ chứa thông tin vé từ database
+    let ticketInfoFromDB = {}; // Sẽ chứa thông tin vé từ database (số vé còn lại)
+    let totalSeatsFromDB = {}; // Sẽ chứa tổng số ghế ban đầu từ database
     let bookedSeats = [];
     
     // Lấy thông tin vé từ database và tạo ghế
@@ -203,45 +204,62 @@
         const eventId = pathParts[pathParts.length - 1];
         
         try {
-            // Lấy thông tin vé từ database
+            // Lấy thông tin vé từ database (số vé còn lại)
             const response = await fetch(`/api/ticket-info/${eventId}`);
             const data = await response.json();
             
             if (data.success) {
                 ticketInfoFromDB = data.ticket_info;
-                console.log("Ticket info from DB:", ticketInfoFromDB);
+                console.log("Ticket info from DB (available):", ticketInfoFromDB);
+            }
+            
+            // Lấy tổng số ghế ban đầu
+            const totalSeatsResponse = await fetch(`/api/total-seats/${eventId}`);
+            const totalSeatsData = await totalSeatsResponse.json();
+            
+            if (totalSeatsData.success) {
+                totalSeatsFromDB = totalSeatsData.total_seats;
+                console.log("Total seats from DB:", totalSeatsFromDB);
             }
         } catch (error) {
             console.error("Error fetching ticket info:", error);
         }
         
-        // Tính số lượng vé VIP và thường từ localStorage
+        // Tính số lượng vé VIP và thường từ localStorage (đã chọn)
         const vipTickets = (selectedTickets["Vé VIP"] || 0) + (selectedTickets["Vé Premium"] || 0);
         const normalTickets = (selectedTickets["Vé Thường"] || 0) + (selectedTickets["Vé Standing"] || 0);
         
-        console.log(`Creating seats: VIP=${vipTickets}, Normal=${normalTickets}`);
+        // Tính tổng số vé có sẵn từ database (số vé còn lại)
+        let totalVipAvailable = 0;
+        let totalNormalAvailable = 0;
         
-        // Hiển thị thông tin vé đã chọn và từ database
+        if (ticketInfoFromDB["Vé VIP"]) totalVipAvailable += ticketInfoFromDB["Vé VIP"];
+        if (ticketInfoFromDB["Vé Premium"]) totalVipAvailable += ticketInfoFromDB["Vé Premium"];
+        if (ticketInfoFromDB["Vé Thường"]) totalNormalAvailable += ticketInfoFromDB["Vé Thường"];
+        if (ticketInfoFromDB["Vé Standing"]) totalNormalAvailable += ticketInfoFromDB["Vé Standing"];
+        
+        // Tính tổng số ghế ban đầu từ database
+        let totalVipSeats = 0;
+        let totalNormalSeats = 0;
+        
+        if (totalSeatsFromDB["Vé VIP"]) totalVipSeats += totalSeatsFromDB["Vé VIP"];
+        if (totalSeatsFromDB["Vé Premium"]) totalVipSeats += totalSeatsFromDB["Vé Premium"];
+        if (totalSeatsFromDB["Vé Thường"]) totalNormalSeats += totalSeatsFromDB["Vé Thường"];
+        if (totalSeatsFromDB["Vé Standing"]) totalNormalSeats += totalSeatsFromDB["Vé Standing"];
+        
+        console.log(`Creating seats: VIP selected=${vipTickets}, available=${totalVipAvailable}, total=${totalVipSeats}, Normal selected=${normalTickets}, available=${totalNormalAvailable}, total=${totalNormalSeats}`);
+        
+        // Hiển thị thông tin vé đã chọn và tổng số ghế ban đầu
         const ticketDetails = document.getElementById('ticket-details');
         let detailsHTML = '';
-        if (vipTickets > 0) {
-            detailsHTML += `<div style="margin: 5px 0;">🎫 Vé VIP: ${vipTickets} vé (đã chọn)`;
-            if (ticketInfoFromDB["Vé VIP"] || ticketInfoFromDB["Vé Premium"]) {
-                const totalVip = (ticketInfoFromDB["Vé VIP"] || 0) + (ticketInfoFromDB["Vé Premium"] || 0);
-                detailsHTML += ` / ${totalVip} vé có sẵn</div>`;
-            } else {
-                detailsHTML += '</div>';
-            }
+        
+        if (totalVipSeats > 0) {
+            detailsHTML += `<div style="margin: 5px 0;">🎫 Vé VIP: ${vipTickets} vé (đã chọn) / ${totalVipSeats} ghế tổng cộng</div>`;
         }
-        if (normalTickets > 0) {
-            detailsHTML += `<div style="margin: 5px 0;">🎫 Vé Thường: ${normalTickets} vé (đã chọn)`;
-            if (ticketInfoFromDB["Vé Thường"] || ticketInfoFromDB["Vé Standing"]) {
-                const totalNormal = (ticketInfoFromDB["Vé Thường"] || 0) + (ticketInfoFromDB["Vé Standing"] || 0);
-                detailsHTML += ` / ${totalNormal} vé có sẵn</div>`;
-            } else {
-                detailsHTML += '</div>';
-            }
+        if (totalNormalSeats > 0) {
+            detailsHTML += `<div style="margin: 5px 0;">🎫 Vé Thường: ${normalTickets} vé (đã chọn) / ${totalNormalSeats} ghế tổng cộng</div>`;
         }
+        
         ticketDetails.innerHTML = detailsHTML;
         
         // Kiểm tra nếu không có vé nào được chọn
@@ -267,20 +285,14 @@
             }
         } catch (e) { bookedSeats = []; }
         
-        // Tạo ghế VIP dựa trên số lượng vé trong database
-        if (vipTickets > 0) {
+        // Tạo ghế VIP dựa trên tổng số ghế ban đầu từ database
+        if (totalVipSeats > 0) {
             vipContainer.innerHTML = '<h3>🎫 Ghế VIP</h3>';
             
-            // Tính tổng số vé VIP có sẵn trong database
-            let totalVipSeats = 0;
-            if (ticketInfoFromDB["Vé VIP"]) totalVipSeats += ticketInfoFromDB["Vé VIP"];
-            if (ticketInfoFromDB["Vé Premium"]) totalVipSeats += ticketInfoFromDB["Vé Premium"];
+            // Sử dụng tổng số ghế VIP ban đầu từ database
+            const vipRows = Math.ceil(totalVipSeats / 30);
             
-            // Sử dụng số lượng vé thực tế từ database, nhưng ít nhất là số vé đã chọn
-            const vipSeatsNeeded = Math.max(totalVipSeats, vipTickets);
-            const vipRows = Math.ceil(vipSeatsNeeded / 30);
-            
-            console.log(`VIP seats from DB: ${totalVipSeats}, Selected: ${vipTickets}, Creating: ${vipSeatsNeeded}`);
+            console.log(`VIP seats from DB: ${totalVipSeats}, Creating: ${totalVipSeats} seats in ${vipRows} rows`);
             
             for (let row = 1; row <= vipRows; row++) {
                 const seatRow = document.createElement('div');
@@ -288,7 +300,7 @@
                 
                 for (let col = 1; col <= 30; col++) {
                     const seatNum = (row - 1) * 30 + col;
-                    if (seatNum <= vipSeatsNeeded) {
+                    if (seatNum <= totalVipSeats) {
                         const seatId = `V${row}-${col}`;
                         const seat = document.createElement('div');
                         seat.className = 'seat vip';
@@ -310,20 +322,14 @@
             }
         }
         
-        // Tạo ghế thường dựa trên số lượng vé trong database
-        if (normalTickets > 0) {
+        // Tạo ghế thường dựa trên tổng số ghế ban đầu từ database
+        if (totalNormalSeats > 0) {
             normalContainer.innerHTML = '<h3>🎫 Ghế Thường</h3>';
             
-            // Tính tổng số vé thường có sẵn trong database
-            let totalNormalSeats = 0;
-            if (ticketInfoFromDB["Vé Thường"]) totalNormalSeats += ticketInfoFromDB["Vé Thường"];
-            if (ticketInfoFromDB["Vé Standing"]) totalNormalSeats += ticketInfoFromDB["Vé Standing"];
+            // Sử dụng tổng số ghế thường ban đầu từ database
+            const normalRows = Math.ceil(totalNormalSeats / 30);
             
-            // Sử dụng số lượng vé thực tế từ database, nhưng ít nhất là số vé đã chọn
-            const normalSeatsNeeded = Math.max(totalNormalSeats, normalTickets);
-            const normalRows = Math.ceil(normalSeatsNeeded / 30);
-            
-            console.log(`Normal seats from DB: ${totalNormalSeats}, Selected: ${normalTickets}, Creating: ${normalSeatsNeeded}`);
+            console.log(`Normal seats from DB: ${totalNormalSeats}, Creating: ${totalNormalSeats} seats in ${normalRows} rows`);
             
             for (let row = 1; row <= normalRows; row++) {
                 const seatRow = document.createElement('div');
@@ -331,7 +337,7 @@
                 
                 for (let col = 1; col <= 30; col++) {
                     const seatNum = (row - 1) * 30 + col;
-                    if (seatNum <= normalSeatsNeeded) {
+                    if (seatNum <= totalNormalSeats) {
                         const seatId = `T${row}-${col}`;
                         const seat = document.createElement('div');
                         seat.className = 'seat normal';
@@ -462,7 +468,6 @@
         .then(data => {
             console.log("📥 Response data:", data);
             if (data.success) {
-                alert("Đã chọn ghế thành công! Chuyển đến trang thanh toán.");
                 // Chuyển đến trang thanh toán thay vì my-tickets
                 const redirectUrl = data.redirect_url || `/payment/${eventId}`;
                 console.log("🔄 Redirecting to:", redirectUrl);

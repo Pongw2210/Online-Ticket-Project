@@ -121,6 +121,24 @@ def get_ticket_info(event_id):
         'event_name': event.name
     })
 
+@events_bp.route("/api/total-seats/<int:event_id>")
+def get_total_seats(event_id):
+    """API để lấy tổng số ghế ban đầu từ database"""
+    event = Event.query.get_or_404(event_id)
+    ticket_types = TicketType.query.filter_by(event_id=event.id).all()
+    
+    # Tính tổng số ghế ban đầu (không trừ đi số vé đã bán)
+    total_seats = {}
+    for ticket in ticket_types:
+        # Sử dụng quantity ban đầu (tổng số ghế)
+        total_seats[ticket.name] = ticket.quantity
+    
+    return jsonify({
+        'success': True,
+        'total_seats': total_seats,
+        'event_name': event.name
+    })
+
 @events_bp.route("/confirm-seats", methods=['POST'])
 def confirm_seats():
     """API để xác nhận ghế đã chọn và chuyển đến trang thanh toán"""
