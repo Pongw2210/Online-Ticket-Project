@@ -322,5 +322,184 @@ function submitEventForm() {
     .catch(() => showToast("Lỗi kết nối máy chủ"));
 }
 
+// ===== CHỨC NĂNG QUẢN LÝ VÉ (TỪ TICKET.JS) =====
+
+// Quản lý tăng/giảm số lượng vé
+function initializeTicketManagement() {
+    console.log('Initializing ticket management...');
+    
+    // Debug: Kiểm tra tất cả elements trên trang
+    console.log('All elements with class "increase":', document.querySelectorAll('.increase'));
+    console.log('All elements with class "decrease":', document.querySelectorAll('.decrease'));
+    console.log('All elements with class "quantity-input":', document.querySelectorAll('.quantity-input'));
+    console.log('Element with id "summary-list":', document.getElementById('summary-list'));
+    console.log('Element with id "summary-total":', document.getElementById('summary-total'));
+    console.log('Element with id "continue-btn":', document.getElementById('continue-btn'));
+    
+    const increaseButtons = document.querySelectorAll('.increase');
+    const decreaseButtons = document.querySelectorAll('.decrease');
+    const summaryList = document.getElementById('summary-list');
+    const summaryTotal = document.getElementById('summary-total');
+    const continueBtn = document.getElementById('continue-btn');
+    
+    console.log('Found increase buttons:', increaseButtons.length);
+    console.log('Found decrease buttons:', decreaseButtons.length);
+    console.log('Summary list element:', summaryList);
+    console.log('Summary total element:', summaryTotal);
+    console.log('Continue button element:', continueBtn);
+
+    function updateSummary() {
+        console.log('updateSummary called');
+        const quantities = document.querySelectorAll('.quantity-input');
+        let total = 0;
+        let summaryHTML = '';
+
+        console.log('Found quantity inputs:', quantities.length);
+
+        quantities.forEach(input => {
+            const quantity = parseInt(input.value);
+            const name = input.dataset.name;
+            const price = parseFloat(input.dataset.price);
+
+            console.log(`Input: ${name}, quantity: ${quantity}, price: ${price}`);
+
+            if (quantity > 0) {
+                total += quantity;
+                summaryHTML += `<li>${name}: ${price.toLocaleString()}đ x${quantity}</li>`;
+            }
+        });
+
+        console.log('Total quantity:', total);
+        console.log('Summary HTML:', summaryHTML);
+
+        if (summaryList) {
+            summaryList.innerHTML = summaryHTML || '<li>Chưa chọn vé nào</li>';
+            console.log('Updated summary list');
+        } else {
+            console.error('Summary list element not found');
+        }
+        if (summaryTotal) {
+            summaryTotal.innerHTML = `<strong>🎟 x${total}</strong>`;
+            console.log('Updated summary total');
+        } else {
+            console.error('Summary total element not found');
+        }
+    }
+
+    increaseButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            console.log('Increase button clicked for ticket:', btn.dataset.ticketId);
+            const ticketId = btn.dataset.ticketId;
+            const input = document.querySelector(`.quantity-input[data-ticket-id="${ticketId}"]`);
+            if (input) {
+                input.value = parseInt(input.value) + 1;
+                console.log('Updated input value to:', input.value);
+                updateSummary();
+            } else {
+                console.error('Input not found for ticket ID:', ticketId);
+            }
+        });
+    });
+
+    decreaseButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            console.log('Decrease button clicked for ticket:', btn.dataset.ticketId);
+            const ticketId = btn.dataset.ticketId;
+            const input = document.querySelector(`.quantity-input[data-ticket-id="${ticketId}"]`);
+            if (input) {
+                input.value = Math.max(0, parseInt(input.value) - 1);
+                console.log('Updated input value to:', input.value);
+                updateSummary();
+            } else {
+                console.error('Input not found for ticket ID:', ticketId);
+            }
+        });
+    });
+
+    if (continueBtn) {
+        continueBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const quantities = document.querySelectorAll('.quantity-input');
+            let tickets = [];
+            let ticketMap = {};  // Để lưu vào localStorage
+
+            quantities.forEach(input => {
+                const quantity = parseInt(input.value);
+                const ticketName = input.dataset.name;  // Sử dụng tên vé trực tiếp từ database
+
+                if (quantity > 0) {
+                    tickets.push({
+                        id: parseInt(input.dataset.ticketId),
+                        quantity: quantity
+                    });
+
+                    ticketMap[ticketName] = quantity;
+                }
+            });
+
+            if (tickets.length === 0) {
+                alert("Vui lòng chọn ít nhất 1 vé.");
+                return;
+            }
+
+            // Lưu vào localStorage để sử dụng ở trang chọn ghế
+            localStorage.setItem("selectedTickets", JSON.stringify(ticketMap));
+            console.log("Saved to localStorage:", ticketMap); // Debug log
+
+            const eventId = parseInt(continueBtn.dataset.eventId);
+
+            // Gửi vé lên server
+            fetch('/process-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ tickets: tickets })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = `/select-seats/${eventId}`;
+                } else {
+                    if (data.message && data.message.includes('đăng nhập')) {
+                        // Nếu lỗi đăng nhập, chuyển hướng đến trang đăng nhập
+                        alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+                        window.location.href = '/login';
+                    } else {
+                        alert(data.message || "Đặt vé thất bại.");
+                    }
+                }
+            })
+            .catch(err => {
+                alert("Lỗi kết nối đến server.");
+                console.error(err);
+            });
+        });
+    }
+
+    updateSummary(); // Cập nhật ban đầu
+}
+
+// Khởi tạo quản lý vé khi trang load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM Content Loaded - Initializing ticket management...');
+    
+    // Khởi tạo các chức năng hiện có (nếu tồn tại)
+    try {
+        if (typeof handleEventFormatChange === 'function') {
+            handleEventFormatChange();
+        }
+        if (typeof handlePaymentMethodChange === 'function') {
+            handlePaymentMethodChange();
+        }
+    } catch (error) {
+        console.log('Some functions not available on this page:', error.message);
+    }
+    
+    // Khởi tạo quản lý vé
+    initializeTicketManagement();
+});
+
 
 

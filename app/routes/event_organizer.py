@@ -1,15 +1,23 @@
-from flask import Blueprint, render_template, redirect, url_for,request, jsonify
-from flask_login import login_required, current_user
+from flask import Blueprint, render_template, redirect, url_for,request, jsonify, session
 from app import dao,db
-from app.data.models import UserEnum,Event, EventOffline, EventOnline, TicketType, EventFormatEnum, EventTypeEnum
+from app.data.models import UserEnum,Event, EventOffline, EventOnline, TicketType, EventFormatEnum, EventTypeEnum, User
 import cloudinary.uploader
 from datetime import datetime
 
 event_organizer_bp = Blueprint("event_organizer", __name__, url_prefix="/organizer")
 
+def check_login():
+    """Kiểm tra đăng nhập và trả về user"""
+    if "user_id" not in session:
+        return None
+    return User.query.get(session["user_id"])
+
 @event_organizer_bp.route("/home")
-@login_required
 def home():
+    current_user = check_login()
+    if not current_user:
+        return redirect(url_for("auth.login"))
+    
     # Chỉ cho phép người tổ chức vào
     if current_user.role != UserEnum.NGUOI_TO_CHUC:
         return redirect(url_for("events.home"))
@@ -17,8 +25,11 @@ def home():
 
 
 @event_organizer_bp.route("/new-event")
-@login_required
 def create_event():
+    current_user = check_login()
+    if not current_user:
+        return redirect(url_for("auth.login"))
+    
     if current_user.role != UserEnum.NGUOI_TO_CHUC:
         return redirect(url_for("events.home"))
     event_type = dao.load_event_type_enum()
@@ -26,8 +37,11 @@ def create_event():
     return render_template("event_organizer/create_event.html",current_user=current_user,event_type=event_type)
 
 @event_organizer_bp.route('/api/create-event', methods=['POST'])
-@login_required
 def create_event_api():
+    current_user = check_login()
+    if not current_user:
+        return jsonify({"success": False, "message": "Vui lòng đăng nhập"}), 401
+    
     try:
         # Upload ảnh lên Cloudinary
         image_file = request.files.get("image")
