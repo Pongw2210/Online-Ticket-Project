@@ -126,3 +126,20 @@ class EventRejectionLog(Base):
     event_id = Column(Integer, ForeignKey('event.id'), nullable=False)
     reason = Column(Text, nullable=False)
     rejected_at = Column(DateTime, default=datetime.utcnow)
+
+
+class Booking(Base):
+    __tablename__ = 'booking'
+
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    event_id = Column(Integer, ForeignKey('event.id'), nullable=False)
+    ticket_type_id = Column(Integer, ForeignKey('ticket_type.id'), nullable=False)
+    quantity = Column(Integer, nullable=False)
+    selected_seats = Column(Text)  # JSON string chứa thông tin ghế đã chọn
+    total_price = Column(Float, nullable=False)
+    booking_date = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    user = relationship("User", backref="bookings")
+    event = relationship("Event", backref="bookings")
+    ticket_type = relationship("TicketType", backref="bookings")
