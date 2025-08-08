@@ -1,19 +1,19 @@
 {% extends "event_organizer/layout_event_organizer/base.html" %}
 
-{% block title %}Tạo sự kiện mới{% endblock %}
+{% block title %}Chỉnh sửa sự kiện{% endblock %}
 
 {% block content %}
 <div class="topbar">
-    <h2>{% block header %}Tạo sự kiện {% endblock %}</h2>
-   <div class="account-wrapper">
-            <div class="account" onclick="toggleDropdown()">
-                Tài khoản <i class="fa fa-caret-down"></i>
-            </div>
-            <div class="dropdown" id="accountDropdown">
-                <a>Thông tin cá nhân</a>
-                <a>Đăng xuất</a>
-            </div>
+    <h2>{% block header %} Chỉnh sửa sự kiện {% endblock %}</h2>
+    <div class="account-wrapper">
+        <div class="account" onclick="toggleDropdown()">
+            Tài khoản <i class="fa fa-caret-down"></i>
         </div>
+        <div class="dropdown" id="accountDropdown">
+            <a>Thông tin cá nhân</a>
+            <a>Đăng xuất</a>
+        </div>
+    </div>
 </div>
 <div class="form-wrapper">
 
@@ -33,7 +33,7 @@
         </div>
         <div class="step-buttons">
             <button class="btn btn-prev" onclick="goToPrevStep()">Quay lại</button>
-            <button class="btn btn-next" onclick="goToNextStep()">Tiếp tục</button>
+            <button class="btn btn-next" onclick="goToNextStepUpdate()">Tiếp tục</button>
         </div>
     </div>
 
@@ -41,34 +41,47 @@
     <div class="main-content-scrollable content-center ">
         <div class="content-center">
             <div class="event-form-wrapper">
-                <div class="event-form-section step-section step-1 active">
+                <div class="event-form-section step-section step-1 active ">
                     <label class="required-label">
                         <span class="text-danger">*</span> Hình ảnh sự kiện
                     </label>
+
                     <div class="upload-box" onclick="document.getElementById('imageUpload').click();">
                         <input type="file" id="imageUpload" name="event_image" accept="image/*" style="display: none;"
                                onchange="previewImage(event)">
+
                         <div id="upload-preview">
+                            {% if event and event.image_url %}
+                            <img id="preview-img" src="{{ event.image_url }}"
+                                 style="max-width: 100%; max-height: 100%; border-radius: 10px;">
+                            {% else %}
                             <div>
                                 <div class="icon">📷</div>
                                 <p>Thêm ảnh sự kiện</p>
                             </div>
+                            {% endif %}
                         </div>
                     </div>
-
                     <div class="form-group">
                         <label class="required-label"><span class="text-danger">*</span> Tên sự kiện</label>
-                        <input type="text" name="name_event" id="name_event" maxlength="100" placeholder="Tên sự kiện">
+                        <input type="text" name="name_event" id="name_event" maxlength="100" placeholder="Tên sự kiện"
+                               value="{{ event.name }}">
                         <div class="text-counter">0 / 100</div>
                     </div>
 
                     <div class="form-group">
                         <label class="required-label">* Hình thức sự kiện</label>
                         <div class="radio-group">
-                            <label><input type="radio" name="event_format" value="offline" checked
-                                          onchange="handleEventFormatChange()"> Sự kiện Offline</label>
-                            <label><input type="radio" name="event_format" value="online"
-                                          onchange="handleEventFormatChange()"> Sự kiện Online</label>
+                            <label>
+                                <input type="radio" name="event_format" value="OFFLINE"
+                                       {% if is_offline %}checked{% endif %}
+                                       onchange="handleEventFormatChange()"> Sự kiện Offline
+                            </label>
+                            <label>
+                                <input type="radio" name="event_format" value="ONLINE"
+                                       {% if not is_offline %}checked{% endif %}
+                                       onchange="handleEventFormatChange()"> Sự kiện Online
+                            </label>
                         </div>
                     </div>
 
@@ -76,12 +89,18 @@
                         <div class="form-group">
                             <label class="required-label"><span class="text-danger">*</span> Tên địa điểm</label>
                             <input type="text" name="venue_name" id="venue_name" maxlength="80"
-                                   placeholder="Tên địa điểm">
-                            <div class="text-counter">0 / 80</div>
+                                   placeholder="Tên địa điểm"
+                                   value="{{ event.event_offline.venue_name if event.event_offline else '' }}">
+                            <div class="text-counter">
+                                {{ event.event_offline.venue_name|length if event.event_offline and
+                                event.event_offline.venue_name else 0 }} / 80
+                            </div>
                         </div>
                         <div class="form-group">
                             <label class="required-label"><span class="text-danger">*</span> Địa chỉ cụ thể</label>
-                            <input type="text" name="address" id="address" placeholder="Địa chỉ cụ thể">
+                            <input type="text" name="address" id="address"
+                                   placeholder="Địa chỉ cụ thể"
+                                   value="{{ event.event_offline.location if event.event_offline else '' }}">
                         </div>
                     </div>
 
@@ -90,8 +109,12 @@
                             <label class="required-label"><span class="text-danger">*</span> Link tham gia sự
                                 kiện</label>
                             <input type="text" name="livestream_url" id="livestream_url" maxlength="80"
-                                   placeholder="Link tham gia sự kiện">
-                            <div class="text-counter">0 / 80</div>
+                                   placeholder="Link tham gia sự kiện"
+                                   value="{{ event.event_online.livestream_url if event.event_online else '' }}">
+                            <div class="text-counter">
+                                {{ event.event_online.livestream_url|length if event.event_online and
+                                event.event_online.livestream_url else 0 }} / 80
+                            </div>
                         </div>
                     </div>
 
@@ -109,62 +132,105 @@
                     <div class="form-group">
                         <label class="required-label"><span class="text-danger">*</span> Thông tin sự kiện</label>
                         <textarea name="description" id="description" rows="4"
-                                  placeholder="Nhập thông tin..."></textarea>
+                                  placeholder="Nhập thông tin...">{{ event.description if event.description else '' }}</textarea>
                     </div>
+
                     <div class="form-group">
                         <label class="required-label"><span class="text-danger">*</span> Luật lệ sự kiện</label>
-                        <textarea name="rules" id="rules" rows="4" placeholder="Nhập thông tin..."></textarea>
+                        <textarea name="rules" id="rules" rows="4"
+                                  placeholder="Nhập thông tin...">{{ event.rules if event.rules else '' }}</textarea>
                     </div>
+
                     <div class="form-group">
                         <label class="required-label"><span class="text-danger">*</span> Thông tin người biểu diễn sự
                             kiện</label>
-                        <textarea name="performers" id="performers" rows="4" placeholder="Nhập thông tin..."></textarea>
+                        <textarea name="performers" id="performers" rows="4"
+                                  placeholder="Nhập thông tin...">{{ event.authors if event.authors else '' }}</textarea>
                     </div>
+
                     <div class="form-group">
                         <label class="required-label"><span class="text-danger">*</span> Thông tin người tổ chức</label>
-                        <textarea name="organizer" id="organizer" rows="4" placeholder="Nhập thông tin..."></textarea>
+                        <textarea name="organizer" id="organizer" rows="4"
+                                  placeholder="Nhập thông tin...">{{ event.producers if event.producers else '' }}</textarea>
                     </div>
+
                 </div>
 
-                <div class="event-form-section step-section step-2">
+                <div class="event-form-section step-section step-2 ">
                     <h3>Thời gian sự kiện</h3>
                     <div class="form-group form-row">
                         <div>
                             <label class="required-label">
                                 <span class="text-danger">*</span> Ngày bắt đầu
                             </label>
-                            <input type="datetime-local" id="start_time" name="start_time" required>
+                            <input type="datetime-local" id="start_time" name="start_time"
+                                   value="{{ event.start_datetime.strftime('%Y-%m-%dT%H:%M') if event.start_datetime else '' }}"
+                                   required>
                         </div>
                         <div>
                             <label class="required-label">
                                 <span class="text-danger">*</span> Ngày kết thúc
                             </label>
-                            <input type="datetime-local" id="end_time" name="end_time" required>
+                            <input type="datetime-local" id="end_time" name="end_time"
+                                   value="{{ event.end_datetime.strftime('%Y-%m-%dT%H:%M') if event.end_datetime else '' }}"
+                                   required>
                         </div>
                     </div>
 
                     <h3>Thông tin các loại vé</h3>
                     <div id="ticket-types">
+                        {% if ticket_types %}
+                        {% for ticket in ticket_types %}
                         <div class="ticket-type form-group form-row">
                             <div>
                                 <label class="required-label">
                                     <span class="text-danger">*</span> Tên vé
                                 </label>
-                                <input type="text" class="ticket_name" placeholder="Ví dụ: Vé thường">
+                                <input type="text" class="ticket_name" name="ticket_name" value="{{ ticket.name }}"
+                                       placeholder="Ví dụ: Vé thường">
                             </div>
                             <div>
                                 <label class="required-label">
-                                    <span class="text-danger">*</span> Giá vé(VNĐ)
+                                    <span class="text-danger">*</span> Giá vé (VNĐ)
                                 </label>
-                                <input type="number" class="ticket_price" min="0" placeholder="100000">
+                                <input type="number" class="ticket_price" name="ticket_price" min="0"
+                                       value="{{ ticket.price }}" placeholder="100000">
                             </div>
                             <div>
                                 <label class="required-label">
                                     <span class="text-danger">*</span> Số lượng
                                 </label>
-                                <input type="number" class="ticket_quantity" min="1" placeholder="50">
+                                <input type="number" class="ticket_quantity" name="ticket_quantity" min="1"
+                                       value="{{ ticket.quantity }}" placeholder="50">
                             </div>
                         </div>
+                        {% endfor %}
+                        {% else %}
+                        <!-- Nếu chưa có vé nào, hiển thị 1 dòng trống để người dùng nhập -->
+                        <div class="ticket-type form-group form-row">
+                            <div>
+                                <label class="required-label">
+                                    <span class="text-danger">*</span> Tên vé
+                                </label>
+                                <input type="text" class="ticket_name" name="ticket_name"
+                                       placeholder="Ví dụ: Vé thường">
+                            </div>
+                            <div>
+                                <label class="required-label">
+                                    <span class="text-danger">*</span> Giá vé (VNĐ)
+                                </label>
+                                <input type="number" class="ticket_price" name="ticket_price" min="0"
+                                       placeholder="100000">
+                            </div>
+                            <div>
+                                <label class="required-label">
+                                    <span class="text-danger">*</span> Số lượng
+                                </label>
+                                <input type="number" class="ticket_quantity" name="ticket_quantity" min="1"
+                                       placeholder="50">
+                            </div>
+                        </div>
+                        {% endif %}
                     </div>
 
                     <button type="button" class="btn btn-save" onclick="addTicketType()">+ Thêm loại vé</button>
@@ -242,9 +308,11 @@
                 </div>
 
             </div>
+
         </div>
     </div>
-    <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+</div>
+<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
 
-    {% endblock %}
+{% endblock %}
 </div>

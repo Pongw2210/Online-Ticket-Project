@@ -42,15 +42,17 @@ function clearErrors() {
     document.querySelectorAll('.error').forEach(e => e.classList.remove('error'));
 }
 
-
 function validateStep1() {
     clearErrors();
 
     let valid = true;
 
     const imageInput = document.getElementById("imageUpload");
-    if (!imageInput.files || imageInput.files.length === 0) {
-        const preview = document.getElementById("upload-preview");
+    const preview = document.getElementById("upload-preview");
+    const hasFile = imageInput.files && imageInput.files.length > 0;
+    const hasPreviewImage = preview.querySelector("img");
+
+    if (!hasFile && !hasPreviewImage) {
         showError(preview, "Vui lòng chọn ảnh sự kiện.");
         valid = false;
     }
@@ -269,12 +271,17 @@ function showToast(message, duration = 3000) {
     }, duration);
 }
 
-
 function submitEventForm() {
-    const imageInput = document.getElementById("imageUpload");
     const formData = new FormData();
+    const imageInput = document.getElementById("imageUpload");
+    const previewImage = document.getElementById("preview-img");
 
-    formData.append("image", imageInput.files[0]);
+    if (imageInput.files.length > 0) {
+        formData.append("image", imageInput.files[0]);  // ảnh mới
+    } else if (previewImage && previewImage.src) {
+        formData.append("existing_image_url", previewImage.src);  // giữ ảnh cũ
+    }
+
     formData.append("name_event", document.getElementById("name_event").value);
     formData.append("event_format", document.querySelector('input[name="event_format"]:checked')?.value);
     formData.append("event_type", document.getElementById("event_type").value);
@@ -314,13 +321,249 @@ function submitEventForm() {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            showToast("Tạo sự kiện thành công!");
+            alert("Tạo sự kiện thành công!");
         } else {
-            showToast(data.message || "Đã có lỗi.");
+            alert(data.message || "Đã có lỗi.");
         }
     })
-    .catch(() => showToast("Lỗi kết nối máy chủ"));
+    .catch(() => alert("Lỗi kết nối máy chủ"));
 }
 
+function toggleDropdown() {
+        const dropdown = document.getElementById("accountDropdown");
+        dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+    }
 
+// Ẩn dropdown nếu bấm ra ngoài
+window.onclick = function(event) {
+    if (!event.target.closest('.account-wrapper')) {
+        const dropdown = document.getElementById("accountDropdown");
+        if (dropdown) dropdown.style.display = "none";
+    }
+}
 
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        // Bỏ active tất cả
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        // Ẩn tất cả nội dung
+        document.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
+
+        // Active tab hiện tại
+        btn.classList.add('active');
+        const tabId = btn.getAttribute('data-tab');
+        document.getElementById(tabId).style.display = 'block';
+    });
+});
+
+let selectedEventId = null;
+
+function showConfirmForm(eventId) {
+    selectedEventId = eventId;
+    document.getElementById("confirmForm").style.display = "flex";
+}
+
+function hideConfirmForm(id) {
+    selectedEventId = null;
+    document.getElementById(id).style.display = "none";
+}
+
+function confirmHide() {
+    if (!selectedEventId) return;
+
+    fetch(`/organizer/api/${selectedEventId}/hide`, {
+        method: "POST"
+    })
+    .then(res => {
+        if (res.ok) {
+            alert("Ẩn sự kiện thành công.");
+            location.reload();
+        } else {
+            alert("Ẩn sự kiện thất bại.");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Có lỗi xảy ra khi gửi yêu cầu.");
+    });
+
+    hideConfirmForm();
+}
+
+function showEvent(eventId) {
+    if (!eventId) return;
+
+    fetch(`/organizer/api/${eventId}/show`, {
+        method: "POST"
+    })
+    .then(res => {
+        if (res.ok) {
+            alert("Công khai sự kiện thành công.");
+            location.reload();
+        } else {
+            alert("Công khai sự kiện thất bại.");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Có lỗi xảy ra khi gửi yêu cầu.");
+    });
+}
+
+function viewRejectionReason( eventId){
+    selectedEventId = eventId;
+    document.getElementById("rejectModal").style.display = "flex";
+
+    if (!eventId) return;
+
+    fetch(`/organizer/api/${eventId}/rejected_reason`)
+        .then(response => response.json())
+        .then(data => {
+            console.log("Response từ server:", data);
+            if (data.reason) {
+                document.getElementById("rejectedReasonText").innerText = data.reason;
+            } else {
+                document.getElementById("rejectedReasonText").innerText = "Không tìm thấy lý do.";
+            }
+            document.getElementById("rejectModal").style.display = "flex";
+        })
+        .catch(err => {
+            document.getElementById("rejectedReasonText").innerText = "Không thể tải lý do.";
+            document.getElementById("rejectModal").style.display = "flex";
+        });
+}
+
+function hideRejectModal() {
+    selectedEventId = null;
+    document.getElementById("rejectModal").style.display = "none";
+}
+
+function goToNextStepUpdate() {
+    const allSections = document.querySelectorAll('.step-section');       // nội dung các bước
+    const stepsProgress = document.querySelectorAll('.step-progress .step'); // thanh tiến trình
+    const btnNext = document.querySelector('.btn-next');
+
+    const currentIndex = Array.from(allSections).findIndex(el => el.classList.contains('active'));
+
+     if (currentIndex === 0 && !validateStep1()) {
+        return;
+    }
+
+    if (currentIndex ===1 && ! validateStep2()){
+        return;
+    }
+
+    if (currentIndex < allSections.length - 1) {
+        // Ẩn bước hiện tại
+        allSections[currentIndex].classList.remove('active');
+
+        // Hiện bước tiếp theo
+        allSections[currentIndex + 1].classList.add('active');
+
+        // Cập nhật thanh tiến trình
+        stepsProgress.forEach((step, i) => {
+            if (i <= currentIndex + 1) step.classList.add('active');
+            else step.classList.remove('active');
+        });
+
+        // Nếu bước tiếp theo là bước cuối (bước 3) thì đổi nút thành "Lưu"
+        if (currentIndex + 1 === allSections.length - 1) {
+            btnNext.innerText = 'Cập nhật';
+            btnNext.onclick = submitEventFormUpdate;
+        } else {
+            btnNext.innerText = 'Tiếp tục';
+            btnNext.onclick = goToNextStepUpdate;
+        }
+    }
+}
+
+function submitEventFormUpdate() {
+
+    const pathParts = window.location.pathname.split('/');
+    const eventId = pathParts[pathParts.length - 1];
+
+    const formData = new FormData();
+    const imageInput = document.getElementById("imageUpload");
+    const previewImage = document.getElementById("preview-img");
+
+    if (imageInput.files.length > 0) {
+        formData.append("image", imageInput.files[0]);  // ảnh mới
+    } else if (previewImage && previewImage.src) {
+        formData.append("existing_image_url", previewImage.src);  // giữ ảnh cũ
+    }
+
+    formData.append("name_event", document.getElementById("name_event").value);
+    formData.append("event_format", document.querySelector('input[name="event_format"]:checked')?.value);
+    formData.append("event_type", document.getElementById("event_type").value);
+    formData.append("description", document.getElementById("description").value);
+    formData.append("rules", document.getElementById("rules").value);
+    formData.append("performers", document.getElementById("performers").value);
+    formData.append("organizer", document.getElementById("organizer").value);
+    formData.append("start_time", document.getElementById("start_time").value);
+    formData.append("end_time", document.getElementById("end_time").value);
+
+    // Format phụ thuộc hình thức
+    const format = document.querySelector('input[name="event_format"]:checked')?.value;
+    formData.append("event_format", format.toUpperCase());
+
+    if (format === "OFFLINE") {
+        formData.append("venue_name", document.getElementById("venue_name").value);
+        formData.append("address", document.getElementById("address").value);
+    } else {
+        formData.append("livestream_url", document.getElementById("livestream_url").value);
+    }
+
+    // Loại vé
+    const ticketRows = document.querySelectorAll("#ticket-types .ticket-type");
+    const tickets = [];
+    ticketRows.forEach(row => {
+        tickets.push({
+            name: row.querySelector(".ticket_name")?.value,
+            price: row.querySelector(".ticket_price")?.value,
+            quantity: row.querySelector(".ticket_quantity")?.value
+        });
+    });
+    formData.append("tickets", JSON.stringify(tickets));
+
+    // Gửi dữ liệu
+    fetch(`/organizer/api/${eventId}/edit`, {
+        method: "POST",
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert("Cập nhật sự kiện thành công!");
+        } else {
+            alert(data.message || "Đã có lỗi.");
+        }
+    })
+    .catch(() => alert("Lỗi kết nối máy chủ"));
+}
+
+function showConfirmDeleteForm(eventId) {
+    selectedEventId = eventId;
+    document.getElementById("confirmDeleteForm").style.display = "flex";
+}
+
+function confirmDelete() {
+    if (!selectedEventId) return;
+
+    fetch(`/organizer/api/${selectedEventId}/delete`, {
+        method: "DELETE"
+    })
+    .then(res => {
+        if (res.ok) {
+            alert("Xóa sự kiện thành công.");
+            location.reload();
+        } else {
+            alert("Xóa sự kiện thất bại.");
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Có lỗi xảy ra khi gửi yêu cầu.");
+    });
+
+    hideConfirmForm();
+}

@@ -4,12 +4,20 @@
 
 {% block content %}
 <div class="topbar">
-    <h2>{% block header %}{% endblock %}</h2>
+    <h2>{% block header %}Sự kiện của tôi{% endblock %}</h2>
     <div class="topbar-right">
         <a class="btn-create" href="{{ url_for('event_organizer.create_event') }}">
             + Tạo sự kiện
         </a>
-        <div class="account">Tài khoản <i class="fa fa-caret-down"></i></div>
+        <div class="account-wrapper">
+            <div class="account" onclick="toggleDropdown()">
+                Tài khoản <i class="fa fa-caret-down"></i>
+            </div>
+            <div class="dropdown" id="accountDropdown">
+                <a>Thông tin cá nhân</a>
+                <a href="{{ url_for('auth.login')}}">Đăng xuất</a>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -19,14 +27,192 @@
 </div>
 
 <div class="tabs">
-    <button class="active">Sắp tới</button>
-    <button>Đã qua</button>
-    <button>Chờ duyệt</button>
-    <button>Nháp</button>
+    <button class="tab-btn active" data-tab="approved">Đã duyệt</button>
+    <button class="tab-btn" data-tab="pending">Chờ duyệt</button>
+    <button class="tab-btn" data-tab="rejected">Từ chối duyệt</button>
+    <button class="tab-btn" data-tab="draft">Đã ẩn</button>
 </div>
 
-<div class="no-data">
-    <i class="fa fa-box-open"></i>
-    <p>Không có dữ liệu</p>
+<div class="tab-content" id="approved">
+    <p>Danh sách sự kiện đã duyệt.</p>
+    {% if approved_events %}
+    <div class="event-grid">
+        {% for event in approved_events %}
+        <div class="event-card">
+            <img src="{{ event.image_url }}" alt="Hình sự kiện">
+            <div class="content">
+                <div class="title">{{ event.name }}</div>
+                <div class="date">
+                    {{ event.start_datetime.strftime('%d/%m/%Y %H:%M') }} -
+                    {{ event.event_offline.location if event.event_offline else 'Trực tuyến' }}
+                </div>
+                <div class="action-buttons">
+                    <a href="{{ url_for('events.event_detail', event_id=event.id) }}">
+                        <button>Xem chi tiết</button>
+                    </a>
+                    <a>
+                        <button onclick="showConfirmForm({{ event.id }})">Ẩn sự kiện</button>
+                    </a>
+                    <a>
+                        <button onclick="showConfirmDeleteForm({{ event.id }})">Xóa</button>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-data">
+        <i class="fa fa-box-open"></i>
+        <p>Không có dữ liệu</p>
+    </div>
+    {% endif %}
 </div>
+
+<div class="tab-content" id="pending" style="display: none;">
+    <p>Danh sách sự kiện chờ duyệt.</p>
+    {% if pending_events %}
+    <div class="event-grid">
+        {% for event in pending_events %}
+        <div class="event-card">
+            <img src="{{ event.image_url }}" alt="Hình sự kiện">
+            <div class="content">
+                <div class="title">{{ event.name }}</div>
+                <div class="date">
+                    {{ event.start_datetime.strftime('%d/%m/%Y %H:%M') }} -
+                    {{ event.event_offline.location if event.event_offline else 'Trực tuyến' }}
+                </div>
+                <div class="action-buttons">
+                    <a href="{{ url_for('events.event_detail', event_id=event.id) }}">
+                        <button>Xem chi tiết</button>
+                    </a>
+                    <a>
+                        <button class="btn-danger" onclick="showConfirmDeleteForm({{ event.id }})">Xóa</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="no-data">
+        <i class="fa fa-box-open"></i>
+        <p>Không có dữ liệu</p>
+    </div>
+    {% endif %}
+</div>
+
+<div class="tab-content" id="rejected" style="display: none;">
+    <p>Danh sách sự kiện bị từ chối duyệt.</p>
+    {% if rejected_events %}
+    <div class="event-grid">
+        {% for event in rejected_events %}
+        <div class="event-card">
+            <img src="{{ event.image_url }}" alt="Hình sự kiện">
+            <div class="content">
+                <div class="title">{{ event.name }}</div>
+                <div class="date">
+                    {{ event.start_datetime.strftime('%d/%m/%Y %H:%M') }} -
+                    {{ event.event_offline.location if event.event_offline else 'Trực tuyến' }}
+                </div>
+                <div class="action-buttons">
+                    <a href="{{ url_for('events.event_detail', event_id=event.id) }}">
+                        <button>Xem chi tiết</button>
+                    </a>
+                    <a href="{{ url_for('event_organizer.edit_event', event_id=event.id) }}">
+                        <button class="btn-confirm">Chỉnh sửa sự kiện</button>
+                    </a>
+                    <a>
+                        <button class="btn btn-warning" onclick="viewRejectionReason({{ event.id }})">
+                            Xem lý do
+                        </button>
+                    </a>
+                    <a>
+                        <button onclick="showConfirmDeleteForm({{ event.id }})">Xóa</button>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-data">
+        <i class="fa fa-box-open"></i>
+        <p>Không có dữ liệu</p>
+    </div>
+    {% endif %}
+</div>
+
+<div class="tab-content" id="draft" style="display: none;">
+    <p>Danh sách sự kiện đã ẩn.</p>
+    {% if hidden_events %}
+    <div class="event-grid">
+        {% for event in hidden_events %}
+        <div class="event-card">
+            <img src="{{ event.image_url }}" alt="Hình sự kiện">
+            <div class="content">
+                <div class="title">{{ event.name }}</div>
+                <div class="date">
+                    {{ event.start_datetime.strftime('%d/%m/%Y %H:%M') }} -
+                    {{ event.event_offline.location if event.event_offline else 'Trực tuyến' }}
+                </div>
+                <div class="action-buttons">
+                    <a href="{{ url_for('events.event_detail', event_id=event.id) }}">
+                        <button class="btn-confirm">Xem chi tiết</button>
+                    </a>
+                    <a>
+                        <button onclick="showEvent({{ event.id }})"> Công khai</button>
+                    </a>
+                    <a>
+                        <button class="btn-danger" onclick="showConfirmDeleteForm({{ event.id }})">Xóa</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="no-data">
+        <i class="fa fa-box-open"></i>
+        <p>Không có dữ liệu</p>
+    </div>
+    {% endif %}
+</div>
+
+<div id="confirmForm" class="modal-overlay" style="display: none;">
+    <div class="modal-box">
+        <p>Bạn chắc chắn muốn ẩn sự kiện này?</p>
+        <div class="modal-buttons">
+            <button class="btn-confirm" onclick="confirmHide()">Đồng ý</button>
+            <button class="btn-cancel" onclick="hideConfirmForm('confirmForm')">Huỷ</button>
+        </div>
+    </div>
+</div>
+
+<div id="rejectModal" class="modal-overlay" style="display: none;">
+    <div class="modal-box">
+        <p><strong>Lý do từ chối sự kiện</strong></p>
+        <p id="rejectedReasonText">Đang tải...</p> <!-- Đây là nơi lý do sẽ được hiển thị -->
+
+        <div class="modal-buttons">
+            <button class="btn-cancel" onclick="hideRejectModal()">Đã hiểu</button>
+        </div>
+    </div>
+</div>
+
+<div id="confirmDeleteForm" class="modal-overlay" style="display: none;">
+    <div class="modal-box">
+        <p>Bạn chắc chắn muốn xóa sự kiện này?</p>
+        <div class="modal-buttons">
+            <button class="btn-confirm" onclick="confirmDelete()">Đồng ý</button>
+            <button class="btn-cancel" onclick="hideConfirmForm('confirmDeleteForm')">Huỷ</button>
+
+        </div>
+    </div>
+</div>
+
 {% endblock %}
