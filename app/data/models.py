@@ -5,6 +5,8 @@ from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, Text
 from enum import Enum as RoleEnum
 from flask_login import UserMixin
 import enum
+import hashlib
+
 class UserEnum(RoleEnum):
     KHACH_HANG = "Khách hàng "
     NGUOI_TO_CHUC = "Người tổ chức"
@@ -54,9 +56,10 @@ class Admin(Base):
     gender = Column(String(10), nullable=False)
     user_id = Column(Integer, ForeignKey('user.id'), nullable=True)
 
-class User(Base, UserMixin):
+class User(Base):
     __tablename__ = 'user'
     username = Column(String(50),unique=True,nullable=False)
+    email = Column(String(100), unique=True, nullable=False)
     password = Column(String(50),nullable=False)
     avatar = Column(String(300),default="https://res.cloudinary.com/dgqx9xde1/image/upload/v1744899995/User1_cmpdyi.jpg")
     role = Column(Enum(UserEnum), default=UserEnum.KHACH_HANG)
@@ -64,6 +67,14 @@ class User(Base, UserMixin):
     customer = relationship(Customer, uselist=False, backref="user", cascade="all, delete")
     event_organizer = relationship(EventOrganizer, uselist=False, backref="user", cascade="all, delete")
     admin = relationship(Admin, uselist=False, backref="user", cascade="all, delete")
+
+    def set_password(self, password):
+        """Hash password và lưu vào database"""
+        self.password = hashlib.md5(password.encode('utf-8')).hexdigest()
+    
+    def check_password(self, password):
+        """Kiểm tra password có đúng không"""
+        return self.password == hashlib.md5(password.encode('utf-8')).hexdigest()
 
     @property
     def fullname(self):
@@ -126,7 +137,6 @@ class EventRejectionLog(Base):
     event_id = Column(Integer, ForeignKey('event.id'), nullable=False)
     reason = Column(Text, nullable=False)
     rejected_at = Column(DateTime, default=datetime.utcnow)
-
 
 class Booking(Base):
     __tablename__ = 'booking'

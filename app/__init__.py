@@ -1,20 +1,16 @@
 from flask import Flask
-from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 import cloudinary
 from app.admin_view import flask_admin
 
-
-
 db = SQLAlchemy()
-login = LoginManager()
 
 def create_app():
     app = Flask(__name__)
 
     # App secret + Config DB
     app.secret_key = "%$@%^@%#^VGHGD"
-    app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:123456@localhost/ticket_db?charset=utf8mb4"
+    app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:12345@localhost/ticket_db?charset=utf8mb4"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     # Cloudinary config
@@ -30,7 +26,6 @@ def create_app():
     login.init_app(app)
     login.login_view = "auth.login"
 
-
     # Đăng ký các blueprint
     from app.routes import auth
     app.register_blueprint(auth.auth_bp)
@@ -43,7 +38,5 @@ def create_app():
 
     from app.routes import admin
     app.register_blueprint(admin.admin_bp)
-
-
 
     return app

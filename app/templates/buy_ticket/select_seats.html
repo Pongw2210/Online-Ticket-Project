@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Chọn ghế ngồi</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/icons8-ticket-50.png') }}" type="image/png">
+    <style>
+        body {
+            background-color: #111;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        h2 {
+            margin-bottom: 10px;
+        }
+        .screen {
+            background: linear-gradient(135deg, #8B4513, #A0522D, #CD853F);
+            color: white;
+            padding: 15px;
+            margin: 20px auto;
+            width: 70%;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 18px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            border: 2px solid #DAA520;
+        }
+        .seat-row {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .seat {
+            width: 30px;
+            height: 30px;
+            margin: 3px;
+            border-radius: 4px;
+            line-height: 30px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .seat.vip {
+            background-color: gold;
+            color: black;
+        }
+        .seat.normal {
+            background-color: #4CAF50;
+        }
+        .seat.selected {
+            border: 3px solid #f00;
+            box-shadow: 0 0 10px #f00;
+        }
+        #confirm-btn {
+            margin-top: 30px;
+            padding: 10px 25px;
+            background: #ccc;
+            color: black;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: not-allowed;
+        }
+        #confirm-btn.enabled {
+            background: #28a745;
+            color: white;
+            cursor: pointer;
+        }
+        
+        #vip-seats-container, #normal-seats-container {
+            margin: 20px 0;
+        }
+        
+        #vip-seats-container h3, #normal-seats-container h3 {
+            color: #ffd700;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        #normal-seats-container h3 {
+            color: #4CAF50;
+        }
+        
+        /* Header và Navigation styles cho theme tối */
+        header {
+            background-color: #222;
+            border-bottom: 1px solid #444;
+        }
+        
+        .nav {
+            background-color: #333;
+            border-bottom: 1px solid #555;
+        }
+        
+        .nav a {
+            color: #fff;
+        }
+        
+        .nav a:hover {
+            background-color: #555;
+        }
+        
+        .auth-links a {
+            color: #fff;
+        }
+        
+        .header-actions a {
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="logo">
+        <a href="/"><img src="{{ url_for('static', filename='images/icons8-ticket-100.png') }}" alt="Ticketbox Logo"
+                         class="logo-img"></a>
+    </div>
+    <form class="search-bar" method="get" action="/">
+        <input type="text" name="q" value="{{ search }}" placeholder="Bạn tìm gì hôm nay?">
+        <button type="submit">Tìm kiếm</button>
+    </form>
+
+    <div class="header-actions">
+        <a href="{{ url_for('event_organizer.create_event') }}" class="create-event">
+            <span>Tạo sự kiện</span>
+        </a>
+        <a href="{{ url_for('events.my_tickets') }}" class="my-ticket">
+            <img src="{{ url_for('static', filename='images/icons8-ticket-30.png') }}" alt="ticket icon"
+                 class="ticket-icon">
+            <span>Vé của tôi</span>
+        </a>
+    </div>
+
+    <div class="auth-links">
+        {% if current_user %}
+    👋 Xin chào, <strong>{{ current_user.fullname }}</strong> |
+    <a href="{{ url_for('auth.logout') }}">Đăng xuất</a>
+    {% else %}
+    <a href="{{ url_for('auth.login') }}">Đăng nhập</a> |
+    <a href="{{ url_for('auth.register') }}">Đăng ký</a>
+    {% endif %}
+    </div>
+</header>
+
+<div class="nav">
+    <a href="{{ url_for('events.home', q='Nhạc sống') }}">Nhạc sống</a>
+    <a href="{{ url_for('events.home', q='Sân khấu & Nghệ thuật') }}">Sân khấu & Nghệ thuật</a>
+    <a href="{{ url_for('events.home', q='Thể thao') }}">Thể thao</a>
+    <a href="{{ url_for('events.home', q='Khác') }}">Khác</a>
+</div>
+
+<h2>🎟️ Chọn ghế của bạn</h2>
+{% if current_user %}
+<div style="background: rgba(76, 175, 80, 0.2); border: 1px solid #4CAF50; border-radius: 8px; padding: 15px; margin: 20px 0; text-align: center;">
+    <div style="color: #4CAF50; font-weight: bold; margin-bottom: 5px;">✅ Đã đăng nhập</div>
+    <div style="font-size: 14px;">Xin chào <strong>{{ current_user.fullname }}</strong>, bạn có thể tiếp tục chọn ghế!</div>
+</div>
+{% endif %}
+<div id="ticket-info" style="margin: 20px 0; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px;">
+    <h3 style="margin: 0 0 10px 0; color: #ffd700;">📋 Thông tin vé đã chọn:</h3>
+    <div id="ticket-details"></div>
+</div>
+<div class="screen">SÂN KHẤU</div>
+
+<!-- VIP SEATS -->
+<div id="vip-seats-container">
+    <!-- Sẽ được tạo động bằng JavaScript -->
+</div>
+
+<!-- NORMAL SEATS -->
+<div id="normal-seats-container">
+    <!-- Sẽ được tạo động bằng JavaScript -->
+</div>
+
+<button id="confirm-btn" disabled>Tiếp tục</button>
+
+<script>
+    // Đọc từ localStorage
+    const selectedTickets = JSON.parse(localStorage.getItem("selectedTickets") || "{}");
+    console.log("Selected tickets from localStorage:", selectedTickets); // Debug log
+    
+    const confirmBtn = document.getElementById('confirm-btn');
+    const selectedSeats = [];
+    let ticketInfoFromDB = {}; // Sẽ chứa thông tin vé từ database (số vé còn lại)
+    let totalSeatsFromDB = {}; // Sẽ chứa tổng số ghế ban đầu từ database
+    let bookedSeats = [];
+    
+    // Lấy thông tin vé từ database và tạo ghế
+    async function createSeats() {
+        const vipContainer = document.getElementById('vip-seats-container');
+        const normalContainer = document.getElementById('normal-seats-container');
+        
+        // Lấy event_id từ URL
+        const pathParts = window.location.pathname.split('/');
+        const eventId = pathParts[pathParts.length - 1];
+        
+        try {
+            // Lấy thông tin vé từ database (số vé còn lại)
+            const response = await fetch(`/api/ticket-info/${eventId}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                ticketInfoFromDB = data.ticket_info;
+                console.log("Ticket info from DB (available):", ticketInfoFromDB);
+            }
+            
+            // Lấy tổng số ghế ban đầu
+            const totalSeatsResponse = await fetch(`/api/total-seats/${eventId}`);
+            const totalSeatsData = await totalSeatsResponse.json();
+            
+            if (totalSeatsData.success) {
+                totalSeatsFromDB = totalSeatsData.total_seats;
+                console.log("Total seats from DB:", totalSeatsFromDB);
+            }
+        } catch (error) {
+            console.error("Error fetching ticket info:", error);
+        }
+        
+        // Tính số lượng vé VIP và thường từ localStorage (đã chọn)
+        const vipTickets = (selectedTickets["Vé VIP"] || 0) + (selectedTickets["Vé Premium"] || 0);
+        const normalTickets = (selectedTickets["Vé Thường"] || 0) + (selectedTickets["Vé Standing"] || 0);
+        
+        // Tính tổng số vé có sẵn từ database (số vé còn lại)
+        let totalVipAvailable = 0;
+        let totalNormalAvailable = 0;
+        
+        if (ticketInfoFromDB["Vé VIP"]) totalVipAvailable += ticketInfoFromDB["Vé VIP"];
+        if (ticketInfoFromDB["Vé Premium"]) totalVipAvailable += ticketInfoFromDB["Vé Premium"];
+        if (ticketInfoFromDB["Vé Thường"]) totalNormalAvailable += ticketInfoFromDB["Vé Thường"];
+        if (ticketInfoFromDB["Vé Standing"]) totalNormalAvailable += ticketInfoFromDB["Vé Standing"];
+        
+        // Tính tổng số ghế ban đầu từ database
+        let totalVipSeats = 0;
+        let totalNormalSeats = 0;
+        
+        if (totalSeatsFromDB["Vé VIP"]) totalVipSeats += totalSeatsFromDB["Vé VIP"];
+        if (totalSeatsFromDB["Vé Premium"]) totalVipSeats += totalSeatsFromDB["Vé Premium"];
+        if (totalSeatsFromDB["Vé Thường"]) totalNormalSeats += totalSeatsFromDB["Vé Thường"];
+        if (totalSeatsFromDB["Vé Standing"]) totalNormalSeats += totalSeatsFromDB["Vé Standing"];
+        
+        console.log(`Creating seats: VIP selected=${vipTickets}, available=${totalVipAvailable}, total=${totalVipSeats}, Normal selected=${normalTickets}, available=${totalNormalAvailable}, total=${totalNormalSeats}`);
+        
+        // Hiển thị thông tin vé đã chọn và tổng số ghế ban đầu
+        const ticketDetails = document.getElementById('ticket-details');
+        let detailsHTML = '';
+        
+        if (totalVipSeats > 0) {
+            detailsHTML += `<div style="margin: 5px 0;">🎫 Vé VIP: ${vipTickets} vé (đã chọn) / ${totalVipSeats} ghế tổng cộng</div>`;
+        }
+        if (totalNormalSeats > 0) {
+            detailsHTML += `<div style="margin: 5px 0;">🎫 Vé Thường: ${normalTickets} vé (đã chọn) / ${totalNormalSeats} ghế tổng cộng</div>`;
+        }
+        
+        ticketDetails.innerHTML = detailsHTML;
+        
+        // Kiểm tra nếu không có vé nào được chọn
+        if (vipTickets === 0 && normalTickets === 0) {
+            vipContainer.innerHTML = `
+                <div style="color: #ff6b6b; font-size: 18px; margin: 20px;">
+                    ⚠️ Không có vé nào được chọn. Vui lòng quay lại trang chọn vé.
+                    <br><br>
+                    <button onclick="window.history.back()" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
+                        ← Quay lại
+                    </button>
+                </div>`;
+            normalContainer.innerHTML = '';
+            return;
+        }
+        
+        // Lấy danh sách ghế đã đặt
+        try {
+            const bookedRes = await fetch(`/api/booked-seats/${eventId}`);
+            const bookedData = await bookedRes.json();
+            if (bookedData.success) {
+                bookedSeats = bookedData.booked_seats || [];
+            }
+        } catch (e) { bookedSeats = []; }
+        
+        // Tạo ghế VIP dựa trên tổng số ghế ban đầu từ database
+        if (totalVipSeats > 0) {
+            vipContainer.innerHTML = '<h3>🎫 Ghế VIP</h3>';
+            
+            // Sử dụng tổng số ghế VIP ban đầu từ database
+            const vipRows = Math.ceil(totalVipSeats / 30);
+            
+            console.log(`VIP seats from DB: ${totalVipSeats}, Creating: ${totalVipSeats} seats in ${vipRows} rows`);
+            
+            for (let row = 1; row <= vipRows; row++) {
+                const seatRow = document.createElement('div');
+                seatRow.className = 'seat-row';
+                
+                for (let col = 1; col <= 30; col++) {
+                    const seatNum = (row - 1) * 30 + col;
+                    if (seatNum <= totalVipSeats) {
+                        const seatId = `V${row}-${col}`;
+                        const seat = document.createElement('div');
+                        seat.className = 'seat vip';
+                        seat.dataset.seat = seatId;
+                        seat.dataset.type = 'Vé VIP';
+                        if (bookedSeats.includes(seatId)) {
+                            seat.classList.add('booked');
+                            seat.textContent = 'X';
+                            seat.style.background = '#888';
+                            seat.style.color = '#fff';
+                            seat.style.cursor = 'not-allowed';
+                        } else {
+                            seat.textContent = seatId;
+                        }
+                        seatRow.appendChild(seat);
+                    }
+                }
+                vipContainer.appendChild(seatRow);
+            }
+        }
+        
+        // Tạo ghế thường dựa trên tổng số ghế ban đầu từ database
+        if (totalNormalSeats > 0) {
+            normalContainer.innerHTML = '<h3>🎫 Ghế Thường</h3>';
+            
+            // Sử dụng tổng số ghế thường ban đầu từ database
+            const normalRows = Math.ceil(totalNormalSeats / 30);
+            
+            console.log(`Normal seats from DB: ${totalNormalSeats}, Creating: ${totalNormalSeats} seats in ${normalRows} rows`);
+            
+            for (let row = 1; row <= normalRows; row++) {
+                const seatRow = document.createElement('div');
+                seatRow.className = 'seat-row';
+                
+                for (let col = 1; col <= 30; col++) {
+                    const seatNum = (row - 1) * 30 + col;
+                    if (seatNum <= totalNormalSeats) {
+                        const seatId = `T${row}-${col}`;
+                        const seat = document.createElement('div');
+                        seat.className = 'seat normal';
+                        seat.dataset.seat = seatId;
+                        seat.dataset.type = 'Vé Thường';
+                        if (bookedSeats.includes(seatId)) {
+                            seat.classList.add('booked');
+                            seat.textContent = 'X';
+                            seat.style.background = '#888';
+                            seat.style.color = '#fff';
+                            seat.style.cursor = 'not-allowed';
+                        } else {
+                            seat.textContent = seatId;
+                        }
+                        seatRow.appendChild(seat);
+                    }
+                }
+                normalContainer.appendChild(seatRow);
+            }
+        }
+        
+        // Thêm event listeners cho các ghế mới
+        addSeatEventListeners();
+    }
+    
+    // Thêm event listeners cho tất cả ghế
+    function addSeatEventListeners() {
+        const seatElements = document.querySelectorAll('.seat');
+        seatElements.forEach(seat => {
+            if (!seat.classList.contains('booked')) {
+                seat.addEventListener('click', () => updateSelection(seat));
+            }
+        });
+    }
+    
+    // Tạo ghế khi trang load
+    createSeats().catch(error => {
+        console.error("Error creating seats:", error);
+    });
+
+    function updateSelection(seatEl) {
+        const seatType = seatEl.dataset.type;
+        const seatId = seatEl.dataset.seat;
+        const selectedOfType = selectedSeats.filter(s => s.type === seatType);
+        
+        // Tìm số lượng vé tương ứng từ selectedTickets
+        let maxAllowed = 0;
+        if (seatType === "Vé VIP") {
+            // Kiểm tra các loại vé VIP khác nhau
+            maxAllowed = selectedTickets["Vé VIP"] || selectedTickets["Vé Premium"] || 0;
+        } else if (seatType === "Vé Thường") {
+            // Kiểm tra các loại vé thường khác nhau
+            maxAllowed = selectedTickets["Vé Thường"] || selectedTickets["Vé Standing"] || 0;
+        }
+        
+        console.log(`Seat: ${seatId}, Type: ${seatType}, Max allowed: ${maxAllowed}, Currently selected: ${selectedOfType.length}`); // Debug log
+
+        if (seatEl.classList.contains('selected')) {
+            seatEl.classList.remove('selected');
+            const index = selectedSeats.findIndex(s => s.id === seatId);
+            if (index > -1) selectedSeats.splice(index, 1);
+        } else {
+            if (selectedOfType.length < maxAllowed) {
+                seatEl.classList.add('selected');
+                selectedSeats.push({ id: seatId, type: seatType });
+            } else {
+                alert(`Chỉ được chọn ${maxAllowed} ghế loại ${seatType}`);
+            }
+        }
+
+        // Tính tổng số ghế cần chọn dựa trên mapping
+        let totalRequired = 0;
+        if (selectedTickets["Vé VIP"] || selectedTickets["Vé Premium"]) {
+            totalRequired += (selectedTickets["Vé VIP"] || 0) + (selectedTickets["Vé Premium"] || 0);
+        }
+        if (selectedTickets["Vé Thường"] || selectedTickets["Vé Standing"]) {
+            totalRequired += (selectedTickets["Vé Thường"] || 0) + (selectedTickets["Vé Standing"] || 0);
+        }
+        
+        console.log(`Total required: ${totalRequired}, Currently selected: ${selectedSeats.length}`); // Debug log
+        
+        if (selectedSeats.length === totalRequired && totalRequired > 0) {
+            confirmBtn.classList.add('enabled');
+            confirmBtn.disabled = false;
+            console.log("✅ Confirm button enabled");
+        } else {
+            confirmBtn.classList.remove('enabled');
+            confirmBtn.disabled = true;
+            console.log("❌ Confirm button disabled");
+        }
+    }
+
+    confirmBtn.addEventListener('click', () => {
+        console.log("🔘 Confirm button clicked!");
+        
+        // Lấy event_id từ URL
+        const pathParts = window.location.pathname.split('/');
+        const eventId = pathParts[pathParts.length - 1];
+        
+        console.log("📋 Event ID:", eventId);
+        console.log("🎫 Selected seats:", selectedSeats);
+        console.log("🎟️ Selected tickets:", selectedTickets);
+        
+        // Kiểm tra dữ liệu trước khi gửi
+        if (selectedSeats.length === 0) {
+            alert("Vui lòng chọn ít nhất một ghế!");
+            return;
+        }
+        
+        const requestData = { 
+            seats: selectedSeats,
+            event_id: parseInt(eventId),
+            selected_tickets: selectedTickets
+        };
+        
+        console.log("📤 Sending request data:", requestData);
+        
+        fetch("/confirm-seats", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestData)
+        })
+        .then(res => {
+            console.log("📥 Response status:", res.status);
+            console.log("📥 Response headers:", res.headers);
+            return res.json();
+        })
+        .then(data => {
+            console.log("📥 Response data:", data);
+            if (data.success) {
+                // Chuyển đến trang thanh toán thay vì my-tickets
+                const redirectUrl = data.redirect_url || `/payment/${eventId}`;
+                console.log("🔄 Redirecting to:", redirectUrl);
+                window.location.href = redirectUrl;
+            } else {
+                if (data.message && data.message.includes('đăng nhập')) {
+                    // Nếu lỗi đăng nhập, chuyển hướng đến trang đăng nhập
+                    alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+                    window.location.href = '{{ url_for("auth.login") }}';
+                } else {
+                    alert("Lỗi: " + data.message);
+                }
+            }
+        })
+        .catch(error => {
+            console.error("❌ Error:", error);
+            alert("Có lỗi xảy ra khi xử lý yêu cầu!");
+        });
+    });
+</script>
+
+<!-- Footer với bản quyền -->
+<footer class="footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>TicketBox Clone</h3>
+            <p>Hệ thống đặt vé sự kiện trực tuyến</p>
+        </div>
+        <div class="footer-section">
+            <h4>Liên hệ</h4>
+            <p>Email: info@ticketboxclone.com</p>
+            <p>Điện thoại: 1900-xxxx</p>
+        </div>
+        <div class="footer-section">
+            <h4>Theo dõi</h4>
+            <p>Facebook | Instagram | Twitter</p>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2024 TicketBox Clone. Tất cả quyền được bảo lưu.</p>
+        <p>Phát triển bởi QLDAPM Team</p>
+    </div>
+</footer>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

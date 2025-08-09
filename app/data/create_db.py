@@ -10,7 +10,7 @@ app = create_app()
 def seed_admin_user():
     admin1 = Admin(fullname="Đặng Mỹ Ngọc", email="dmn@gmail.com", gender="Nữ")
     db.session.add(admin1)
-    uAdmin1 = User(username="userAdmin", password=str(hashlib.md5("123".encode('utf-8')).hexdigest()),
+    uAdmin1 = User(username="userAdmin", email="useradmin@gmail.com", password=str(hashlib.md5("123".encode('utf-8')).hexdigest()),
                    avatar="https://res.cloudinary.com/dgqx9xde1/image/upload/v1744900055/User2_qjswcy.webp",
                    role=UserEnum.ADMIN)
     uAdmin1.admin = admin1
@@ -21,7 +21,7 @@ def seed_customer_user():
     cus1 = Customer(fullname="Nguyễn Ngọc Anh", email="nna@gmail.com", gender="Nữ", dob=datetime(2000, 1, 1),
                     number_phone="0987654321")
     db.session.add(cus1)
-    ucus1 = User(username="userKhachHang", password=str(hashlib.md5("123".encode('utf-8')).hexdigest()),
+    ucus1 = User(username="userKhachHang", email="userkhachhang@gmail.com", password=str(hashlib.md5("123".encode('utf-8')).hexdigest()),
                  avatar="https://res.cloudinary.com/dgqx9xde1/image/upload/v1744900183/User3_byutxj.jpg",
                  role=UserEnum.KHACH_HANG)
     ucus1.customer = cus1
@@ -31,7 +31,7 @@ def seed_customer_user():
 def seed_event_organizer_user():
     event_organizer1 = EventOrganizer(fullname="Trần Bảo Ngọc", email="tbn@gmail.com", gender="Nữ")
     db.session.add(event_organizer1)
-    uEvent_organizer1 = User(username="userNguoiToChuc",
+    uEvent_organizer1 = User(username="userNguoiToChuc", email="usertochnuc@gmail.com",
                              password=str(hashlib.md5("123".encode('utf-8')).hexdigest()),
                              role=UserEnum.NGUOI_TO_CHUC)
     uEvent_organizer1.event_organizer = event_organizer1
@@ -229,7 +229,7 @@ def seed_ticket_type():
 
 if __name__ == "__main__":
     with app.app_context():
-        # db.drop_all()
+        db.drop_all()
         db.create_all()
 
         seed_customer_user()
