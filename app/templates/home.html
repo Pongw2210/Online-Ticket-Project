@@ -1,17 +1,96 @@
-{%extends 'layout/base.html'%}
-{% block title %}Trang chủ{% endblock %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TicketBox Clone</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/icons8-ticket-50.png') }}" type="image/png">
+</head>
+<body>
 
-{% block content %}
+<header>
+    <div class="logo">
+        <a href="/"><img src="{{ url_for('static', filename='images/icons8-ticket-100.png') }}" alt="Ticketbox Logo"
+                         class="logo-img"></a>
+    </div>
+    <form class="search-bar" method="get" action="/">
+        <input type="text" name="q" value="{{ search }}" placeholder="Bạn tìm gì hôm nay?">
+        <button type="submit">Tìm kiếm</button>
+    </form>
+
+    <div class="header-actions">
+        <a href="{{ url_for('event_organizer.create_event') }}" class="create-event">
+            <span>Tạo sự kiện</span>
+        </a>
+        <a href="{{ url_for('events.my_tickets') }}" class="my-ticket">
+            <img src="{{ url_for('static', filename='images/icons8-ticket-30.png') }}" alt="ticket icon"
+                 class="ticket-icon">
+            <span>Vé của tôi</span>
+        </a>
+    </div>
+
+<div class="auth-links">
+    {% if current_user %}
+        👋 Xin chào, <strong>{{ current_user.fullname }}</strong> |
+        <a href="{{ url_for('auth.logout') }}">Đăng xuất</a>
+    {% else %}
+        <a href="{{ url_for('auth.login') }}">Đăng nhập</a> |
+        <a href="{{ url_for('auth.register') }}">Đăng ký</a>
+    {% endif %}
+</div>
+
+</header>
+
+<div class="nav">
+    <a href="{{ url_for('events.home', q='Nhạc sống') }}">Nhạc sống</a>
+    <a href="{{ url_for('events.home', q='Sân khấu & Nghệ thuật') }}">Sân khấu & Nghệ thuật</a>
+    <a href="{{ url_for('events.home', q='Thể thao') }}">Thể thao</a>
+    <a href="{{ url_for('events.home', q='Khác') }}">Khác</a>
+</div>
+
+<div class="container">
     {% for event in events %}
     <div class="event-card">
         <img src="{{ event.image_url }}" alt="Hình sự kiện">
         <div class="content">
             <div class="title">{{ event.name }}</div>
-            <div class="date">{{ event.start_datetime }} - {{ event.location }}</div>
+            <div class="date">{{ event.start_datetime.strftime('%d/%m/%Y %H:%M') }} - 
+                {% if event.event_format.value == 'OFFLINE' and event.event_offline %}
+                    {{ event.event_offline.location }}
+                {% else %}
+                    Trực tuyến
+                {% endif %}
+            </div>
             <a href="{{ url_for('events.event_detail', event_id=event.id) }}">
                 <button>Xem chi tiết</button>
             </a>
         </div>
     </div>
     {% endfor %}
-{% endblock %}
+</div>
+
+<!-- Footer với bản quyền -->
+<footer class="footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>TicketBox Clone</h3>
+            <p>Hệ thống đặt vé sự kiện trực tuyến</p>
+        </div>
+        <div class="footer-section">
+            <h4>Liên hệ</h4>
+            <p>Email: info@ticketboxclone.com</p>
+            <p>Điện thoại: 1900-xxxx</p>
+        </div>
+        <div class="footer-section">
+            <h4>Theo dõi</h4>
+            <p>Facebook | Instagram | Twitter</p>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2024 TicketBox Clone. Tất cả quyền được bảo lưu.</p>
+        <p>Phát triển bởi QLDAPM Team</p>
+    </div>
+</footer>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

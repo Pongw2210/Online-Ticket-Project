@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <title>Đăng nhập / Đăng ký</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth_pages.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/icons8-ticket-50.png') }}" type="image/png">
     <style>
         .auth-container {
             max-width: 400px;
@@ -68,11 +70,10 @@
     <div class="auth-container">
         <h2>{% if is_login %}Đăng nhập{% else %}Đăng ký{% endif %}</h2>
         <form method="POST">
+            <input type="text" name="username" placeholder="Tên đăng nhập" required>
+            
             {% if not is_login %}
-            <input type="text" name="username" placeholder="Tên đăng nhập" required>
             <input type="email" name="email" placeholder="Email" required>
-            {% else %}
-            <input type="text" name="username" placeholder="Tên đăng nhập" required>
             {% endif %}
 
             <input type="password" name="password" placeholder="Mật khẩu" required>
@@ -87,5 +88,30 @@
             {% endif %}
         </div>
     </div>
+
+<!-- Footer với bản quyền -->
+<footer class="footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>TicketBox Clone</h3>
+            <p>Hệ thống đặt vé sự kiện trực tuyến</p>
+        </div>
+        <div class="footer-section">
+            <h4>Liên hệ</h4>
+            <p>Email: info@ticketboxclone.com</p>
+            <p>Điện thoại: 1900-xxxx</p>
+        </div>
+        <div class="footer-section">
+            <h4>Theo dõi</h4>
+            <p>Facebook | Instagram | Twitter</p>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2024 TicketBox Clone. Tất cả quyền được bảo lưu.</p>
+        <p>Phát triển bởi QLDAPM Team</p>
+    </div>
+</footer>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
