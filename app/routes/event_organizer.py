@@ -1,4 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for,request, jsonify, session
+from flask_login import login_required, current_user
+
 from app import dao,db
 from app.data.models import UserEnum, Event, EventOffline, EventOnline, TicketType, EventFormatEnum, EventTypeEnum, \
     StatusEventEnum, EventRejectionLog
@@ -6,16 +8,16 @@ import cloudinary.uploader
 from datetime import datetime
 
 event_organizer_bp = Blueprint("event_organizer", __name__, url_prefix="/organizer")
-
-def check_login():
-    """Kiểm tra đăng nhập và trả về user"""
-    if "user_id" not in session:
-        return None
-    return User.query.get(session["user_id"])
+#
+# def check_login():
+#     """Kiểm tra đăng nhập và trả về user"""
+#     if "user_id" not in session:
+#         return None
+#     return User.query.get(session["user_id"])
 
 @event_organizer_bp.route("/home")
 def home():
-    current_user = check_login()
+    # current_user = check_login()
     if not current_user:
         return redirect(url_for("auth.login"))
     
@@ -39,7 +41,7 @@ def home():
 
 @event_organizer_bp.route("/new-event")
 def create_event():
-    current_user = check_login()
+    # current_user = check_login()
     if not current_user:
         return redirect(url_for("auth.login"))
     
@@ -51,7 +53,7 @@ def create_event():
 
 @event_organizer_bp.route('/api/create-event', methods=['POST'])
 def create_event_api():
-    current_user = check_login()
+    # current_user = check_login()
     if not current_user:
         return jsonify({"success": False, "message": "Vui lòng đăng nhập"}), 401
     
@@ -200,7 +202,6 @@ def edit_event_api(event_id):
         elif existing_image_url:
             event.image_url = existing_image_url
 
-        # Trích xuất các giá trị trước để vừa cập nhật vừa debug
         name = request.form.get("name_event")
         description = request.form.get("description")
         rules = request.form.get("rules")

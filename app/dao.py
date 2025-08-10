@@ -1,5 +1,6 @@
 import hashlib
-from app.data.models import User,EventTypeEnum,Event,StatusEventEnum
+from app.data.models import User, EventTypeEnum, Event, StatusEventEnum, TicketType
+
 
 def get_user_by_id(user_id):
     return User.query.get(user_id)
@@ -16,7 +17,6 @@ def auth_user(username,password,role=None):
         query = query.filter(User.role == role)
 
     return query.first()
-
 
 def load_event_type_enum():
     return {
@@ -53,3 +53,8 @@ def load_hidden_events (organizer_id):
 
 def get_event_by_id(event_id):
     return Event.query.get(event_id)
+
+def load_ticket_type(event_id):
+    ticket_types = TicketType.query.filter_by(event_id=event_id).all()
+    return ticket_types
+

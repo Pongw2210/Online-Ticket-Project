@@ -56,7 +56,7 @@ class Admin(Base):
     gender = Column(String(10), nullable=False)
     user_id = Column(Integer, ForeignKey('user.id'), nullable=True)
 
-class User(Base):
+class User(Base,UserMixin):
     __tablename__ = 'user'
     username = Column(String(50),unique=True,nullable=False)
     email = Column(String(100), unique=True, nullable=False)
@@ -71,7 +71,7 @@ class User(Base):
     def set_password(self, password):
         """Hash password và lưu vào database"""
         self.password = hashlib.md5(password.encode('utf-8')).hexdigest()
-    
+
     def check_password(self, password):
         """Kiểm tra password có đúng không"""
         return self.password == hashlib.md5(password.encode('utf-8')).hexdigest()
@@ -91,7 +91,12 @@ class TicketType(Base):
     name = Column(String(50))
     price = Column(Float)
     quantity = Column(Integer, nullable= False)
+    benefits = Column(Text)
     event_id = Column(Integer, ForeignKey("event.id"), nullable=False)
+
+    @property
+    def benefits_list(self):
+        return [b.strip() for b in self.benefits.split('|')] if self.benefits else []
 
 class EventOffline(Base):
     __tablename__ = 'event_offline'
@@ -129,7 +134,6 @@ class Event(Base):
     # Thêm quan hệ với bảng ghi lý do từ chối
     rejection_logs = relationship("EventRejectionLog", backref="event", cascade="all, delete")
     ticket_types = relationship("TicketType", backref="event", cascade="all, delete")
-
 
 class EventRejectionLog(Base):
     __tablename__ = 'event_rejection_log'

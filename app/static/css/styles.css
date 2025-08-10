@@ -136,51 +136,58 @@ header {
 }
 
 .event-card {
-    background-color: #222;
-    width: 300px;
-    border-radius: 10px;
+    background-color: #1f1f1f;
+    width: 280px;
+    border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: transform 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .event-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-4px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
 }
 
 .event-card img {
     width: 100%;
-    height: 200px;
+    height: 180px;
     object-fit: cover;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
+    border-radius: 12px 12px 0 0;
 }
 
 .event-card .content {
-    padding: 15px;
+    padding: 12px 14px 16px;
 }
 
 .event-card .title {
-    font-size: 18px;
+    font-size: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
     color: #fff;
-    font-weight: bold;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    line-height: 1.4;
 }
 
 .event-card .date {
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: 700;       /* In đậm */
+    color: #00b14f;         /* Màu xanh */
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+.event-card .location {
+    font-size: 13px;
     color: #aaa;
-    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
 }
 
-.event-card button {
-    padding: 8px 12px;
-    background-color: #2ecc71;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
 
 /* ==== TRANG CHI TIẾT SỰ KIỆN ==== */
 .event-detail-wrapper {
@@ -934,3 +941,152 @@ h4 {
     .ticket-info-left, .ticket-info-right { margin-right: 0; min-width: 0; }
     .ticket-info-right { margin-top: 18px; }
 }
+
+
+.auth-container {
+    max-width: 400px;
+    margin: 60px auto;
+    padding: 30px;
+    background-color: #222;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    color: white;
+}
+
+.auth-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.auth-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.auth-container input[type="text"],
+.auth-container input[type="password"],
+.auth-container input[type="email"] {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.auth-container button {
+    padding: 10px;
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.auth-container button:hover {
+    background-color: #27ae60;
+}
+
+.auth-container .switch {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.auth-container .switch a {
+    color: #2ecc71;
+    text-decoration: none;
+}
+
+.auth-container .switch a:hover {
+    text-decoration: underline;
+}
+
+footer {
+    background-color: #111; /* Nền đen */
+    color: #ccc;
+    font-family: Arial, sans-serif;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: auto;
+    padding: 40px 20px;
+    gap: 20px;
+}
+
+.footer-section {
+    flex: 1;
+    min-width: 220px;
+}
+
+.footer-section h3,
+.footer-section h4 {
+    color: #2ecc71; /* Xanh lá */
+    margin-bottom: 12px;
+}
+
+.footer-section p {
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.footer-bottom {
+    border-top: 1px solid #333;
+    padding: 15px 20px;
+    text-align: center;
+    font-size: 13px;
+    color: #777;
+}
+
+.footer-bottom p:first-child {
+    color: #2ecc71; /* Xanh lá cho dòng bản quyền */
+    font-weight: bold;
+}
+
+.event-list {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+}
+.event-card {
+    flex: 0 0 220px;
+    background-color: #1e1e1e;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.event-card img {
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+}
+
+
+.ticket-main {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.ticket-selection {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.ticket-summary {
+    flex: 1;
+    position: sticky;
+    top: 20px;
+}
+
+@media (max-width: 768px) {
+    .ticket-main {
+        flex-direction: column;
+    }
+}
+

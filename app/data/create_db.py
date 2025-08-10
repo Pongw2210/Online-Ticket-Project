@@ -1,9 +1,9 @@
 import hashlib
 from datetime import datetime
-from sqlalchemy import inspect
+import json
 from app import create_app, db
 from app.data.models import Admin, User, Customer, UserEnum, EventOrganizer, TicketType, Event, EventOnline, \
-    EventOffline, EventTypeEnum, EventFormatEnum
+    EventOffline, EventTypeEnum, EventFormatEnum, StatusEventEnum
 
 app = create_app()
 
@@ -200,7 +200,8 @@ def seed_event_offline():
             image_url=data["image_url"],
             event_format = EventFormatEnum.OFFLINE,
             event_type = EventTypeEnum.NGHE_THUAT,
-            organizer_id = organizer.id
+            organizer_id = organizer.id,
+            status = StatusEventEnum.DA_DUYET
         )
         db.session.add(event)
         db.session.flush()  # để có event.id
@@ -216,12 +217,48 @@ def seed_event_offline():
 
 def seed_ticket_type():
     ticket_types = [
-        TicketType(name='Vé Thường', price=250000, quantity=50 , event_id=1),
-        TicketType(name='Vé VIP', price=500000, quantity=50,  event_id=1),
-        TicketType(name='Vé Standing', price=300000, quantity=50, event_id=2),
-        TicketType(name='Vé VIP', price=650000, quantity=50, event_id=2),
-        TicketType(name='Vé Thường', price=200000, quantity=50, event_id=3),
-        TicketType(name='Vé Premium', price=400000,quantity=50, event_id=3),
+        TicketType(
+            name='Vé Thường',
+            price=250000,
+            quantity=50,
+            event_id=1,
+            benefits="Đảm bảo quyền lợi tham gia sự kiện|Ghế ngồi sắp xếp ngẫu nhiên|Ghế ngồi xa sân khấu"
+        ),
+        TicketType(
+            name='Vé VIP',
+            price=500000,
+            quantity=50,
+            event_id=1,
+            benefits="Khu vực checkin riêng, không phải xếp hàng|Ghế ngồi gần sân khấu, quà tặng đặc biệt|Dịch vụ ăn uống, quà tặng, giao lưu nghệ sĩ"
+        ),
+        TicketType(
+            name='Vé Standing',
+            price=300000,
+            quantity=50,
+            event_id=2,
+            benefits="Khu vực đứng gần sân khấu|Không giới hạn di chuyển khu vực standing|Trải nghiệm âm thanh sống động"
+        ),
+        TicketType(
+            name='Vé VIP',
+            price=650000,
+            quantity=50,
+            event_id=2,
+            benefits="Khu vực checkin riêng, không phải xếp hàng|Ghế ngồi gần sân khấu, quà tặng đặc biệt|Dịch vụ ăn uống, quà tặng, giao lưu nghệ sĩ"
+        ),
+        TicketType(
+            name='Vé Thường',
+            price=200000,
+            quantity=50,
+            event_id=3,
+            benefits="Đảm bảo quyền lợi tham gia sự kiện|Ghế ngồi sắp xếp ngẫu nhiên|Ghế ngồi xa sân khấu"
+        ),
+        TicketType(
+            name='Vé Premium',
+            price=400000,
+            quantity=50,
+            event_id=3,
+            benefits="Ghế ngồi ở khu vực trung tâm|Tặng voucher đồ uống|Có cơ hội chụp hình lưu niệm"
+        )
     ]
 
     db.session.add_all(ticket_types)
@@ -229,7 +266,7 @@ def seed_ticket_type():
 
 if __name__ == "__main__":
     with app.app_context():
-        db.drop_all()
+        # db.drop_all()
         db.create_all()
 
         seed_customer_user()

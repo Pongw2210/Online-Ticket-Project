@@ -1,14 +1,14 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
-from app.data.models import User
-from app import db
-import re
+from app import db,dao,login
+from app.data.models import User, UserEnum
+from flask_login import current_user, login_user, logout_user
 
 auth_bp = Blueprint("auth", __name__)
 
-def is_valid_email(email):
-    """Kiểm tra email có hợp lệ không"""
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    return re.match(pattern, email) is not None
+@login.user_loader
+def load_user(user_id):
+    print("LOAD USER:", user_id)
+    return User.query.get(int(user_id))
 
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
@@ -16,11 +16,6 @@ def register():
         username = request.form["username"]
         email = request.form["email"]
         password = request.form["password"]
-
-        # Kiểm tra email hợp lệ
-        if not is_valid_email(email):
-            flash("Email không hợp lệ!")
-            return redirect(url_for("auth.register"))
 
         # Kiểm tra người dùng đã tồn tại
         if User.query.filter((User.username == username) | (User.email == email)).first():
@@ -37,7 +32,9 @@ def register():
         flash("Đăng ký thành công. Vui lòng đăng nhập.")
         return redirect(url_for("auth.login"))
 
-    return render_template("auth.html", is_login=False)
+    return render_template("auth/register.html")
+
+from flask_login import current_user
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])
@@ -46,29 +43,24 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
 
-        user = dao.auth_user(username, password)
-
-        # user = User.query.filter_by(username=username).first()
-        # if user and user.check_password(password):
+        user = dao.auth_user(username,password)
 
         if user:
-            login_user(user)  # Đăng nhập flask-login
+            print(user.fullname)
+            login_user(user)
+
             if user.role == UserEnum.ADMIN:
-                return redirect(url_for("admin_view.approve_events"))
+                return redirect(url_for(("admin_view.approve_events")))
             elif user.role == UserEnum.NGUOI_TO_CHUC:
-                return redirect(url_for("event_organizer.home"))
+                return redirect(url_for('event_organizer.home'))
             else:
                 return redirect(url_for("events.home"))
         else:
             flash("Tên đăng nhập hoặc mật khẩu không đúng!")
 
-    return render_template("auth.html", is_login=True)
+    return render_template("auth/login.html")
 
-
-
-# ✅ Gắn route cho logout
 @auth_bp.route("/logout")
-def logout():
-    session.pop("user_id", None)
-    flash("Đăng xuất thành công!")
+def logout_my_user():
+    logout_user()
     return redirect(url_for("events.home"))

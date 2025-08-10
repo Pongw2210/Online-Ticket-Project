@@ -3,9 +3,5 @@
   <component name="Black">
     <option name="sdkName" value="Python 3.10 (OnlineTicketProject)" />
   </component>
-<<<<<<< HEAD
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.10 (OnlineTicketProject) (3)" project-jdk-type="Python SDK" />
-=======
-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.10 (ClinicManager-master)" project-jdk-type="Python SDK" />
->>>>>>> fc6650c87b34241530e4755d49c69d4cfebddb61
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.10 (OnlineTicketProject)" project-jdk-type="Python SDK" />
 </project>
