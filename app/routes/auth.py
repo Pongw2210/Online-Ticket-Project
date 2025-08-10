@@ -1,9 +1,9 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
-from app import db,dao,login
+from app import db, dao, login
 from app.data.models import User, UserEnum
 from flask_login import current_user, login_user, logout_user
-auth_bp = Blueprint("auth", __name__)
 
+auth_bp = Blueprint("auth", __name__)
 
 @login.user_loader
 def load_user(user_id):
@@ -33,7 +33,6 @@ def register():
 
     return render_template("auth.html", is_login=False)
 
-
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
@@ -43,12 +42,15 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
 
-        user = dao.auth_user(username,password)
+        user = dao.auth_user(username, password)
 
         if user:
             login_user(user)
+
+            # ✅ Admin → chuyển về trang Flask-Admin
             if user.role == UserEnum.ADMIN:
-                return redirect(url_for(("admin_view.approve_events")))
+                return redirect("/admin/")
+
             elif user.role == UserEnum.NGUOI_TO_CHUC:
                 return redirect(url_for('event_organizer.home'))
 
