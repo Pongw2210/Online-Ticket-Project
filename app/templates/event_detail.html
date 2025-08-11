@@ -3,21 +3,28 @@
 
 {% block content %}
 
-<div class="event-detail-wrapper">
-    <div class="event-info">
+<!-- Thẻ vé -->
+<div class="ticket-card">
+    <div class="ticket-image">
+        {% if event.image_url %}
+        <img src="{{ event.image_url }}" alt="Hình sự kiện">
+        {% else %}
+        <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="Hình mặc định">
+        {% endif %}
+    </div>
+
+    <div class="ticket-info">
         <h1>{{ event.name }}</h1>
 
         <div class="time">
-            <i>📅</i>
-            {{ event.start_datetime.strftime('%d/%m/%Y %H:%M') }}
+            Thời gian bắt đầu: {{ event.start_datetime.strftime('%d/%m/%Y %H:%M') }}
         </div>
 
         <div class="location">
-            <i>📍</i>
             {% if event.event_format.name == 'OFFLINE' %}
-            {{ event.event_offline.location }}
+                Địa chỉ: {{ event.event_offline.location }}
             {% else %}
-            Trực tuyến
+                Trực tuyến
             {% endif %}
         </div>
 
@@ -28,19 +35,10 @@
         {% endif %}
 
         <a href="{{ url_for('events.buy_ticket', event_id=event.id) }}" class="buy-btn">Mua vé ngay</a>
-
-
-    </div>
-
-    <div class="event-image">
-        {% if event.image_url %}
-        <img src="{{ event.image_url }}" alt="Hình sự kiện">
-        {% else %}
-        <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="Hình mặc định">
-        {% endif %}
     </div>
 </div>
-<!-- CHUYỂN PHẦN GIỚI THIỆU RA NGOÀI, SAU KHỐI WRAPPER -->
+
+<!-- Phần giới thiệu -->
 <div class="event-extra-info">
     <h2>Giới thiệu chương trình</h2>
     <p>{{ event.description }}</p>
@@ -71,4 +69,4 @@
     <p>{{ event.producers }}</p>
 </div>
 
-{%endblock  %}
+{% endblock %}

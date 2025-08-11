@@ -333,7 +333,6 @@ function toggleDropdown() {
         dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
     }
 
-
 // Ẩn dropdown nếu bấm ra ngoài
 window.onclick = function(event) {
     if (!event.target.closest('.account-wrapper')) {
@@ -568,104 +567,5 @@ function confirmDelete() {
     hideConfirmForm();
 }
 
-//function initializeTicketManagement() {
-//    const increaseButtons = document.querySelectorAll('.increase');
-//    const decreaseButtons = document.querySelectorAll('.decrease');
-//    const summaryList = document.getElementById('summary-list');
-//    const summaryTotal = document.getElementById('summary-total');
-//    const continueBtn = document.getElementById('continue-btn');
-//
-//    function updateSummary() {
-//        const quantities = document.querySelectorAll('.quantity-input');
-//        let totalQty = 0;
-//        let totalPrice = 0;
-//        let summaryHTML = '';
-//
-//        quantities.forEach(input => {
-//            const quantity = parseInt(input.value) || 0;
-//            const name = input.dataset.name;
-//            const price = parseFloat(input.dataset.price);
-//            if (quantity > 0) {
-//                totalQty += quantity;
-//                totalPrice += quantity * price;
-//                summaryHTML += `<li>${name}: ${price.toLocaleString()}đ x${quantity}</li>`;
-//            }
-//        });
-//
-//        summaryList.innerHTML = summaryHTML || '<li>Chưa chọn vé nào</li>';
-//        summaryTotal.innerHTML = `<strong>🎟 x${totalQty} - ${totalPrice.toLocaleString()}đ</strong>`;
-//    }
-//
-//    increaseButtons.forEach(btn => {
-//        btn.addEventListener('click', () => {
-//            const input = document.querySelector(`.quantity-input[data-ticket-id="${btn.dataset.ticketId}"]`);
-//            const stock = parseInt(input.closest('.ticket-card').querySelector('.ticket-stock').textContent.match(/\d+/)[0]);
-//            if (parseInt(input.value) < stock) {
-//                input.value = parseInt(input.value) + 1;
-//                updateSummary();
-//            }
-//        });
-//    });
-//
-//    decreaseButtons.forEach(btn => {
-//        btn.addEventListener('click', () => {
-//            const input = document.querySelector(`.quantity-input[data-ticket-id="${btn.dataset.ticketId}"]`);
-//            if (parseInt(input.value) > 0) {
-//                input.value = parseInt(input.value) - 1;
-//                updateSummary();
-//            }
-//        });
-//    });
-//
-//    if (continueBtn) {
-//        continueBtn.addEventListener('click', function (e) {
-//            e.preventDefault();
-//            const quantities = document.querySelectorAll('.quantity-input');
-//            let tickets = [];
-//            let ticketMap = {};
-//
-//            quantities.forEach(input => {
-//                const quantity = parseInt(input.value);
-//                const ticketName = input.dataset.name;
-//                if (quantity > 0) {
-//                    tickets.push({ id: parseInt(input.dataset.ticketId), quantity });
-//                    ticketMap[ticketName] = quantity;
-//                }
-//            });
-//
-//            if (tickets.length === 0) {
-//                alert("Vui lòng chọn ít nhất 1 vé.");
-//                return;
-//            }
-//
-//            localStorage.setItem("selectedTickets", JSON.stringify(ticketMap));
-//
-//            fetch('/process-order', {
-//                method: 'POST',
-//                headers: { 'Content-Type': 'application/json' },
-//                body: JSON.stringify({ tickets })
-//            })
-//            .then(res => res.json())
-//            .then(data => {
-//                if (data.success) {
-//                    window.location.href = `/select-seats/${continueBtn.dataset.eventId}`;
-//                } else {
-//                    if (data.message?.includes('đăng nhập')) {
-//                        alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
-//                        window.location.href = '/login';
-//                    } else {
-//                        alert(data.message || "Đặt vé thất bại.");
-//                    }
-//                }
-//            })
-//            .catch(err => {
-//                alert("Lỗi kết nối đến server.");
-//                console.error(err);
-//            });
-//        });
-//    }
-//
-//    updateSummary();
-//}
-//
-//document.addEventListener('DOMContentLoaded', initializeTicketManagement);
+
+

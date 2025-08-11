@@ -10,9 +10,6 @@
 
     {% if current_user.is_authenticated %}
         <div class="header-actions">
-<!--            <a href="/new-event" class="create-event">-->
-<!--                <span>Tạo sự kiện</span>-->
-<!--            </a>-->
             <a href="/my-ticket" class="my-ticket">
                 <img src="{{ url_for('static', filename='images/icons8-ticket-30.png') }}" alt="ticket icon" class="ticket-icon">
                 <span>Vé của tôi</span>

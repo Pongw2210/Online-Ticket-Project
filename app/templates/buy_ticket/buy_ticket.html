@@ -17,16 +17,25 @@
                 <div class="ticket-price">
                     Giá vé: {{ "{:,.0f}".format(ticket.price) }}đ
                 </div>
-                <div class="ticket-stock">Số vé còn lại: {{ ticket.quantity }}</div>
+                <div class="ticket-stock" id="stock-{{ ticket.id }}">
+                    Số vé còn lại: {{ ticket.quantity }}
+                </div>
 
                 <div class="quantity-selector">
-                    <button class="decrease" data-ticket-id="{{ ticket.id }}">-</button>
-                    <input type="number" min="0" value="0" name="quantity_{{ ticket.id }}"
+                    <button onclick="decreaseTicket('{{ ticket.id }}')"
+                            class="decrease">-</button>
+
+                    <input type="number" min="0" max="{{ ticket.quantity }}" value="0"
+                           name="quantity_{{ ticket.id }}"
                            class="quantity-input"
+                           id="quantity-{{ ticket.id }}"
                            data-ticket-id="{{ ticket.id }}"
                            data-price="{{ ticket.price }}"
-                           data-name="{{ ticket.name }}">
-                    <button class="increase" data-ticket-id="{{ ticket.id }}">+</button>
+                           data-name="{{ ticket.name }}"
+                           onchange="manualTicketChange('{{ ticket.id }}')">
+
+                    <button onclick="increaseTicket('{{ ticket.id }}')"
+                            class="increase">+</button>
                 </div>
             </div>
             <div class="ticket-right">
@@ -39,11 +48,13 @@
 
     <!-- Tổng vé bên phải -->
     <div class="ticket-summary">
-        <h4>Tổng vé:</h4>
+        <h3>Tổng vé:</h3>
+        <h4>Sự kiện {{event.name}}</h4>
         <ul id="summary-list"></ul>
         <p class="total" id="summary-total"><strong>🎟 x0</strong></p>
-        <a href="#" class="continue-btn" id="continue-btn"
-           data-event-id="{{ event.id }}">Tiếp tục >></a>
+        <a href="{{ url_for('events.pay_ticket',event_id=event.id)}}" class="continue-btn" id="continue-btn"
+           data-event-id="{{ event.id }}"
+           onclick="goToCheckout()">Tiếp tục >></a>
     </div>
 </div>
 {% endblock %}

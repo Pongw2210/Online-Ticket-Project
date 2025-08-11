@@ -1,0 +1,126 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles_payment.css') }}">
+{% extends 'layout/base.html' %}
+{% block title %}Mua vé{% endblock %}
+{% block content %}
+<section class="hero">
+    <div class="hero-inner">
+        <div class="event-info">
+            <h1 class="event-title">Nhà Hát Kịch IDECAF: Lệ Chi Viên (Bí Mật Vườn Lệ Chi)</h1>
+            <div class="meta">
+                <div>📍 Nhà Hát Thanh Niên — Số 4 Phạm Ngọc Thạch, P. Bến Nghé, Q.1</div>
+                <div>🕒 16:00 - 19:00, 31 Tháng 08, 2025</div>
+            </div>
+        </div>
+
+        <div class="countdown" aria-hidden="true">
+            <div style="font-size:13px;color:rgba(255,255,255,0.8);margin-bottom:8px">Hoàn tất đặt vé trong</div>
+            <div class="time">
+                <div class="digit" id="cd-min">14</div>
+                <div style="align-self:center">:</div>
+                <div class="digit" id="cd-sec">30</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<main class="container">
+    <div class="left">
+        <h3 class="section-title">THANH TOÁN</h3>
+
+        <div class="card">
+            <label>Thông tin nhận vé</label>
+            <div class="muted">Vé điện tử sẽ được hiển thị trong mục "Vé của tôi" của tài khoản</div>
+            <input class="input" placeholder="Email nhận vé" id="email" value="2254052006bong@ou.edu.vn">
+        </div>
+
+        <div class="card">
+            <label>Mã khuyến mãi</label>
+            <div class="voucher">
+                <input class="input" placeholder="Thêm khuyến mãi" style="flex:1">
+                <button class="btn secondary">Chọn voucher</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <label>Phương thức thanh toán</label>
+            <div class="payment-methods">
+                <label class="method"><input type="radio" name="pay" value="vnpay" checked> <img src="" alt=""
+                                                                                                 style="width:36px;height:24px;object-fit:contain">
+                    VNPay / Ứng dụng ngân hàng</label>
+                <label class="method"><input type="radio" name="pay" value="vietqr"> VietQR</label>
+                <label class="method"><input type="radio" name="pay" value="momo"> MoMo</label>
+                <label class="method"><input type="radio" name="pay" value="card"> Thẻ nội địa / quốc tế</label>
+            </div>
+        </div>
+    </div>
+
+    <aside class="right">
+        <div class="checkout-footer">
+            <div class="summary-card">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                    <div style="font-weight:700">Thông tin đặt vé</div>
+                    <a href="#" style="font-size:13px;color:#2b6df0;text-decoration:none">Chọn lại vé</a>
+                </div>
+                <div class="summary-row">
+                    <div>Hạng Regular (Không Dành ...)</div>
+                    <div>01</div>
+                </div>
+                <div class="summary-row" style="font-weight:700">
+                    <div>Giá</div>
+                    <div>270.000 đ</div>
+                </div>
+                <div style="height:1px;background:rgba(0,0,0,0.06);margin:10px 0"></div>
+                <div class="summary-row">
+                    <div class="muted">Mã ghế</div>
+                    <div><span class="ticket-badge">LA-15</span></div>
+                </div>
+            </div>
+
+            <div class="summary-card" style="padding:18px;">
+                <div style="font-weight:700;margin-bottom:10px">Thông tin đơn hàng</div>
+                <div class="summary-row">
+                    <div class="muted">Tạm tính</div>
+                    <div>270.000 đ</div>
+                </div>
+                <div style="height:1px;background:rgba(0,0,0,0.06);margin:10px 0"></div>
+                <div class="summary-row">
+                    <div style="font-weight:700">Tổng tiền</div>
+                    <div class="total">270.000 đ</div>
+                </div>
+                <div style="font-size:12px;color:#6b6b6b;margin-top:10px">Bằng việc tiến hành đặt mua, bạn đã đồng ý với
+                    <a href="#">Điều Kiện Giao Dịch Chung</a></div>
+                <div style="margin-top:12px;display:flex;gap:8px">
+                    <button class="btn" style="flex:1" id="payBtn2">Thanh toán</button>
+                </div>
+            </div>
+
+        </div>
+    </aside>
+</main>
+{%endblock%}
+<script>
+    // simple countdown demo (minutes:seconds)
+    let minutes = 14; let seconds = 30;
+    const minEl = document.getElementById('cd-min');
+    const secEl = document.getElementById('cd-sec');
+    function tick(){
+      if(seconds===0){
+        if(minutes===0){ clearInterval(timer); return; }
+        minutes--; seconds=59;
+      } else seconds--;
+      minEl.textContent = String(minutes).padStart(2,'0');
+      secEl.textContent = String(seconds).padStart(2,'0');
+    }
+    const timer = setInterval(tick,1000);
+
+    // fake payment action
+    function doPay(){
+      const payMethod = document.querySelector('input[name="pay"]:checked').value;
+      const email = document.getElementById('email').value;
+      alert('Thanh toán bằng: ' + payMethod + '\nEmail: ' + email + '\n(Đây là demo giao diện)');
+    }
+    document.getElementById('payBtn').addEventListener('click',doPay);
+    document.getElementById('payBtn2').addEventListener('click',doPay);
+</script>
+</body>
+</html>  hãy đặt toàn bộ class lại

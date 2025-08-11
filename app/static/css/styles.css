@@ -2,8 +2,8 @@
 body {
     margin: 0;
     font-family: 'Segoe UI', sans-serif;
-    background-color: #181818;
-    color: #f0f0f0;
+    background-color: #ffffff; /* nền trắng */
+    color: #000000; /* chữ đen */
 }
 
 .logo {
@@ -20,49 +20,74 @@ body {
 }
 
 /* ==== HEADER ==== */
+/* Header chính */
 header {
     background-color: #2ecc71;
-    padding: 15px 30px;
+    padding: 20px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
+/* Header phụ (hoặc class .header) */
 .header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 15px 30px;
-    background-color: #1c1c1c;
+    background-color: #f9f9f9;
     gap: 20px;
+    border-bottom: 1px solid #e0e0e0;
 }
 
+/* Search bar */
 .search-bar {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
+/* Input tìm kiếm */
 .search-bar input[type="text"] {
-    padding: 10px;
-    border: none;
-    border-radius: 4px;
+    padding: 10px 14px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
     width: 300px;
+    background-color: #ffffff;
+    color: #000000;
+    font-size: 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
+.search-bar input[type="text"]:focus {
+    border-color: #28a745;
+    outline: none;
+    box-shadow: 0 0 4px rgba(40, 167, 69, 0.4);
+}
+
+/* Nút tìm kiếm */
 .search-bar button {
-    padding: 10px 16px;
+    padding: 10px 18px;
     background-color: #28a745;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
 .search-bar button:hover {
     background-color: #218838;
+    transform: translateY(-1px);
 }
 
+.search-bar button:active {
+    transform: translateY(0);
+}
+
+/* Auth links */
 .auth-links {
     color: white;
     font-size: 14px;
@@ -85,6 +110,7 @@ header {
     gap: 16px;
 }
 
+/* Header actions */
 .header-actions a {
     display: flex;
     align-items: center;
@@ -110,21 +136,34 @@ header {
 
 /* ==== NAVIGATION ==== */
 .nav {
-    background: #000;
-    padding: 10px 30px;
+    width: 100%;
+    background: #ffffff;
+    padding: 12px 30px;
     display: flex;
     gap: 30px;
+    justify-content: flex-start;
+    align-items: center;
+    margin: -15px 0;
+    box-sizing: border-box;
 }
 
 .nav a {
-    color: white;
+    color: #28a745;
     text-decoration: none;
     font-weight: bold;
+    font-size: 16px;
+    transition: color 0.2s ease;
 }
 
 .nav a:hover {
-    color: #2ecc71;
+    color: #218838;
 }
+
+/* ==== MAIN CONTENT ==== */
+.main-content {
+    padding-top: 20px;
+}
+
 
 /* ==== TRANG DANH SÁCH SỰ KIỆN ==== */
 .container {
@@ -133,159 +172,226 @@ header {
     flex-wrap: wrap;
     gap: 20px;
     justify-content: center;
+    background-color: #ffffff;
 }
 
 .event-card {
-    background-color: #1f1f1f;
+    background: rgba(225, 255, 255, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     width: 280px;
-    border-radius: 12px;
+    border-radius: 14px;
     overflow: hidden;
     text-decoration: none;
-    color: inherit;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    color: #000;
+
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+
 }
 
 .event-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
 }
 
 .event-card img {
     width: 100%;
     height: 180px;
     object-fit: cover;
-    border-radius: 12px 12px 0 0;
 }
 
 .event-card .content {
-    padding: 12px 14px 16px;
+    padding: 14px 16px 18px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
+/* Nội dung card */
+.event-card .content {
+    padding: 14px 16px 18px;
+    background-color:#FAFAFA;
+}
+
+/* Tiêu đề sự kiện */
 .event-card .title {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
     text-transform: uppercase;
-    color: #fff;
-    margin-bottom: 8px;
-    line-height: 1.4;
+    color: #003333;
+    margin-bottom: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.5px;
 }
 
 .event-card .date {
     font-size: 13px;
-    font-weight: 700;       /* In đậm */
-    color: #00b14f;         /* Màu xanh */
+    font-weight: 700;
+    color: #27ae60;
     display: flex;
     align-items: center;
     gap: 6px;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
 }
+
+/* Địa điểm */
 .event-card .location {
     font-size: 13px;
-    color: #aaa;
+    font-weight: 400;
+    color: rgb(90, 110, 105); /* xám xanh dịu */
     display: flex;
     align-items: center;
     gap: 6px;
-    margin-bottom: 4px;
+    letter-spacing: 0.2px;
 }
 
+/* Icon nhỏ */
+.event-card .date svg,
+.event-card .location svg {
+    width: 14px;
+    height: 14px;
+}
 
 /* ==== TRANG CHI TIẾT SỰ KIỆN ==== */
-.event-detail-wrapper {
+/* ==== Ticket Card ==== */
+.ticket-card {
     display: flex;
-    background-color: #1c1c1c;
-    color: white;
-    border-radius: 15px;
-    overflow: hidden;
-    margin: 40px auto;
+    align-items: center;
+    gap: 24px;
+    border: 2px solid #28a745;
+    border-radius: 12px;
+    padding: 20px;
     max-width: 1200px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+    width: 70%;
+    margin: 20px auto;
+    background-color: #fefefe;
+    min-height: 220px;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.15);
+    transition: box-shadow 0.3s ease;
 }
 
-.event-info {
+.ticket-card:hover {
+    box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
+}
+
+/* ==== Ảnh sự kiện ==== */
+.ticket-card .ticket-image img {
+    width: 450px;
+    height: 280px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Thông tin vé */
+.ticket-info {
     flex: 1;
-    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+    padding: 10px 0;
 }
 
-.event-info h1 {
+.ticket-info h1 {
     font-size: 28px;
-    margin-bottom: 15px;
+    font-weight: 800;
+    color: #222;
+    margin-bottom: 8px;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
 }
 
-.event-info .time,
-.event-info .location {
-    margin: 15px 0;
-    font-size: 15px;
-    color: #ccc;
+.ticket-info .time,
+.ticket-info .location,
+.ticket-info .price {
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
 }
 
-.event-info .time i,
-.event-info .location i {
-    color: #2ecc71;
-    margin-right: 8px;
+.ticket-info .time {
+    color: #007bff; /* xanh cho thời gian */
 }
 
-.event-info .venue {
-    margin-top: 5px;
-    font-size: 14px;
-    color: #aaa;
+.ticket-info .location {
+    color: #555;
 }
 
-.price {
+.ticket-info .price {
     font-size: 18px;
-    margin-top: 30px;
-    color: #2ecc71;
-    font-weight: bold;
+    font-weight: 700;
+    color: #d0021b;
 }
 
+.ticket-info .status {
+    font-size: 15px;
+    font-weight: 600;
+    color: #d0021b;
+    margin: 5px 0 15px 0;
+}
+
+/* Nút mua vé */
 .buy-btn {
     display: inline-block;
-    margin-top: 15px;
-    background-color: #2ecc71;
-    color: white;
-    padding: 12px 24px;
+    background-color: #28a745;
+    color: #fff;
+    padding: 14px 28px;
     border-radius: 8px;
-    font-size: 16px;
     text-decoration: none;
-    font-weight: bold;
-    transition: 0.3s;
+    font-weight: 700;
+    box-shadow: 0 6px 16px rgba(40, 167, 69, 0.3);
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    align-self: start; /* nút canh trái theo content */
+    cursor: pointer;
+    user-select: none;
 }
 
-.buy-btn:hover {
-    background-color: #27ae60;
+.buy-btn:hover,
+.buy-btn:focus {
+    background-color: #218838;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(33, 136, 56, 0.6);
 }
 
-.event-image {
-    flex: 1;
-    width: 50%;
-}
-
-.event-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
+/* Phần giới thiệu thêm */
 .event-extra-info {
-    background-color: white;
-    color: black;
-    padding: 40px;
-    margin: 30px auto 0;
+    background: #fff;
+    color: #333;
+    padding: 24px 28px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     max-width: 1200px;
-    border-radius: 10px;
+    width: 70%;
+    margin: 30px auto 40px auto;
+    font-size: 16px;
+    line-height: 1.5;
 }
 
-/* ==== RESPONSIVE ==== */
-@media (max-width: 768px) {
-    .event-detail-wrapper {
-        flex-direction: column;
-    }
-
-    .event-info,
-    .event-image {
-        width: 100%;
-    }
+.event-extra-info h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-top: 0;  /* để h2 sát phần trên */
+    margin-bottom: 16px;
+    color: #222;
+    border-bottom: 2px solid #28a745;
+    padding-bottom: 6px;
+    letter-spacing: 0.03em;
 }
+
+
+
+
+
+
+
 
 .ticket-booking-container {
     display: flex;
@@ -435,11 +541,11 @@ h4 {
 
 /* ==== FOOTER ==== */
 .footer {
-    background-color: #1c1c1c;
-    color: #f0f0f0;
+    background-color: #fefaf4;
+    color: #333;
     padding: 40px 0 20px 0;
     margin-top: 60px;
-    border-top: 1px solid #333;
+    border-top: 1px solid #28a745;
 }
 
 .footer-content {
@@ -452,20 +558,20 @@ h4 {
 }
 
 .footer-section h3 {
-    color: #2ecc71;
+    color: #28a745; /* đổi từ #2ecc71 thành #28a745 cho đồng bộ */
     margin-bottom: 15px;
     font-size: 20px;
 }
 
 .footer-section h4 {
-    color: #2ecc71;
+    color: #28a745;
     margin-bottom: 10px;
     font-size: 16px;
 }
 
 .footer-section p {
     margin: 8px 0;
-    color: #ccc;
+    color: #555; /* màu chữ tối hơn để dễ đọc trên nền sáng */
     font-size: 14px;
     line-height: 1.5;
 }
@@ -474,17 +580,17 @@ h4 {
     text-align: center;
     margin-top: 30px;
     padding-top: 20px;
-    border-top: 1px solid #333;
+    border-top: 1px solid #28a745; /* viền xanh */
 }
 
 .footer-bottom p {
     margin: 5px 0;
-    color: #999;
+    color: #777; /* chữ xám nhạt */
     font-size: 12px;
 }
 
 .footer-bottom p:first-child {
-    color: #2ecc71;
+    color: #28a745;
     font-weight: bold;
     font-size: 14px;
 }
@@ -1089,4 +1195,14 @@ footer {
         flex-direction: column;
     }
 }
+h4 {
+    color: #2ecc71; /* Xanh lá chủ đạo */
+    margin-bottom: 10px;
+}
+
+h3 {
+    color: black; /* Xanh lá chủ đạo */
+    margin-bottom: 10px;
+}
+
 
