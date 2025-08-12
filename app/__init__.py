@@ -17,6 +17,7 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:123456@localhost/ticket_db?charset=utf8mb4"
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+
     # Cloudinary config
     cloudinary.config(
         cloud_name='dgqx9xde1',

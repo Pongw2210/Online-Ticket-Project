@@ -126,11 +126,138 @@ function goToCheckout() {
 
     if (tickets.length === 0) {
         alert('Vui lòng chọn ít nhất một vé để tiếp tục.');
+        event.preventDefault();
         return;
     }
 
     // Lưu dữ liệu vào sessionStorage (hoặc localStorage) để trang thanh toán dùng
     sessionStorage.setItem('checkoutEventId', eventId);
     sessionStorage.setItem('checkoutTickets', JSON.stringify(tickets));
+}
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    let tickets = JSON.parse(sessionStorage.getItem('checkoutTickets')) || [];
+    let summaryDiv = document.getElementById('ticket-summary');
+    let subtotalEl = document.getElementById('subtotal');
+    let totalEl = document.getElementById('total-price');
+
+    if (tickets.length === 0) {
+        summaryDiv.innerHTML = '<div class="muted">Chưa có vé nào được chọn</div>';
+        subtotalEl.textContent = '0 đ';
+        totalEl.textContent = '0 đ';
+        return;
+    }
+
+    summaryDiv.innerHTML = '';
+    let totalPrice = 0;
+
+    tickets.forEach(ticket => {
+        let itemPrice = parseInt(ticket.price) * ticket.quantity;
+        totalPrice += itemPrice;
+
+        summaryDiv.innerHTML += `
+            <div class="summary-row">
+                <div>${ticket.name}</div>
+                <div>${ticket.quantity}</div>
+            </div>
+            <div class="summary-row muted">
+                <div>Giá vé</div>
+                <div>${itemPrice.toLocaleString()} đ</div>
+            </div>
+        `;
+    });
+
+    subtotalEl.textContent = totalPrice.toLocaleString() + ' đ';
+    totalEl.textContent = totalPrice.toLocaleString() + ' đ';
+});
+
+
+let minutes = 14; let seconds = 30;
+const minEl = document.getElementById('cd-min');
+const secEl = document.getElementById('cd-sec');
+function tick(){
+  if(seconds===0){
+    if(minutes===0){ clearInterval(timer); return; }
+    minutes--; seconds=59;
+  } else seconds--;
+  minEl.textContent = String(minutes).padStart(2,'0');
+  secEl.textContent = String(seconds).padStart(2,'0');
+}
+const timer = setInterval(tick,1000);
+
+function handlePayment() {
+    // Lấy phương thức thanh toán đang được chọn
+    const selectedPayMethod = document.querySelector('input[name="pay"]:checked').value;
+
+    if (selectedPayMethod === "momo") {
+        payment_momo();
+    } else if (selectedPayMethod === "vnpay") {
+        payment_vnpay();
+    } else {
+        alert("Vui lòng chọn phương thức thanh toán.");
+    }
+}
+
+function payment_momo() {
+    let payBtn = document.getElementById("payBtn2");
+    payBtn.disabled = true;
+
+    let tickets = JSON.parse(sessionStorage.getItem('checkoutTickets')) || [];
+    console.log(sessionStorage.getItem('checkoutTickets'));
+    if (tickets.length === 0) {
+        alert("Không có vé để thanh toán");
+        payBtn.disabled = false;
+        return;
+    }
+
+    let totalPrice = tickets.reduce((sum, ticket) => sum + (parseInt(ticket.price) * ticket.quantity), 0);
+
+    fetch("/booking/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            tickets: tickets,
+            totalPrice: totalPrice,
+            eventId: sessionStorage.getItem('checkoutEventId'),
+        }),
+    })
+    .then(res => res.json())
+    .then(bookingData => {
+        if (!bookingData.success) {
+            alert("Tạo booking thất bại: " + bookingData.message);
+            payBtn.disabled = false;
+            throw new Error("Booking failed");
+        }
+        return fetch("/payment/momo", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                amount: totalPrice,
+                orderId: "order_" + bookingData.bookingId,
+                orderInfo: `Thanh toán vé sự kiện ${sessionStorage.getItem('checkoutEventId')}`,
+            }),
+        });
+    })
+    .then(res => res.json())
+    .then(paymentData => {
+        if (paymentData.payUrl) {
+            window.location.href = paymentData.payUrl;
+        } else {
+            alert("Không tạo được link thanh toán!");
+            payBtn.disabled = false;
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        if (err.message !== "Booking failed") {
+            alert("Đã xảy ra lỗi, vui lòng thử lại.");
+            payBtn.disabled = false;
+        }
+    });
+}
+
+function payment_vnpay(){
 
 }
+

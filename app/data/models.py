@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy.orm import relationship
 from app import db
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, Text, Time, Float
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, Text, Time, Float, Boolean
 from enum import Enum as RoleEnum
 from flask_login import UserMixin
 import enum
@@ -17,6 +17,15 @@ class StatusEventEnum(RoleEnum):
     DANG_DUYET = "Đang duyệt"
     TU_CHOI = "Từ chối"
     DA_AN = "Đã ẩn "
+
+class StatusBookingEnum(RoleEnum):
+    CHO_THANH_TOAN = "Chờ thanh toán"
+    DA_THANH_TOAN = "Đã thanh toán"
+    DA_HUY = "Đã hủy"
+
+class StatusSeatEnum(RoleEnum):
+    TRONG = "Trống"
+    DA_DAT = "Đã đặt"
 
 class EventFormatEnum(RoleEnum):
     ONLINE ="Trực tuyến"
@@ -93,6 +102,7 @@ class TicketType(Base):
     quantity = Column(Integer, nullable= False)
     benefits = Column(Text)
     event_id = Column(Integer, ForeignKey("event.id"), nullable=False)
+    requires_seat = Column(Boolean, default=False)   #thể hiện loại vé có được chọn ghế hay ngồi ngẫu nhiên
 
     @property
     def benefits_list(self):
@@ -102,6 +112,7 @@ class EventOffline(Base):
     __tablename__ = 'event_offline'
     venue_name = Column(String(255), nullable=False)
     location = Column(String(255), nullable=False)
+    has_seat = Column(Boolean, default=False)
     event_id = Column(Integer, ForeignKey('event.id'), nullable=False,unique=True)
 
 class EventOnline(Base):
@@ -127,13 +138,12 @@ class Event(Base):
     organizer_id = Column(Integer, ForeignKey('event_organizer.id'))
     event_organizer = relationship("EventOrganizer", backref="events")
 
-    ticket_types = relationship(TicketType, backref="event", lazy=True)
+    ticket_types = relationship("TicketType", backref="event", cascade="all, delete")
     event_offline = relationship(EventOffline, uselist=False, backref="event", cascade="all, delete")
     event_online = relationship(EventOnline, uselist=False, backref="event", cascade="all, delete")
 
     # Thêm quan hệ với bảng ghi lý do từ chối
     rejection_logs = relationship("EventRejectionLog", backref="event", cascade="all, delete")
-    ticket_types = relationship("TicketType", backref="event", cascade="all, delete")
 
 class EventRejectionLog(Base):
     __tablename__ = 'event_rejection_log'
@@ -147,13 +157,40 @@ class Booking(Base):
 
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     event_id = Column(Integer, ForeignKey('event.id'), nullable=False)
-    ticket_type_id = Column(Integer, ForeignKey('ticket_type.id'), nullable=False)
-    quantity = Column(Integer, nullable=False)
-    selected_seats = Column(Text)  # JSON string chứa thông tin ghế đã chọn
     total_price = Column(Float, nullable=False)
     booking_date = Column(DateTime, default=datetime.utcnow)
+    status = Column(Enum(StatusBookingEnum), default=StatusBookingEnum.CHO_THANH_TOAN)
 
-    # Relationships
     user = relationship("User", backref="bookings")
     event = relationship("Event", backref="bookings")
-    ticket_type = relationship("TicketType", backref="bookings")
+    booking_seats = relationship("BookingSeat", back_populates="booking", cascade="all, delete")
+    booking_details = relationship("BookingDetail", backref="booking", cascade="all, delete")
+
+class BookingDetail(Base):
+    __tablename__ = 'booking_detail'
+
+    booking_id = Column(Integer, ForeignKey('booking.id'))
+    ticket_type_id = Column(Integer, ForeignKey('ticket_type.id'))
+    quantity = Column(Integer, nullable=False)
+    unit_price = Column(Float, nullable=False)
+
+    ticket_type = relationship("TicketType")
+
+class Seat(Base):
+    __tablename__ = 'seat'
+
+    event_id = Column(Integer, ForeignKey('event.id'), nullable=False)
+    seat_code = Column(String(10), nullable=False)  # VD: "A1", "B3"
+    status = Column(String(20), default="available")  # trạng thái: available, booked, etc.
+
+    event = relationship("Event", backref="seats")
+
+class BookingSeat(Base):
+    __tablename__ = 'booking_seat'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    booking_id = Column(Integer, ForeignKey('booking.id'), nullable=False)
+    seat_id = Column(Integer, ForeignKey('seat.id'), nullable=False)
+
+    booking = relationship("Booking", back_populates="booking_seats")
+    seat = relationship("Seat")

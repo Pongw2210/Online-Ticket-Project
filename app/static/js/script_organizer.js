@@ -125,6 +125,11 @@ function validateStep2() {
         valid = false;
     }
 
+    if (startTime.value >= endTime.value) {
+        showError(endTime, "Vui lòng thời gian bắt đầu trước thời gian kết thúc.");
+        valid = false;
+    }
+
     const ticketRows = document.querySelectorAll("#ticket-types .ticket-type");
 
     if (ticketRows.length === 0) {
@@ -214,7 +219,6 @@ function goToPrevStep() {
 function addTicketType() {
     const container = document.getElementById("ticket-types");
 
-    // Tạo một div mới cho loại vé
     const newTicket = document.createElement("div");
     newTicket.classList.add("ticket-type", "form-group", "form-row");
 
@@ -231,12 +235,29 @@ function addTicketType() {
            <label class="required-label"><span class="text-danger">*</span> Số lượng</label>
             <input type="number" class="ticket_quantity" min="1" placeholder="50">
         </div>
+        <div class="requires-seat-container" style="display:none; align-self:center; padding-left:10px;">
+            <label>
+                <input type="checkbox" class="requires_seat" required>
+                Yêu cầu chọn ghế
+            </label>
+        </div>
+
+        <div>
+            <label class="required-label">
+                <span class="text-danger">*</span> Lợi ích
+            </label>
+            <input type="text" class="ticket_benefits" placeholder="Hãy nhập với cấu trúc lợi ích 1 | lợi ích 2">
+        </div>
+
         <div>
             <button type="button" class="btn btn-danger remove-ticket" onclick="this.parentElement.parentElement.remove()">X</button>
         </div>
     `;
 
     container.appendChild(newTicket);
+
+    // Cập nhật lại trạng thái checkbox "Yêu cầu chọn ghế" theo has_seat
+    toggleRequiresSeatCheckbox();
 }
 
 function handlePaymentMethodChange() {
@@ -300,14 +321,19 @@ function submitEventForm(){
         formData.append("livestream_url", document.getElementById("livestream_url").value);
     }
 
+    const hasSeatCheckbox = document.getElementById("has_seat");
+    formData.append("has_seat", hasSeatCheckbox && hasSeatCheckbox.checked ? "true" : "false");
+
     // Loại vé
     const ticketRows = document.querySelectorAll("#ticket-types .ticket-type");
     const tickets = [];
     ticketRows.forEach(row => {
         tickets.push({
-            name: row.querySelector(".ticket_name")?.value,
-            price: row.querySelector(".ticket_price")?.value,
-            quantity: row.querySelector(".ticket_quantity")?.value
+            name: row.querySelector(".ticket_name")?.value || "",
+            price: row.querySelector(".ticket_price")?.value || "",
+            quantity: row.querySelector(".ticket_quantity")?.value || "",
+            requires_seat: row.querySelector(".requires_seat") ? row.querySelector(".requires_seat").checked : false,
+            benefits: row.querySelector(".ticket_benefits")?.value || "",
         });
     });
     formData.append("tickets", JSON.stringify(tickets));
@@ -567,5 +593,34 @@ function confirmDelete() {
     hideConfirmForm();
 }
 
+function toggleRequiresSeatCheckbox() {
+    const hasSeatChecked = document.getElementById('has_seat').checked;
+    // Lấy tất cả checkbox yêu cầu ghế trong step 2
+    const requireSeatContainers = document.querySelectorAll('.requires-seat-container');
+
+    requireSeatContainers.forEach(container => {
+        if (hasSeatChecked) {
+            container.style.display = 'flex';  // hoặc 'block' tùy style bạn muốn
+            // đồng thời set required cho checkbox
+            const checkbox = container.querySelector('input[type="checkbox"]');
+            if (checkbox) checkbox.required = true;
+        } else {
+            container.style.display = 'none';
+            const checkbox = container.querySelector('input[type="checkbox"]');
+            if (checkbox) {
+                checkbox.required = false;
+                checkbox.checked = false; // reset checkbox
+            }
+        }
+    });
+}
+
+// Lắng nghe sự kiện check/uncheck của has_seat
+document.getElementById('has_seat').addEventListener('change', toggleRequiresSeatCheckbox);
+
+// Gọi hàm một lần khi load trang để set đúng trạng thái lúc đầu
+window.addEventListener('DOMContentLoaded', () => {
+    toggleRequiresSeatCheckbox();
+});
 
 

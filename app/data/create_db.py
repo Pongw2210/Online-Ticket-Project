@@ -219,42 +219,43 @@ def seed_ticket_type():
     ticket_types = [
         TicketType(
             name='Vé Thường',
-            price=250000,
+            price=2000,
             quantity=50,
             event_id=1,
             benefits="Đảm bảo quyền lợi tham gia sự kiện|Ghế ngồi sắp xếp ngẫu nhiên|Ghế ngồi xa sân khấu"
         ),
         TicketType(
             name='Vé VIP',
-            price=500000,
+            price=5000,
             quantity=50,
             event_id=1,
             benefits="Khu vực checkin riêng, không phải xếp hàng|Ghế ngồi gần sân khấu, quà tặng đặc biệt|Dịch vụ ăn uống, quà tặng, giao lưu nghệ sĩ"
         ),
         TicketType(
             name='Vé Standing',
-            price=300000,
+            price=3000,
             quantity=50,
             event_id=2,
             benefits="Khu vực đứng gần sân khấu|Không giới hạn di chuyển khu vực standing|Trải nghiệm âm thanh sống động"
         ),
         TicketType(
             name='Vé VIP',
-            price=650000,
+            price=6500,
             quantity=50,
             event_id=2,
-            benefits="Khu vực checkin riêng, không phải xếp hàng|Ghế ngồi gần sân khấu, quà tặng đặc biệt|Dịch vụ ăn uống, quà tặng, giao lưu nghệ sĩ"
+            benefits="Khu vực checkin riêng, không phải xếp hàng|Ghế ngồi gần sân khấu, quà tặng đặc biệt|Dịch vụ ăn uống, quà tặng, giao lưu nghệ sĩ",
+            has_seat= True
         ),
         TicketType(
             name='Vé Thường',
-            price=200000,
+            price=2000,
             quantity=50,
             event_id=3,
             benefits="Đảm bảo quyền lợi tham gia sự kiện|Ghế ngồi sắp xếp ngẫu nhiên|Ghế ngồi xa sân khấu"
         ),
         TicketType(
             name='Vé Premium',
-            price=400000,
+            price=4000,
             quantity=50,
             event_id=3,
             benefits="Ghế ngồi ở khu vực trung tâm|Tặng voucher đồ uống|Có cơ hội chụp hình lưu niệm"

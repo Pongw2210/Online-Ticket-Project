@@ -5,15 +5,15 @@
 {% block content %}
 <div class="topbar">
     <h2>{% block header %}Tạo sự kiện {% endblock %}</h2>
-   <div class="account-wrapper">
-            <div class="account" onclick="toggleDropdown()">
-                Tài khoản <i class="fa fa-caret-down"></i>
-            </div>
-            <div class="dropdown" id="accountDropdown">
-                <a>Thông tin cá nhân</a>
-                <a>Đăng xuất</a>
-            </div>
+    <div class="account-wrapper">
+        <div class="account" onclick="toggleDropdown()">
+            Tài khoản <i class="fa fa-caret-down"></i>
         </div>
+        <div class="dropdown" id="accountDropdown">
+            <a>Thông tin cá nhân</a>
+            <a>Đăng xuất</a>
+        </div>
+    </div>
 </div>
 <div class="form-wrapper">
 
@@ -63,7 +63,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="required-label">* Hình thức sự kiện</label>
+                        <label class="required-label"><span class="text-danger">*</span> Hình thức sự kiện </label>
                         <div class="radio-group">
                             <label><input type="radio" name="event_format" value="offline" checked
                                           onchange="handleEventFormatChange()"> Sự kiện Offline</label>
@@ -73,6 +73,12 @@
                     </div>
 
                     <div class="form-info-event-offline">
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" name="has_seat" id="has_seat" value="true">
+                                Có chỗ ngồi (ghế) không?
+                            </label>
+                        </div>
                         <div class="form-group">
                             <label class="required-label"><span class="text-danger">*</span> Tên địa điểm</label>
                             <input type="text" name="venue_name" id="venue_name" maxlength="80"
@@ -164,6 +170,20 @@
                                 </label>
                                 <input type="number" class="ticket_quantity" min="1" placeholder="50">
                             </div>
+                            <div class="form-group requires-seat-container"
+                                 style="display:none; align-self:center; padding-left:10px;">
+                                <label>
+                                    <input type="checkbox" class="requires_seat" required>
+                                    Yêu cầu chọn ghế
+                                </label>
+                            </div>
+                            <div>
+                                <label class="required-label">
+                                    <span class="text-danger">*</span> Lợi ích
+                                </label>
+                                <input type="text" class="ticket_benefits" placeholder="Hãy nhập với cấu trúc lợi ích 1 | lợi ích 2">
+                            </div>
+
                         </div>
                     </div>
 

@@ -53,10 +53,9 @@ def create_event():
 
 @event_organizer_bp.route('/api/create-event', methods=['POST'])
 def create_event_api():
-    # current_user = check_login()
     if not current_user:
         return jsonify({"success": False, "message": "Vui lòng đăng nhập"}), 401
-    
+
     try:
         # Upload ảnh lên Cloudinary
         image_file = request.files.get("image")
@@ -77,6 +76,8 @@ def create_event_api():
         start_time = request.form.get("start_time")
         end_time = request.form.get("end_time")
         tickets = request.form.get("tickets")
+        has_seat_str = request.form.get("has_seat", "false")  # từ form gửi lên string "true"/"false"
+        has_seat = True if has_seat_str.lower() == "true" else False
 
         # Tạo sự kiện
         new_event = Event(
@@ -103,6 +104,7 @@ def create_event_api():
             event_offline = EventOffline(
                 venue_name=venue_name,
                 location=address,
+                has_seat=has_seat,
                 event_id=new_event.id
             )
             db.session.add(event_offline)
@@ -122,6 +124,8 @@ def create_event_api():
                 name=t['name'],
                 price=float(t['price']),
                 quantity=int(t['quantity']),
+                requires_seat=bool(t.get('requires_seat', False)),
+                benefits = t['benefits'],
                 event_id=new_event.id
             )
             db.session.add(ticket)
