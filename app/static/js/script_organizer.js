@@ -260,15 +260,6 @@ function addTicketType() {
     toggleRequiresSeatCheckbox();
 }
 
-function handlePaymentMethodChange() {
-    const method = document.querySelector('input[name="payment_method"]:checked').value;
-
-    document.querySelector('.payment-bank').style.display = (method === 'bank') ? 'block' : 'none';
-    document.querySelector('.payment-momo').style.display = (method === 'momo') ? 'block' : 'none';
-    document.querySelector('.payment-vnpay').style.display = (method === 'vnpay') ? 'block' : 'none';
-}
-
-document.addEventListener("DOMContentLoaded", handlePaymentMethodChange);
 
 function showToast(message, duration = 3000) {
     const container = document.getElementById("toast-container");
@@ -324,6 +315,13 @@ function submitEventForm(){
     const hasSeatCheckbox = document.getElementById("has_seat");
     formData.append("has_seat", hasSeatCheckbox && hasSeatCheckbox.checked ? "true" : "false");
 
+
+    if (hasSeatCheckbox) {
+        const numRows = document.getElementById("num_rows")?.value || "";
+        const seatsPerRow = document.getElementById("seats_per_row")?.value || "";
+        formData.append("num_rows", numRows);
+        formData.append("seats_per_row", seatsPerRow);
+    }
     // Loại vé
     const ticketRows = document.querySelectorAll("#ticket-types .ticket-type");
     const tickets = [];
@@ -618,9 +616,13 @@ function toggleRequiresSeatCheckbox() {
 // Lắng nghe sự kiện check/uncheck của has_seat
 document.getElementById('has_seat').addEventListener('change', toggleRequiresSeatCheckbox);
 
+document.getElementById('has_seat').addEventListener('change', function() {
+    const seatSetup = document.getElementById('seat-setup-section');
+    seatSetup.style.display = this.checked ? 'block' : 'none';
+});
+
 // Gọi hàm một lần khi load trang để set đúng trạng thái lúc đầu
 window.addEventListener('DOMContentLoaded', () => {
     toggleRequiresSeatCheckbox();
 });
-
 

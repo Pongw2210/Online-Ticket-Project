@@ -1,93 +1,100 @@
 body {
     margin: 0;
     font-family: 'Poppins', sans-serif;
-    background-color: #1E1E1E; /* Đen nhạt */
+    background: radial-gradient(circle at top left, #ffe6f0, #fff0f5);
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    color: #fff;
+    color: #333;
 }
 
+/* Khung login */
 .login-container {
-    background: rgba(255, 255, 255, 0.05); /* Nền form mờ nhẹ */
-    padding: 50px;
-    border-radius: 20px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(0, 255, 136, 0.4);
+    background: rgba(255, 255, 255, 0.6);
+    padding: 50px 40px;
+    border-radius: 25px;
+    box-shadow: 0 12px 40px rgba(255, 105, 180, 0.35);
+    backdrop-filter: blur(18px);
+    border: 1px solid rgba(255, 182, 193, 0.5);
     width: 420px;
     text-align: center;
-    animation: fadeIn 0.5s ease-in-out;
+    animation: fadeIn 0.6s ease-in-out;
+    transition: transform 0.3s ease;
+}
+.login-container:hover {
+    transform: scale(1.02);
 }
 
+/* Tiêu đề */
 .login-container h2 {
     margin-bottom: 30px;
-    font-size: 28px;
-    font-weight: 600;
-    color: #00ff88;
+    font-size: 30px;
+    font-weight: 700;
+    color: #ff4fa3;
+    text-shadow: 0 3px 8px rgba(255, 105, 180, 0.3);
 }
 
+/* Nhóm input */
 .form-group {
     margin-bottom: 20px;
     text-align: left;
 }
-
 .form-group label {
-    font-size: 16px;
+    font-size: 15px;
     margin-bottom: 8px;
     display: block;
+    color: #555;
 }
-
 .form-group input {
     width: 100%;
     padding: 14px 16px;
-    border: 1px solid rgba(0, 255, 136, 0.3);
+    border: 1px solid rgba(255, 182, 193, 0.5);
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
     font-size: 16px;
     outline: none;
     transition: all 0.3s ease;
 }
-
 .form-group input:focus {
-    border-color: #00ff88;
-    box-shadow: 0 0 8px #00ff88;
+    border-color: #ff69b4;
+    box-shadow: 0 0 12px rgba(255, 105, 180, 0.5);
 }
 
+/* Nút đăng nhập */
 .btn-login {
     width: 100%;
     padding: 14px;
-    background: linear-gradient(90deg, #00ff88, #00cc66);
+    background: linear-gradient(135deg, #ff9fbe, #ff4fa3);
     border: none;
     border-radius: 12px;
-    color: #000;
+    color: #fff;
     font-weight: bold;
     font-size: 18px;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
-
 .btn-login:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 15px rgba(0, 255, 136, 0.5);
+    box-shadow: 0 8px 18px rgba(255, 105, 180, 0.5);
 }
 
+/* Link đăng ký */
 .register-link {
     margin-top: 20px;
-    font-size: 16px;
+    font-size: 15px;
 }
-
 .register-link a {
-    color: #00ff88;
+    color: #ff4fa3;
     text-decoration: none;
+    font-weight: 500;
 }
-
 .register-link a:hover {
     text-decoration: underline;
 }
 
+/* Animation */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }

@@ -1,9 +1,11 @@
+import string
+
 from flask import Blueprint, render_template, redirect, url_for,request, jsonify, session
 from flask_login import login_required, current_user
 
 from app import dao,db
 from app.data.models import UserEnum, Event, EventOffline, EventOnline, TicketType, EventFormatEnum, EventTypeEnum, \
-    StatusEventEnum, EventRejectionLog
+    StatusEventEnum, EventRejectionLog, Seat
 import cloudinary.uploader
 from datetime import datetime
 
@@ -79,6 +81,11 @@ def create_event_api():
         has_seat_str = request.form.get("has_seat", "false")  # từ form gửi lên string "true"/"false"
         has_seat = True if has_seat_str.lower() == "true" else False
 
+        num_rows = seats_per_row = None
+        if has_seat == True:
+            num_rows = request.form.get("num_rows")
+            seats_per_row = request.form.get("seats_per_row")
+
         # Tạo sự kiện
         new_event = Event(
             name=name,
@@ -129,6 +136,22 @@ def create_event_api():
                 event_id=new_event.id
             )
             db.session.add(ticket)
+
+        if has_seat and num_rows and seats_per_row:
+                num_rows = int(num_rows)
+                seats_per_row = int(seats_per_row)
+                # Mã hàng ghế từ A-Z (tối đa 26 hàng)
+                row_labels = list(string.ascii_uppercase)[:num_rows]
+
+                for row_label in row_labels:
+                    for seat_num in range(1, seats_per_row + 1):
+                        seat_code = f"{row_label}{seat_num}"
+                        seat = Seat(
+                            event_id=new_event.id,
+                            seat_code=seat_code,
+                            status="available"
+                        )
+                        db.session.add(seat)
 
         db.session.commit()
         return jsonify({"success": True})

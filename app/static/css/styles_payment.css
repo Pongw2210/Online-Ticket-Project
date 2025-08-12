@@ -1,74 +1,459 @@
-:root{
-  --green:#2fc26e;
-  --dark:#0f0f10;
-  --muted:#3a3a3a;
-  --card:#1f1f21;
-  --accent:#2aa7d6;
-  --white:#ffffff;
-  --radius:12px;
-}
-*{box-sizing:border-box}
-body{
-    font-family:Inter,system-ui,Arial;
-    margin:0;
-    background:linear-gradient(180deg,#000 0%, #050505 60%);
-    color:var(--white)
+:root {
+  --pink: #f7c6d0;          /* Hồng pastel nhẹ */
+  --pink-dark: #e99ab1;     /* Hồng đậm hơn */
+  --pink-soft: #fdeaf0;     /* Nền hồng rất nhạt */
+  --white: #ffffff;
+  --gray-light: #f8f8f8;
+  --gray-border: #e0e0e0;
+  --text-dark: #333333;
+  --radius: 14px;
+  --shadow-light: rgba(0,0,0,0.05);
+  --shadow-medium: rgba(0,0,0,0.08);
+  --shadow-strong: rgba(0,0,0,0.12);
 }
 
-/* header */
-.site-header{background:var(--green); padding:18px 36px; display:flex;align-items:center;justify-content:space-between}
-.brand{color:#fff;font-weight:700;font-size:28px;letter-spacing:1px}
-.top-right{display:flex;gap:18px;align-items:center}
-.pill{background:rgba(255,255,255,0.1);padding:8px 12px;border-radius:999px}
-
-/* hero */
-.hero{background:linear-gradient(90deg, rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('') center/cover no-repeat; padding:40px 60px 30px; border-bottom:1px solid rgba(255,255,255,0.04)}
-.hero-inner{display:flex;align-items:center;justify-content:space-between}
-.event-info{max-width:75%}
-.event-title{font-size:26px;font-weight:700;margin:0 0 8px}
-.meta{color:rgba(255,255,255,0.8);display:flex;gap:16px;align-items:center;font-size:14px}
-
-.countdown{min-width:120px;background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));padding:18px;border-radius:18px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
-.countdown .time{display:flex;gap:8px;justify-content:center}
-.countdown .digit{background:var(--green);color:#00321b;padding:10px 14px;border-radius:10px;font-weight:700}
-
-/* page layout */
-.container{max-width:1200px;margin:28px auto;padding:0 20px;display:flex;gap:28px}
-.left{flex:1}
-.right{width:340px}
-
-h3.section-title{color:var(--green);letter-spacing:1px}
-
-.card{background:var(--card);padding:18px;border-radius:12px;margin-bottom:18px;border:1px solid rgba(255,255,255,0.03)}
-
-label{display:block;color:#cbd5d1;margin-bottom:8px;font-weight:600}
-.muted{color:#9aa0a0;font-size:13px}
-
-.input{width:100%;padding:12px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--white);margin-bottom:12px}
-
-.voucher{display:flex;gap:12px;align-items:center}
-.btn{background:var(--green);color:#00321b;padding:12px 16px;border-radius:10px;border:none;font-weight:700;cursor:pointer}
-.btn.secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--white)}
-
-.payment-methods{display:flex;flex-direction:column;gap:10px}
-.method{display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04)}
-.method input{transform:scale(1.1)}
-
-/* right side white cards */
-.summary-card{background:#fff;color:#111;padding:16px;border-radius:12px;margin-bottom:12px}
-.summary-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.ticket-badge{background:#2b6df0;color:#fff;padding:4px 8px;border-radius:6px;font-weight:600;font-size:12px}
-.total{font-size:20px;font-weight:800;color:var(--green)}
-
-.checkout-footer{position:sticky;top:18px}
-
-/* small screens */
-@media (max-width:900px){
-  .container{flex-direction:column;padding:0 12px}
-  .right{width:100%}
-  .event-info{max-width:100%}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
+body {
+  font-family: 'Inter', system-ui, Arial, sans-serif;
+  margin: 0;
+  background-color: var(--pink-soft);
+  color: var(--text-dark);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
+/* ===== Header ===== */
+.site-header {
+  background-color: var(--white);
+  padding: 20px 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f0f0f0;
+  box-shadow: 0 4px 10px var(--shadow-light);
+}
 
- thay dổi cái này luôn
+.brand {
+  color: var(--pink-dark);
+  font-weight: 800;
+  font-size: 28px;
+  letter-spacing: 1px;
+  user-select: none;
+}
+
+.top-right {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}
+
+.pill {
+  background-color: var(--pink-soft);
+  padding: 8px 14px;
+  border-radius: 9999px;
+  font-weight: 500;
+  color: var(--pink-dark);
+  user-select: none;
+}
+
+/* ===== Hero Section ===== */
+.hero {
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.85), rgba(255,255,255,0.85)),
+    url('') center/cover no-repeat;
+  padding: 50px 60px 40px;
+  border-bottom: 1px solid #f2f2f2;
+}
+
+.hero-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.event-info {
+  max-width: 75%;
+}
+
+.event-title {
+  font-size: 30px;
+  font-weight: 800;
+  margin: 0 0 8px;
+  color: var(--pink-dark);
+  line-height: 1.2;
+}
+
+.meta {
+  color: #777;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  font-size: 14px;
+  user-select: none;
+}
+
+/* ===== Countdown Timer ===== */
+.countdown {
+  min-width: 130px;
+  background-color: var(--white);
+  padding: 18px;
+  border-radius: 18px;
+  text-align: center;
+  box-shadow: 0 4px 14px var(--shadow-medium);
+  user-select: none;
+}
+
+.countdown .time {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.countdown .digit {
+  background-color: var(--pink);
+  color: var(--text-dark);
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== Page Layout ===== */
+.container {
+  max-width: 1200px;
+  margin: 28px auto;
+  padding: 0 20px;
+  display: flex;
+  gap: 28px;
+}
+
+.left {
+  flex: 1;
+}
+
+.right {
+  width: 340px;
+}
+
+/* ===== Section Titles ===== */
+h3.section-title {
+  color: var(--pink-dark);
+  letter-spacing: 0.5px;
+  margin-bottom: 14px;
+  font-weight: 700;
+  user-select: none;
+}
+
+/* ===== Cards ===== */
+.card {
+  background-color: var(--white);
+  padding: 20px;
+  border-radius: var(--radius);
+  margin-bottom: 20px;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 4px 12px var(--shadow-light);
+  transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 8px 24px var(--shadow-strong);
+}
+
+/* ===== Forms and Inputs ===== */
+label {
+  display: block;
+  color: var(--pink-dark);
+  margin-bottom: 8px;
+  font-weight: 600;
+  user-select: none;
+}
+
+.muted {
+  color: #888;
+  font-size: 13px;
+}
+
+.input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  background-color: var(--gray-light);
+  border: 1px solid var(--gray-border);
+  color: var(--text-dark);
+  margin-bottom: 12px;
+  font-size: 15px;
+  transition: border-color 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--pink-dark);
+  box-shadow: 0 0 4px var(--pink-dark);
+}
+
+/* ===== Voucher Input Group ===== */
+.voucher {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* ===== Buttons ===== */
+.btn {
+  background-color: var(--pink-dark);
+  color: var(--white);
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  user-select: none;
+}
+
+.btn:hover {
+  background-color: var(--pink);
+  transform: scale(1.05);
+}
+
+.btn.secondary {
+  background-color: transparent;
+  border: 1px solid var(--pink-dark);
+  color: var(--pink-dark);
+}
+
+/* ===== Payment Methods ===== */
+.payment-methods {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.method {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #f0f0f0;
+  background-color: var(--white);
+  cursor: pointer;
+  transition: box-shadow 0.2s ease;
+}
+
+.method:hover {
+  box-shadow: 0 0 6px var(--pink-dark);
+}
+
+.method input {
+  transform: scale(1.1);
+  cursor: pointer;
+}
+
+/* ===== Right Side Summary Cards ===== */
+.summary-card {
+  background-color: var(--white);
+  color: var(--text-dark);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 4px 12px var(--shadow-light);
+  user-select: none;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.ticket-badge {
+  background-color: var(--pink-dark);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 12px;
+  user-select: none;
+}
+
+.total {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--pink-dark);
+  user-select: none;
+}
+
+/* ===== Checkout Footer Sticky ===== */
+.checkout-footer {
+  position: sticky;
+  top: 18px;
+  z-index: 10;
+}
+
+/* ===== Card Images ===== */
+.card img {
+  width: 100%;
+  max-height: 180px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+  border-radius: 8px;
+  background-color: #ffe6ef; /* hồng pastel nhạt rõ hơn */
+  padding: 6px;
+  user-select: none;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 900px) {
+  .container {
+    flex-direction: column;
+    padding: 0 12px;
+  }
+  .right {
+    width: 100%;
+  }
+  .event-info {
+    max-width: 100%;
+  }
+}
+body {
+  background-color: #fdeaf0;
+  font-family: 'Inter', sans-serif;
+  color: #4a2e48; /* tím đậm cho chữ dễ đọc */
+  margin: 0;
+  padding: 0;
+}
+
+.main-container {
+  max-width: 960px;
+  margin: 40px auto;
+  padding: 24px 30px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(179, 55, 81, 0.15);
+}
+
+h2.title {
+  color: #9b2d46;
+  font-weight: 700;
+  font-size: 28px;
+  margin-bottom: 24px;
+  letter-spacing: 0.02em;
+}
+
+.card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(233, 154, 177, 0.2);
+  padding: 20px;
+  margin-bottom: 30px;
+  border: 1px solid #f2d7de;
+}
+
+.card label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #b33951;
+}
+
+.card input[type="text"],
+.card input[type="email"],
+.card input[type="number"] {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #e4b8c6;
+  border-radius: 10px;
+  font-size: 16px;
+  color: #5a3a4a;
+  transition: border-color 0.3s ease;
+}
+
+.card input[type="text"]:focus,
+.card input[type="email"]:focus,
+.card input[type="number"]:focus {
+  outline: none;
+  border-color: #b33951;
+  box-shadow: 0 0 6px rgba(179, 55, 81, 0.3);
+}
+
+.btn-primary {
+  display: inline-block;
+  background-color: #b33951;
+  color: white;
+  font-weight: 700;
+  font-size: 16px;
+  padding: 14px 0;
+  width: 100%;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.25s ease;
+  margin-top: 16px;
+  user-select: none;
+}
+
+.btn-primary:hover {
+  background-color: #9b2d46;
+}
+
+.summary-section {
+  background: #fff0f3;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(233, 154, 177, 0.15);
+  font-weight: 600;
+  font-size: 18px;
+  color: #b33951;
+  margin-top: 16px;
+}
+
+.summary-section .total {
+  font-size: 22px;
+  font-weight: 800;
+  color: #9b2d46;
+}
+
+.payment-methods label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid #f2d7de;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #9b2d46;
+  font-weight: 600;
+  margin-bottom: 12px;
+  transition: background-color 0.3s ease;
+}
+
+.payment-methods label:hover {
+  background-color: #fdeaf0;
+}
+
+.payment-methods input[type="radio"] {
+  transform: scale(1.2);
+  cursor: pointer;
+}
+
+/* Responsive nhỏ hơn */
+@media (max-width: 768px) {
+  .main-container {
+    margin: 20px;
+    padding: 20px;
+  }
+  h2.title {
+    font-size: 24px;
+  }
+}

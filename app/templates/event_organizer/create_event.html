@@ -29,7 +29,7 @@
         </div>
         <div class="step">
             <div class="circle">3</div>
-            <div class="label">Thông tin thanh toán</div>
+            <div class="label">Mã khuyến mãi</div>
         </div>
         <div class="step-buttons">
             <button class="btn btn-prev" onclick="goToPrevStep()">Quay lại</button>
@@ -78,6 +78,20 @@
                                 <input type="checkbox" name="has_seat" id="has_seat" value="true">
                                 Có chỗ ngồi (ghế) không?
                             </label>
+                        </div>
+
+                        <div id="seat-setup-section" style="display:none; margin-top: 15px;">
+                            <h4>Thiết lập chỗ ngồi</h4>
+                            <div class="form-group">
+                                <label for="num_rows">Số hàng ghế:</label>
+                                <input type="number" id="num_rows" name="num_rows" min="1" max="26" value="10"/>
+                                <small>(Tối đa 26 hàng, tương ứng A-Z)</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="seats_per_row">Số ghế mỗi hàng:</label>
+                                <input type="number" id="seats_per_row" name="seats_per_row" min="1" max="100"
+                                       value="15"/>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label class="required-label"><span class="text-danger">*</span> Tên địa điểm</label>
@@ -181,7 +195,8 @@
                                 <label class="required-label">
                                     <span class="text-danger">*</span> Lợi ích
                                 </label>
-                                <input type="text" class="ticket_benefits" placeholder="Hãy nhập với cấu trúc lợi ích 1 | lợi ích 2">
+                                <input type="text" class="ticket_benefits"
+                                       placeholder="Hãy nhập với cấu trúc lợi ích 1 | lợi ích 2">
                             </div>
 
                         </div>
@@ -191,74 +206,8 @@
                 </div>
 
                 <div class="event-form-section step-section step-3">
-                    <h3>Thông tin thanh toán</h3>
+                    <h3>Mã khuyến mãi</h3>
 
-                    <div class="form-group">
-                        <label class="required-label">Chọn phương thức thanh toán</label>
-                        <div class="radio-group">
-                            <label>
-                                <input type="radio" name="payment_method" value="bank" checked
-                                       onchange="handlePaymentMethodChange()">
-                                Chuyển khoản ngân hàng
-                            </label>
-                            <label>
-                                <input type="radio" name="payment_method" value="momo"
-                                       onchange="handlePaymentMethodChange()">
-                                Ví MoMo
-                            </label>
-                            <label>
-                                <input type="radio" name="payment_method" value="vnpay"
-                                       onchange="handlePaymentMethodChange()">
-                                VNPay
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Ngân hàng -->
-                    <div class="payment-bank">
-                        <div class="form-group">
-                            <label class="required-label">Ngân hàng nhận tiền</label>
-                            <select name="bank">
-                                <option value="vcb">Vietcombank</option>
-                                <option value="mb">MB Bank</option>
-                                <option value="tcb">Techcombank</option>
-                                <option value="agribank">Agribank</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label class="required-label">Số tài khoản</label>
-                            <input type="text" name="account_number" placeholder="Ví dụ: 0123456789">
-                        </div>
-                        <div class="form-group">
-                            <label class="required-label">Chủ tài khoản</label>
-                            <input type="text" name="account_holder" placeholder="Tên chủ tài khoản">
-                        </div>
-                    </div>
-
-                    <!-- MoMo -->
-                    <div class="payment-momo" style="display: none;">
-                        <div class="form-group">
-                            <label class="required-label">Số điện thoại MoMo</label>
-                            <input type="text" name="momo_number" placeholder="Nhập số ĐT liên kết MoMo">
-                        </div>
-                        <div class="form-group">
-                            <label>Tên chủ tài khoản MoMo</label>
-                            <input type="text" name="momo_name" placeholder="Tên MoMo">
-                        </div>
-                    </div>
-
-                    <!-- VNPay -->
-                    <div class="payment-vnpay" style="display: none;">
-                        <div class="form-group">
-                            <label class="required-label">Mã Merchant VNPay</label>
-                            <input type="text" name="vnpay_merchant" placeholder="Nhập mã merchant ID VNPay">
-                        </div>
-                        <div class="form-group">
-                            <label class="required-label">URL callback VNPay</label>
-                            <input type="text" name="vnpay_return_url"
-                                   placeholder="https://yourdomain.com/vnpay-return">
-                        </div>
-                    </div>
                 </div>
 
             </div>

@@ -12,7 +12,7 @@
 }
 
 body {
-  background: #0c1612;
+  background: #fff0f5;
   color: #fff;
 }
 
@@ -26,7 +26,7 @@ body {
 /* Sidebar */
 .sidebar {
   width: 240px;
-  background: #0f2d21;
+  background: #fff0f5;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -1151,3 +1151,240 @@ input.error, textarea.error, select.error {
 }
 
 
+
+
+/* ==== OVERRIDE TO PINK THEME ==== */
+:root {
+  --main-green: #ffb6c1; /* Hồng nhạt */
+  --main-green-hover: #ff99aa; /* Hồng đậm hơn chút khi hover */
+}
+
+/* Nền chung */
+body, .main, .sidebar, .event-form-wrapper, .event-form-section,
+.tab-content, .event-card, .upload-box {
+  background-color: #ffe4ec !important; /* Hồng pastel nhạt */
+  color: #333 !important; /* Giữ chữ dễ đọc */
+}
+
+/* Viền và border */
+input, select, textarea, .upload-box, .ticket-type {
+  border-color: #f4b6c2 !important;
+  background-color: #fff0f5 !important; /* Hồng phấn */
+}
+
+/* Các nút chính */
+.btn-create,
+.search-bar button,
+.tabs .active,
+.event-card button,
+.action-buttons a:first-child button {
+  background-color: var(--main-green) !important;
+  color: white !important;
+}
+
+.btn-create:hover,
+.search-bar button:hover,
+.tabs button:hover,
+.event-card button:hover,
+.action-buttons a:first-child button:hover {
+  background-color: var(--main-green-hover) !important;
+}
+
+/* Nút xoá, cảnh báo giữ nguyên để nổi bật */
+/* ==== OVERRIDE FONT WEIGHT & COLOR ==== */
+body,
+.sidebar,
+.main,
+.event-card,
+.event-card .title,
+.event-card .date,
+button,
+.btn,
+.tabs button,
+input,
+select,
+textarea,
+label,
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600 !important; /* Đậm vừa */
+  color: #000 !important;      /* Màu đen */
+}
+
+.event-card .title {
+  font-weight: 700 !important; /* Đậm hơn cho tiêu đề */
+  color: #000 !important;
+}
+
+.btn,
+button,
+a.btn-create {
+  font-weight: 700 !important; /* Nút đậm */
+  color: #000 !important;
+}
+/* Sidebar text đậm + đen */
+.sidebar ul li a {
+  color: #000 !important;
+  font-weight: 700 !important;
+}
+
+/* Active link trong sidebar */
+.sidebar ul li.active a {
+  color: #000 !important;
+  font-weight: 800 !important;
+}
+/* Ép 4 nút trạng thái thành hồng đậm */
+.status-buttons button,
+.tabs button {
+    background-color: #e75480 !important; /* Hồng đậm */
+    color: #fff !important; /* Chữ trắng */
+    border: none !important;
+}
+
+/* Hover */
+.status-buttons button:hover,
+.tabs button:hover {
+    background-color: #d14a72 !important; /* Hồng đậm hơn khi hover */
+    color: #fff !important;
+}
+/* Text thông báo không có dữ liệu thành đen đậm */
+.no-data,
+.no-data p,
+.tab-content .no-data,
+.tab-content .no-data p {
+    color: #000 !important;
+    font-weight: 700 !important;
+}
+.status-title,
+.tab-content p,
+.event-list-title {
+    color: #000 !important;
+    font-weight: 700 !important;
+}
+/* Đổi màu chữ "Ngôn ngữ" thành đen */
+.lang span {
+    color: #000 !important;
+    font-weight: 700 !important;
+}
+
+/* Đổi nút chọn ngôn ngữ thành hồng */
+.lang-btn {
+    background-color: #e75480 !important; /* Hồng đậm */
+    color: #fff !important;
+    border: none !important;
+}
+
+/* Hover */
+.lang-btn:hover {
+    background-color: #d14a72 !important;
+}
+/* Nền thanh step-progress đổi từ đen -> hồng nhạt */
+.step-progress {
+    background-color: #ffe4ec !important; /* Hồng pastel nhạt */
+    border-bottom: 2px solid #e75480 !important; /* Viền hồng đậm */
+}
+
+/* Số bước (vòng tròn) màu hồng đậm, chữ trắng */
+.circle {
+    background-color: #e75480 !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+}
+
+/* Khi bước active: nền hồng đậm hơn */
+.step.active .circle {
+    background-color: #d14a72 !important;
+    color: #fff !important;
+}
+
+/* Nhãn bước chữ đen đậm */
+.label {
+    color: #000 !important;
+    font-weight: 700 !important;
+}
+
+/* Nút Quay lại & Tiếp tục hồng */
+.step-buttons .btn {
+    background-color: #ffb6c1 !important;
+    color: #000 !important;
+    font-weight: 700 !important;
+    border: 2px solid #e75480 !important;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Hover nút */
+.step-buttons .btn:hover {
+    background-color: #e75480 !important;
+    color: #fff !important;
+}
+/* Đổi nền đen của container thành hồng nhạt */
+.upload-container,
+.form-section,
+.form-step {
+    background-color: #ffe4ec !important; /* Hồng pastel */
+    border-radius: 12px;
+    padding: 20px;
+}
+
+/* Viền đổi sang hồng đậm */
+.upload-container {
+    border: 2px dashed #e75480 !important;
+}
+
+/* Label chữ đen đậm */
+.upload-container label,
+.form-section label {
+    color: #000 !important;
+    font-weight: 700 !important;
+}
+/* Ghi đè màu chữ cho tên sự kiện / thể loại / label & nội dung input thành trắng */
+.event-form-wrapper .form-group label,
+.event-form-wrapper label.required-label,
+.event-form-section .form-group label {
+  color: #fff !important;
+}
+
+/* Nội dung trong input/select/textarea hiển thị chữ trắng */
+.event-form-wrapper input[type="text"],
+.event-form-wrapper input[type="number"],
+.event-form-wrapper input[type="datetime-local"],
+.event-form-wrapper select,
+.event-form-wrapper textarea {
+  color: #fff !important;
+  background-color: #2e2e2e !important; /* giữ nền tối để chữ trắng dễ đọc */
+  border-color: #444 !important;
+}
+
+/* Placeholder màu sáng (mờ) nhưng trắng-ish */
+.event-form-wrapper input::placeholder,
+.event-form-wrapper textarea::placeholder {
+  color: rgba(255,255,255,0.6) !important;
+  font-style: italic;
+}
+
+/* Nếu tên sự kiện hiển thị ở dạng card (event-card) */
+.event-card .title,
+.event-card .date {
+  color: #000 !important;
+}
+h3 {
+  color: #fff !important;
+}
+
+
+/* Hiển thị lại nút tăng giảm cho input number */
+input::-webkit-inner-spin-button,
+input::-webkit-outer-spin-button {
+    -webkit-appearance: auto;
+    margin: 0;
+}
+
+input[type=number] {
+    -moz-appearance: number-input;
+}
+
+
+/* Đảm bảo tất cả chữ trong event-card đều đen */
+.event-card * {
+    color: #000 !important;
+}

@@ -1,9 +1,9 @@
 /* ==== GIAO DIỆN CHUNG ==== */
 body {
     margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    background-color: #ffffff; /* nền trắng */
-    color: #000000; /* chữ đen */
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
+    background-color: #fff0f5; /* nền trắng */
+    color: #333333; /* chữ đen */
 }
 
 .logo {
@@ -22,7 +22,7 @@ body {
 /* ==== HEADER ==== */
 /* Header chính */
 header {
-    background-color: #2ecc71;
+    background: linear-gradient(90deg, rgba(244,143,177,0.95), rgba(206,147,216,0.95));
     padding: 20px 30px;
     display: flex;
     justify-content: space-between;
@@ -35,7 +35,7 @@ header {
     align-items: center;
     justify-content: space-between;
     padding: 15px 30px;
-    background-color: #f9f9f9;
+    background: linear-gradient(90deg, rgba(244,143,177,0.95), rgba(206,147,216,0.95));
     gap: 20px;
     border-bottom: 1px solid #e0e0e0;
 }
@@ -60,7 +60,7 @@ header {
 }
 
 .search-bar input[type="text"]:focus {
-    border-color: #28a745;
+    border-color: #f48fb1;
     outline: none;
     box-shadow: 0 0 4px rgba(40, 167, 69, 0.4);
 }
@@ -68,7 +68,7 @@ header {
 /* Nút tìm kiếm */
 .search-bar button {
     padding: 10px 18px;
-    background-color: #28a745;
+    background-color: #f48fb1;
     color: white;
     border: none;
     border-radius: 6px;
@@ -79,7 +79,7 @@ header {
 }
 
 .search-bar button:hover {
-    background-color: #218838;
+    background-color: #ad1457;
     transform: translateY(-1px);
 }
 
@@ -95,9 +95,11 @@ header {
 }
 
 .auth-links a {
-    color: #ffffff;
+    color: white;
+    font-weight: bold;
     text-decoration: none;
     margin-left: 10px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
 .auth-links a:hover {
@@ -126,7 +128,7 @@ header {
 
 .header-actions a:hover {
     background-color: white;
-    color: #28a745;
+    color: #f48fb1;
 }
 
 .header-actions .ticket-icon {
@@ -148,7 +150,7 @@ header {
 }
 
 .nav a {
-    color: #28a745;
+    color: #ce93d8;
     text-decoration: none;
     font-weight: bold;
     font-size: 16px;
@@ -156,12 +158,13 @@ header {
 }
 
 .nav a:hover {
-    color: #218838;
+    color: #ad1457;
 }
 
 /* ==== MAIN CONTENT ==== */
 .main-content {
     padding-top: 20px;
+    background-color: #fde8ef;
 }
 
 
@@ -172,26 +175,86 @@ header {
     flex-wrap: wrap;
     gap: 20px;
     justify-content: center;
-    background-color: #ffffff;
+    background-color: #fde8ef;
 }
 
 .event-card {
-    background: rgba(225, 255, 255, 0.75);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+    background: rgba(225, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     width: 280px;
-    border-radius: 14px;
+    border-radius: 16px;
     overflow: hidden;
     text-decoration: none;
     color: #000;
-
     display: flex;
     flex-direction: column;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
 
+.event-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.event-card .content {
+    padding: 14px 16px 18px;
+    background-color: #FAFAFA;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex: 1;
+}
+
+.event-card .title {
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #003333;
+    margin-bottom: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.5px;
+}
+
+.event-card .date {
+    font-size: 13px;
+    font-weight: 700;
+    color: #f48fb1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+
+.event-card .location {
+    font-size: 13px;
+    font-weight: 400;
+    color: rgb(90, 110, 105);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 0.2px;
+}
+
+.event-card .date svg,
+.event-card .location svg {
+    width: 14px;
+    height: 14px;
 }
 
 .event-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.event-card:hover img {
+    transform: scale(1.05);
+}.event-card:hover {
     transform: translateY(-4px);
     box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
 }
@@ -230,7 +293,7 @@ header {
 .event-card .date {
     font-size: 13px;
     font-weight: 700;
-    color: #27ae60;
+    color: #f48fb1;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -263,7 +326,7 @@ header {
     display: flex;
     align-items: center;
     gap: 24px;
-    border: 2px solid #28a745;
+    border: 2px solid #f48fb1;
     border-radius: 12px;
     padding: 20px;
     max-width: 1200px;
@@ -301,7 +364,7 @@ header {
 .ticket-info h1 {
     font-size: 28px;
     font-weight: 800;
-    color: #222;
+    color: #ad1457;
     margin-bottom: 8px;
     line-height: 1.2;
     letter-spacing: 0.02em;
@@ -318,7 +381,7 @@ header {
 }
 
 .ticket-info .time {
-    color: #007bff; /* xanh cho thời gian */
+    color: #f48fb1; /* xanh cho thời gian */
 }
 
 .ticket-info .location {
@@ -341,7 +404,7 @@ header {
 /* Nút mua vé */
 .buy-btn {
     display: inline-block;
-    background-color: #28a745;
+    background-color: #f48fb1;
     color: #fff;
     padding: 14px 28px;
     border-radius: 8px;
@@ -356,7 +419,7 @@ header {
 
 .buy-btn:hover,
 .buy-btn:focus {
-    background-color: #218838;
+    background-color: #ad1457;
     transform: translateY(-3px);
     box-shadow: 0 8px 20px rgba(33, 136, 56, 0.6);
 }
@@ -380,8 +443,8 @@ header {
     font-weight: 700;
     margin-top: 0;  /* để h2 sát phần trên */
     margin-bottom: 16px;
-    color: #222;
-    border-bottom: 2px solid #28a745;
+    color: #ad1457;
+    border-bottom: 2px solid #f48fb1;
     padding-bottom: 6px;
     letter-spacing: 0.03em;
 }
@@ -406,7 +469,7 @@ header {
     font-size: 28px;
     font-weight: bold;
     margin: 20px 40px 10px;
-    color: #2ecc71;
+    color: #f48fb1;
 }
 
 .ticket-selection {
@@ -442,7 +505,7 @@ header {
 }
 
 .ticket-name {
-    color: #28a745;
+    color: #f48fb1;
     font-size: 22px;
     font-weight: bold;
     margin-bottom: 10px;
@@ -458,7 +521,7 @@ header {
 .ticket-price {
     font-size: 18px;
     font-weight: bold;
-    color: #28a745;
+    color: #f48fb1;
 }
 
 .ticket-stock {
@@ -493,7 +556,7 @@ header {
 .ticket-summary {
     background: white;
     padding: 20px;
-    border: 2px solid #28a745;
+    border: 2px solid #f48fb1;
     border-radius: 10px;
     width: 300px;
     margin-left: auto;
@@ -514,7 +577,7 @@ header {
 
 .continue-btn {
     display: inline-block;
-    background-color: #28a745;
+    background-color: #f48fb1;
     color: white;
     padding: 10px 20px;
     border: none;
@@ -529,7 +592,7 @@ header {
 }
 
 .continue-btn:hover {
-    background-color: #218838;
+    background-color: #ad1457;
 }
 
 h4 {
@@ -541,11 +604,11 @@ h4 {
 
 /* ==== FOOTER ==== */
 .footer {
-    background-color: #fefaf4;
+    background: linear-gradient(90deg, rgba(244,143,177,0.95), rgba(206,147,216,0.95));
     color: #333;
     padding: 40px 0 20px 0;
     margin-top: 60px;
-    border-top: 1px solid #28a745;
+    border-top: 1px solid #f48fb1;
 }
 
 .footer-content {
@@ -558,13 +621,13 @@ h4 {
 }
 
 .footer-section h3 {
-    color: #28a745; /* đổi từ #2ecc71 thành #28a745 cho đồng bộ */
+    color: #ad1457; /* đổi từ #f48fb1 thành #f48fb1 cho đồng bộ */
     margin-bottom: 15px;
     font-size: 20px;
 }
 
 .footer-section h4 {
-    color: #28a745;
+    color: #ad1457;
     margin-bottom: 10px;
     font-size: 16px;
 }
@@ -580,7 +643,7 @@ h4 {
     text-align: center;
     margin-top: 30px;
     padding-top: 20px;
-    border-top: 1px solid #28a745; /* viền xanh */
+    border-top: 1px solid #f48fb1; /* viền xanh */
 }
 
 .footer-bottom p {
@@ -590,7 +653,7 @@ h4 {
 }
 
 .footer-bottom p:first-child {
-    color: #28a745;
+    color: #f48fb1;
     font-weight: bold;
     font-size: 14px;
 }
@@ -621,7 +684,7 @@ h4 {
     margin-bottom: 40px;
 }
 .payment-header h1 {
-    color: #28a745;
+    color: #ad1457;
     font-size: 2.5em;
     margin-bottom: 10px;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
@@ -632,15 +695,15 @@ h4 {
     font-weight: 500;
 }
 .order-summary {
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    background: linear-gradient(135deg, #fce4ec, #e9ecef);
     padding: 25px;
     border-radius: 10px;
     margin-bottom: 30px;
-    border-left: 4px solid #28a745;
+    border-left: 4px solid #f48fb1;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 .order-summary h3 {
-    color: #28a745;
+    color: #ad1457;
     margin-bottom: 15px;
     font-size: 1.4em;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
@@ -662,17 +725,17 @@ h4 {
 .total-amount {
     font-size: 1.5em;
     font-weight: bold;
-    color: #28a745;
+    color: #f48fb1;
     text-align: right;
     padding-top: 15px;
-    border-top: 3px solid #28a745;
+    border-top: 3px solid #f48fb1;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
 }
 .payment-methods {
     margin-bottom: 30px;
 }
 .payment-methods h3 {
-    color: #28a745;
+    color: #ad1457;
     margin-bottom: 20px;
     text-align: center;
     font-size: 1.6em;
@@ -693,12 +756,12 @@ h4 {
     background: white;
 }
 .payment-option:hover {
-    border-color: #28a745;
+    border-color: #f48fb1;
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
 }
 .payment-option.selected {
-    border-color: #28a745;
+    border-color: #f48fb1;
     background: linear-gradient(135deg, #ebf3fd, #d6eaf8);
 }
 .payment-option img {
@@ -707,7 +770,7 @@ h4 {
     margin-bottom: 15px;
 }
 .payment-option h4 {
-    color: #2c3e50;
+    color: #ad1457;
     margin-bottom: 10px;
     font-size: 1.2em;
     font-weight: 600;
@@ -719,7 +782,7 @@ h4 {
     font-weight: 500;
 }
 .qr-section {
-    background: #f8f9fa;
+    background: #fce4ec;
     padding: 25px;
     border-radius: 10px;
     margin-bottom: 30px;
@@ -743,7 +806,7 @@ h4 {
     color: #666;
 }
 .bank-info {
-    background: #f8f9fa;
+    background: #fce4ec;
     padding: 25px;
     border-radius: 10px;
     margin-bottom: 30px;
@@ -770,7 +833,7 @@ h4 {
     border-bottom: none;
 }
 .copy-btn {
-    background: linear-gradient(135deg, #28a745, #2980b9);
+    background: linear-gradient(135deg, rgba(244,143,177,0.95), #f06292);
     color: white;
     border: none;
     padding: 8px 15px;
@@ -782,7 +845,7 @@ h4 {
     transition: all 0.3s ease;
 }
 .copy-btn:hover {
-    background: linear-gradient(135deg, #2980b9, #1f5f8b);
+    background: linear-gradient(135deg, #f06292, #ec407a);
     transform: translateY(-1px);
 }
 .payment-actions {
@@ -790,7 +853,7 @@ h4 {
     margin-top: 30px;
 }
 .btn-pay {
-    background: linear-gradient(135deg, #28a745, #2980b9);
+    background: linear-gradient(135deg, rgba(244,143,177,0.95), #f06292);
     color: white;
     border: none;
     padding: 15px 40px;
@@ -803,7 +866,7 @@ h4 {
     box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
 }
 .btn-pay:hover {
-    background: linear-gradient(135deg, #2980b9, #1f5f8b);
+    background: linear-gradient(135deg, #f06292, #ec407a);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
 }
@@ -829,7 +892,7 @@ h4 {
     margin-bottom: 20px;
 }
 .payment-instructions h4 {
-    color: #2c3e50;
+    color: #ad1457;
     margin-bottom: 10px;
     font-weight: 600;
 }
@@ -853,7 +916,7 @@ h4 {
     word-wrap: break-word;
 }
 .qr-section h3, .bank-info h3 {
-    color: #28a745;
+    color: #ad1457;
     margin-bottom: 20px;
     text-align: center;
     font-size: 1.4em;
@@ -899,7 +962,7 @@ h4 {
     margin-bottom: 40px;
 }
 .my-tickets-title {
-    color: #28a745;
+    color: #f48fb1;
     font-size: 32px;
     font-weight: bold;
     margin-bottom: 10px;
@@ -916,7 +979,7 @@ h4 {
     padding: 28px 32px;
     margin-bottom: 30px;
     box-shadow: 0 4px 16px rgba(40, 167, 69, 0.08);
-    border: 2px solid #28a745;
+    border: 2px solid #f48fb1;
     transition: box-shadow 0.2s;
 }
 .ticket-card:hover {
@@ -937,7 +1000,7 @@ h4 {
 .ticket-info-right {
     flex: 1;
     min-width: 220px;
-    background: #f8f9fa;
+    background: #fce4ec;
     border-radius: 12px;
     padding: 18px 12px;
     display: flex;
@@ -946,7 +1009,7 @@ h4 {
     justify-content: flex-start;
 }
 .event-name {
-    color: #28a745;
+    color: #f48fb1;
     font-size: 24px;
     font-weight: bold;
     margin-bottom: 18px;
@@ -955,7 +1018,7 @@ h4 {
     margin-bottom: 10px;
 }
 .info-label {
-    color: #28a745;
+    color: #f48fb1;
     font-weight: bold;
     font-size: 15px;
     margin-right: 8px;
@@ -965,13 +1028,13 @@ h4 {
     font-size: 16px;
 }
 .seats-info {
-    background: #f8f9fa;
+    background: #fce4ec;
     padding: 12px 16px;
     border-radius: 8px;
     margin-top: 10px;
 }
 .seats-title {
-    color: #28a745;
+    color: #f48fb1;
     font-weight: bold;
     margin-bottom: 8px;
     font-size: 15px;
@@ -979,7 +1042,7 @@ h4 {
 }
 .seat-tag {
     display: inline-block;
-    background: #28a745;
+    background: #f48fb1;
     color: #fff;
     padding: 6px 14px;
     border-radius: 16px;
@@ -1004,7 +1067,7 @@ h4 {
     margin-bottom: 20px;
 }
 .no-tickets h2 {
-    color: #28a745;
+    color: #ad1457;
     font-size: 28px;
     margin-bottom: 15px;
 }
@@ -1014,7 +1077,7 @@ h4 {
     margin-bottom: 30px;
 }
 .back-btn {
-    background: #28a745;
+    background: #f48fb1;
     color: white;
     padding: 12px 25px;
     border-radius: 6px;
@@ -1023,7 +1086,7 @@ h4 {
     transition: all 0.3s ease;
 }
 .back-btn:hover {
-    background: #218838;
+    background: #ad1457;
     transform: translateY(-2px);
 }
 .status-badge {
@@ -1032,7 +1095,7 @@ h4 {
     font-size: 13px;
     font-weight: bold;
     text-transform: uppercase;
-    background: #28a745;
+    background: #f48fb1;
     color: #fff;
     margin-bottom: 4px;
 }
@@ -1081,7 +1144,7 @@ h4 {
 
 .auth-container button {
     padding: 10px;
-    background-color: #2ecc71;
+    background-color: #f48fb1;
     color: white;
     border: none;
     border-radius: 5px;
@@ -1090,7 +1153,7 @@ h4 {
 }
 
 .auth-container button:hover {
-    background-color: #27ae60;
+    background-color: #f48fb1;
 }
 
 .auth-container .switch {
@@ -1099,7 +1162,7 @@ h4 {
 }
 
 .auth-container .switch a {
-    color: #2ecc71;
+    color: #ce93d8;
     text-decoration: none;
 }
 
@@ -1108,7 +1171,7 @@ h4 {
 }
 
 footer {
-    background-color: #111; /* Nền đen */
+    background: linear-gradient(90deg, rgba(244,143,177,0.95), rgba(206,147,216,0.95)); /* Nền đen */
     color: #ccc;
     font-family: Arial, sans-serif;
 }
@@ -1130,7 +1193,7 @@ footer {
 
 .footer-section h3,
 .footer-section h4 {
-    color: #2ecc71; /* Xanh lá */
+    color: #ad1457; /* Xanh lá */
     margin-bottom: 12px;
 }
 
@@ -1148,7 +1211,7 @@ footer {
 }
 
 .footer-bottom p:first-child {
-    color: #2ecc71; /* Xanh lá cho dòng bản quyền */
+    color: #f48fb1; /* Xanh lá cho dòng bản quyền */
     font-weight: bold;
 }
 
@@ -1159,19 +1222,82 @@ footer {
     padding-bottom: 10px;
 }
 .event-card {
-    flex: 0 0 220px;
-    background-color: #1e1e1e;
-    border-radius: 10px;
+    background: rgba(225, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    width: 280px;
+    border-radius: 16px;
     overflow: hidden;
+    text-decoration: none;
+    color: #000;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
 }
+
 .event-card img {
     width: 100%;
-    height: 140px;
+    height: 180px;
     object-fit: cover;
+    transition: transform 0.4s ease;
 }
 
+.event-card .content {
+    padding: 14px 16px 18px;
+    background-color: #FAFAFA;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex: 1;
+}
 
-.ticket-main {
+.event-card .title {
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #003333;
+    margin-bottom: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.5px;
+}
+
+.event-card .date {
+    font-size: 13px;
+    font-weight: 700;
+    color: #f48fb1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+
+.event-card .location {
+    font-size: 13px;
+    font-weight: 400;
+    color: rgb(90, 110, 105);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    letter-spacing: 0.2px;
+}
+
+.event-card .date svg,
+.event-card .location svg {
+    width: 14px;
+    height: 14px;
+}
+
+.event-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.event-card:hover img {
+    transform: scale(1.05);
+}.ticket-main {
     display: flex;
     gap: 20px;
     align-items: flex-start;
@@ -1196,7 +1322,7 @@ footer {
     }
 }
 h4 {
-    color: #2ecc71; /* Xanh lá chủ đạo */
+    color: #ad1457; /* Xanh lá chủ đạo */
     margin-bottom: 10px;
 }
 
@@ -1206,3 +1332,29 @@ h3 {
 }
 
 
+
+.button, .btn-primary {
+    background-color: #ce93d8;
+    color: white;
+}
+.button:hover, .btn-primary:hover {
+    background-color: #d81b60;
+}
+
+a:hover {
+    color: #d81b60;
+}
+
+.card-title, .event-title, .event-name {
+    color: #ad1457;
+    font-weight: bold;
+}
+
+.card-date, .event-date, .date-time {
+    color: #d81b60;
+    font-weight: bold;
+}
+
+.card-location, .event-location, .location {
+    color: #555555;
+}

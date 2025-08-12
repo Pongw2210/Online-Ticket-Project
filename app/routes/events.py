@@ -1,21 +1,18 @@
 import uuid
-
-from flask import Blueprint, render_template, request, session, jsonify, redirect, url_for
+from flask import Blueprint, render_template, flash, session
 from flask_login import current_user
-
-from app.data.models import Event, EventTypeEnum, Seat, BookingSeat, Booking, StatusBookingEnum, BookingDetail
+from app.data.models import Event, EventTypeEnum, Seat, BookingSeat, Booking, StatusBookingEnum, BookingDetail, \
+    TicketType
 from app import dao, db
 import requests
 import hmac
-
 import hashlib
-import urllib.parse
-import time
+from urllib.parse import urlencode
+from flask import Blueprint, request, redirect, jsonify, url_for
+import datetime
+import random
+import string
 
-import json
-import qrcode
-import io
-import base64
 
 events_bp = Blueprint("events", __name__)
 
@@ -170,17 +167,14 @@ def payment_return():
     print("MoMo RETURN params:", params)  # In toàn bộ params trả về
 
     result_code = request.args.get("resultCode")
-    order_id = request.args.get("orderId")  # Lấy orderId MoMo gửi về
+    order_id = request.args.get("orderId")
 
     if not order_id:
-        # Không có orderId, không thể xác định booking
         return redirect(url_for("events.home", _anchor="payment-failed"))
 
     try:
-        # Giả sử orderId có dạng "order_123", tách lấy phần số phía sau dấu "_"
         booking_id = int(order_id.split('_')[-1])
     except (ValueError, IndexError):
-        # Nếu không tách được hoặc chuyển sang int lỗi
         return redirect(url_for("events.home", _anchor="payment-failed"))
 
     booking = Booking.query.get(booking_id)
@@ -189,20 +183,17 @@ def payment_return():
         return redirect(url_for("events.home", _anchor="payment-failed"))
 
     if result_code == "0":
-        # Thanh toán thành công, cập nhật trạng thái
         booking.status = StatusBookingEnum.DA_THANH_TOAN
 
-        # Cập nhật số lượng vé còn lại cho từng loại vé trong booking
         for detail in booking.booking_details:
             ticket_type = detail.ticket_type
             if ticket_type:
-                # Giảm quantity theo số lượng vé đã đặt
                 ticket_type.quantity = max(ticket_type.quantity - detail.quantity, 0)
 
         db.session.commit()
         return redirect(url_for("events.home", _anchor="payment-success"))
     else:
-        # Thanh toán thất bại hoặc hủy
+        BookingDetail.query.filter_by(booking_id=booking.id).delete()
         booking.status = StatusBookingEnum.DA_HUY
         db.session.commit()
         return redirect(url_for("events.home", _anchor="payment-failed"))
@@ -213,3 +204,97 @@ def payment_ipn():
     print("IPN từ MoMo:", data)
     return "OK", 200
 
+# Hàm tạo chữ ký HMAC SHA512 cho VNPAY
+def hmac_sha512(key, data):
+    return hmac.new(key.encode(), data.encode(), hashlib.sha512).hexdigest()
+
+@events_bp.route("/payment/vnpay", methods=["POST"])
+def payment_vnpay():
+    data = request.get_json()
+
+    vnp_url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
+    return_url = "http://localhost:5000/payment/return_vnpay"
+    tmn_code = "F0ATDO1K"
+    secret_key = "ZISV60HMEWJIF2KO5I7UWS35Z8N0K3NO"
+
+    order_id = data.get("orderId", ''.join(random.choices(string.ascii_uppercase + string.digits, k=8)))
+    amount = int(data.get("amount", 10000)) * 100
+    order_info = data.get("orderInfo", f"Thanh toan don hang {order_id}")
+
+    vnp_params = {
+        "vnp_Version": "2.1.0",
+        "vnp_Command": "pay",
+        "vnp_TmnCode": tmn_code,
+        "vnp_Amount": str(amount),
+        "vnp_CurrCode": "VND",
+        "vnp_TxnRef": order_id,
+        "vnp_OrderInfo": order_info,
+        "vnp_OrderType": "other",
+        "vnp_Locale": "vn",
+        "vnp_ReturnUrl": return_url,
+        "vnp_IpAddr": request.remote_addr,
+        "vnp_CreateDate": datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
+    }
+
+    # Sắp xếp tham số và tạo query string
+    sorted_params = sorted(vnp_params.items())
+    query_string = urlencode(sorted_params)
+
+    # Tạo secure hash
+    secure_hash = hmac_sha512(secret_key, query_string)
+
+    # Gắn vào URL
+    payment_url = f"{vnp_url}?{query_string}&vnp_SecureHash={secure_hash}"
+
+    return jsonify({"payUrl": payment_url})
+
+@events_bp.route("/payment/return_vnpay")
+def payment_return_vnpay():
+    params = request.args.to_dict()
+    print("VNPAY RETURN params:", params)
+
+    received_hash = params.pop("vnp_SecureHash", None)
+    params.pop("vnp_SecureHashType", None)
+
+    secret_key = "ZISV60HMEWJIF2KO5I7UWS35Z8N0K3NO"
+    sorted_params = sorted(params.items())
+    query_string = urlencode(sorted_params)
+    calculated_hash = hmac_sha512(secret_key, query_string)
+
+    order_id = request.args.get("vnp_TxnRef")
+
+    if not order_id or calculated_hash != received_hash:
+        return redirect(url_for("events.home", _anchor="payment-failed"))
+
+    booking_id = int(order_id.split('_')[-1])
+    booking = Booking.query.get(booking_id)
+    if not booking:
+        return redirect(url_for("events.home", _anchor="payment-failed"))
+
+    result_code = params.get("vnp_ResponseCode")
+
+    if result_code == "00":
+        booking.status = StatusBookingEnum.DA_THANH_TOAN
+
+        for detail in booking.booking_details:
+            ticket_type = detail.ticket_type
+            if ticket_type:
+                ticket_type.quantity = max(ticket_type.quantity - detail.quantity, 0)
+
+        db.session.commit()
+        return redirect(url_for("events.home", _anchor="payment-success"))
+    else:
+
+        BookingDetail.query.filter_by(booking_id=booking.id).delete()
+        # BookingSeat.query.filter_by(booking_id=booking.id).delete()
+
+        booking.status = StatusBookingEnum.DA_HUY
+        db.session.commit()
+        return redirect(url_for("events.home", _anchor="payment-failed"))
+
+
+@events_bp.route("/payment/ipn", methods=["GET"])
+def payment_ipn_vnpay():
+    params = request.args.to_dict()
+    print("IPN từ VNPAY:", params)
+    return "OK", 200
