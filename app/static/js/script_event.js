@@ -257,7 +257,64 @@ function payment_momo() {
     });
 }
 
-function payment_vnpay(){
+function payment_vnpay() {
+    let payBtn = document.getElementById("payBtn2");
+    payBtn.disabled = true;
 
+    let tickets = JSON.parse(sessionStorage.getItem('checkoutTickets')) || [];
+    if (tickets.length === 0) {
+        alert("Không có vé để thanh toán");
+        payBtn.disabled = false;
+        return;
+    }
+
+    let totalPrice = tickets.reduce((sum, ticket) => sum + (parseInt(ticket.price) * ticket.quantity), 0);
+
+    // Tạo booking trước
+    fetch("/booking/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            tickets: tickets,
+            totalPrice: totalPrice,
+            eventId: sessionStorage.getItem('checkoutEventId'),
+        }),
+    })
+    .then(res => res.json())
+    .then(bookingData => {
+        if (!bookingData.success) {
+            alert("Tạo booking thất bại: " + bookingData.message);
+            payBtn.disabled = false;
+            throw new Error("Booking failed");
+        }
+
+        // Tạo yêu cầu thanh toán VNPAY với orderId theo bookingId
+        return fetch("/payment/vnpay", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                amount: totalPrice,
+                orderId: "order_" + bookingData.bookingId,
+                orderInfo: `Thanh toán vé sự kiện ${sessionStorage.getItem('checkoutEventId')}`,
+            }),
+        });
+    })
+    .then(res => res.json())
+    .then(paymentData => {
+        if (paymentData.payUrl) {
+            window.location.href = paymentData.payUrl;
+        } else {
+            alert("Không tạo được link thanh toán!");
+            payBtn.disabled = false;
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        if (err.message !== "Booking failed") {
+            alert("Đã xảy ra lỗi, vui lòng thử lại.");
+            payBtn.disabled = false;
+        }
+    });
 }
+
 

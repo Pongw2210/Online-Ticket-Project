@@ -50,7 +50,8 @@ def seed_event_offline():
             "rules": "Không mang vũ khí, chất cấm, không quay phim...",
             "authors": "Đạo diễn Nguyễn Văn A, Biên đạo Trần Văn B",
             "producers": "SKY SOUND PRODUCTION, Nhà hát Lớn Hà Nội",
-            "image_url": "https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612716/gomshow_spfsbk.jpg"
+            "image_url": "https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612716/gomshow_spfsbk.jpg",
+            "has_seat": False
         },
         {
             "name": "Hòa Nhạc Mùa Thu",
@@ -62,7 +63,8 @@ def seed_event_offline():
             "rules": "Trang phục lịch sự. Không mang đồ ăn, nước uống...",
             "authors": "NSƯT Lê Hồng Sơn",
             "producers": "Dàn nhạc giao hưởng Quốc gia",
-            "image_url": "https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612717/hoa-nhac-mua-thu_r3vwtt.jpg"
+            "image_url": "https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612717/hoa-nhac-mua-thu_r3vwtt.jpg",
+            "has_seat": False
         },
         {
             "name": "Live Concert Sơn Tùng M-TP",
@@ -74,7 +76,8 @@ def seed_event_offline():
             "rules": "Không mang đồ ăn, nước uống. Vé không dành cho trẻ dưới 8 tuổi...",
             "authors": "Sơn Tùng M-TP",
             "producers": "M-TP Entertainment",
-            "image_url": "https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612717/mtp-live_aelu1w.jpg"
+            "image_url": "https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612717/mtp-live_aelu1w.jpg",
+            "has_seat": True
         },
         {
             "name": "Đêm Nhạc Trịnh – Gọi Tên Bốn Mùa",
@@ -86,7 +89,8 @@ def seed_event_offline():
             "rules": "Trang phục lịch sự. Không quay phim...",
             "authors": "Hồng Nhung, Đức Tuấn",
             "producers": "Công ty Truyền Thông Mưa",
-            "image_url": "https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612716/demnhactrinh_wdtcul.jpg"
+            "image_url": "https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612716/demnhactrinh_wdtcul.jpg",
+            "has_seat": False
         },
         {
             "name": "Sân Khấu Hài – Tám Chuyện Cuối Tuần",
@@ -98,7 +102,8 @@ def seed_event_offline():
             "rules": "Không hoàn vé. Không mang đồ ăn, quay phim...",
             "authors": "Nhóm Hài Thứ Bảy, MC Đại Nghĩa",
             "producers": "Công ty Giải Trí Cười Vui",
-            "image_url": "https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612716/haicuoi_crzki5.jpg"
+            "image_url": "https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612716/haicuoi_crzki5.jpg",
+            "has_seat": False
         },
         {
             "name": "Gala Hài Kịch 2025",
@@ -110,7 +115,8 @@ def seed_event_offline():
             "rules": "Không trẻ em dưới 8 tuổi. Không quay phim...",
             "authors": "Trấn Thành, Việt Hương",
             "producers": "Hài TV & Showbiz Việt",
-            "image_url": "https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612716/gala-hai_l9vlnz.jpg"
+            "image_url": "https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612716/gala-hai_l9vlnz.jpg",
+            "has_seat": False
         },
         {
             "name": "Kịch Trinh Thám: 'Lưới Trời'",
@@ -122,7 +128,8 @@ def seed_event_offline():
             "rules": "Không trẻ dưới 8 tuổi. Vé hết hiệu lực sau 15 phút...",
             "authors": "Đạo diễn Nguyễn Ngọc Bảo",
             "producers": "Nhà hát kịch Idecaf",
-            "image_url": "https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612717/kich-luoi-troi_nwzh6p.jpg"
+            "image_url": "https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612717/kich-luoi-troi_nwzh6p.jpg",
+            "has_seat": False
         },
         {
             "name": "Rap Việt All Stars",
@@ -134,7 +141,8 @@ def seed_event_offline():
             "rules": "Không trẻ em dưới 8 tuổi. Vé hết hiệu lực sau 15 phút...",
             "authors": "Binz, Wowy, Rhymastic",
             "producers": "VieON, Rap Việt Production",
-            "image_url": "https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612717/rapviet_pxr0ye.jpg"
+            "image_url": "https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612717/rapviet_pxr0ye.jpg",
+            "has_seat": False
         },
         {
             "name": "Triển Lãm Tranh 3D Quốc Tế",
@@ -146,7 +154,8 @@ def seed_event_offline():
             "rules": "Không trẻ em dưới 8 tuổi. Không quay phim...",
             "authors": "Tổ chức nghệ thuật 3D Asia",
             "producers": "SECC phối hợp Bộ Văn hóa",
-            "image_url": "https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612717/trienlam3d_gsqm4t.jpg"
+            "image_url": "https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612717/trienlam3d_gsqm4t.jpg",
+            "has_seat": False
         },
         {
             "name": "Thơ - Nhạc Trịnh Công Sơn",
@@ -158,7 +167,8 @@ def seed_event_offline():
             "rules": "Không trẻ em dưới 8 tuổi. Vé hết hiệu lực sau 15 phút...",
             "authors": "Hồng Nhung, Đức Tuấn",
             "producers": "Gia đình Trịnh Công Sơn & Nhà hát Hòa Bình",
-            "image_url": "https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612718/trinhcongson_pu5pmv.jpg"
+            "image_url": "https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612718/trinhcongson_pu5pmv.jpg",
+            "has_seat": False
         },
         {
             "name": "Hội Thảo Công Nghệ AI 2025",
@@ -170,7 +180,8 @@ def seed_event_offline():
             "rules": "Không trẻ em dưới 8 tuổi. Vé hết hiệu lực sau 15 phút...",
             "authors": "TS. Nguyễn Văn A, Prof. John Doe",
             "producers": "Bộ KH&CN & TechTalks Vietnam",
-            "image_url": "https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612715/ai-conference_kvlkfl.jpg"
+            "image_url": "https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612715/ai-conference_kvlkfl.jpg",
+            "has_seat": False
         },
         {
             "name": "Đêm Nhạc Acoustic 'Góc Phố Xưa'",
@@ -182,7 +193,8 @@ def seed_event_offline():
             "rules": "Không trẻ em dưới 8 tuổi. Vé hết hiệu lực sau 15 phút...",
             "authors": "Minh Vương M4U, Trang",
             "producers": "Trixie Music Group",
-            "image_url": "https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612715/acoustic_akxfdk.jpg"
+            "image_url": "https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612715/acoustic_akxfdk.jpg",
+            "has_seat": False
         }
     ]
 
@@ -209,7 +221,8 @@ def seed_event_offline():
         offline = EventOffline(
             event_id=event.id,
             venue_name=data["venue_name"],
-            location=data["location"]
+            location=data["location"],
+            has_seat=data.get("has_seat", False)
         )
         db.session.add(offline)
 
@@ -229,7 +242,8 @@ def seed_ticket_type():
             price=5000,
             quantity=50,
             event_id=1,
-            benefits="Khu vực checkin riêng, không phải xếp hàng|Ghế ngồi gần sân khấu, quà tặng đặc biệt|Dịch vụ ăn uống, quà tặng, giao lưu nghệ sĩ"
+            benefits="Khu vực checkin riêng, không phải xếp hàng|Ghế ngồi gần sân khấu, quà tặng đặc biệt|Dịch vụ ăn uống, quà tặng, giao lưu nghệ sĩ",
+            requires_seat = True
         ),
         TicketType(
             name='Vé Standing',
@@ -243,8 +257,7 @@ def seed_ticket_type():
             price=6500,
             quantity=50,
             event_id=2,
-            benefits="Khu vực checkin riêng, không phải xếp hàng|Ghế ngồi gần sân khấu, quà tặng đặc biệt|Dịch vụ ăn uống, quà tặng, giao lưu nghệ sĩ",
-            has_seat= True
+            benefits="Khu vực checkin riêng, không phải xếp hàng|Ghế ngồi gần sân khấu, quà tặng đặc biệt|Dịch vụ ăn uống, quà tặng, giao lưu nghệ sĩ"
         ),
         TicketType(
             name='Vé Thường',
@@ -267,7 +280,7 @@ def seed_ticket_type():
 
 if __name__ == "__main__":
     with app.app_context():
-        # db.drop_all()
+        db.drop_all()
         db.create_all()
 
         seed_customer_user()

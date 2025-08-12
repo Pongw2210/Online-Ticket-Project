@@ -7,7 +7,10 @@ from app.data.models import Event, EventTypeEnum, Seat, BookingSeat, Booking, St
 from app import dao, db
 import requests
 import hmac
+
 import hashlib
+import urllib.parse
+import time
 
 import json
 import qrcode
@@ -188,6 +191,14 @@ def payment_return():
     if result_code == "0":
         # Thanh toán thành công, cập nhật trạng thái
         booking.status = StatusBookingEnum.DA_THANH_TOAN
+
+        # Cập nhật số lượng vé còn lại cho từng loại vé trong booking
+        for detail in booking.booking_details:
+            ticket_type = detail.ticket_type
+            if ticket_type:
+                # Giảm quantity theo số lượng vé đã đặt
+                ticket_type.quantity = max(ticket_type.quantity - detail.quantity, 0)
+
         db.session.commit()
         return redirect(url_for("events.home", _anchor="payment-success"))
     else:
@@ -196,11 +207,9 @@ def payment_return():
         db.session.commit()
         return redirect(url_for("events.home", _anchor="payment-failed"))
 
+@events_bp.route("/payment/ipn", methods=["POST"])
+def payment_ipn():
+    data = request.get_json()
+    print("IPN từ MoMo:", data)
+    return "OK", 200
 
-#
-#
-# @events_bp.route("/payment/ipn", methods=["POST"])
-# def payment_ipn():
-#     data = request.get_json()
-#     print("IPN từ MoMo:", data)
-#     return "OK", 200
