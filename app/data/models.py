@@ -4,8 +4,10 @@ from app import db
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, Text, Time, Float, Boolean
 from enum import Enum as RoleEnum
 from flask_login import UserMixin
+
 import enum
 import hashlib
+
 
 class UserEnum(RoleEnum):
     KHACH_HANG = "Khách hàng "

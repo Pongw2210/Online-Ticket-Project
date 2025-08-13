@@ -1,8 +1,15 @@
+
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from app import db, dao, login
 from app.data.models import User, UserEnum, Customer
 from flask_login import login_user, logout_user
 from datetime import datetime
+
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from app import db, dao, login
+from app.data.models import User, UserEnum
+from flask_login import current_user, login_user, logout_user
+
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -59,7 +66,9 @@ def register():
         flash("Đăng ký thành công. Vui lòng đăng nhập.")
         return redirect(url_for("auth.login"))
 
+
     return render_template("auth/register.html")
+
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
@@ -72,8 +81,11 @@ def login():
         if user:
             login_user(user)
 
+            #  Admin → chuyển về trang Flask-Admin
+
             if user.role == UserEnum.ADMIN:
-                return redirect(url_for(("admin_view.approve_events")))
+                return redirect("/admin/")
+
             elif user.role == UserEnum.NGUOI_TO_CHUC:
                 return redirect(url_for('event_organizer.home'))
             else:

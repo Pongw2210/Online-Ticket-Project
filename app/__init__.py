@@ -2,10 +2,9 @@ from flask import Flask
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 import cloudinary
-from app.admin_view import flask_admin
 
 
-
+#Khai báo db và login
 db = SQLAlchemy()
 login = LoginManager()
 
@@ -25,12 +24,14 @@ def create_app():
         api_secret='4ouN8Z8Hjj1ahlD7lH8sU21MWwA'
     )
 
+    #Khởi tạo các extensions
     db.init_app(app)
-    from app import admin_view
-    admin_view.init_admin(app)
     login.init_app(app)
     login.login_view = "auth.login"
 
+    # IMPORT SAU khi db & login đã init
+    from app.admin_view import init_admin
+    init_admin(app)
 
     # Đăng ký các blueprint
     from app.routes import auth
@@ -45,9 +46,11 @@ def create_app():
     from app.routes import admin
     app.register_blueprint(admin.admin_bp)
 
+
     from app.routes.report import report_bp
     app.register_blueprint(report_bp)
 
 
 
     return app
+
