@@ -1338,10 +1338,15 @@ a.btn-create {
     font-weight: 700 !important;
 }
 /* Ghi đè màu chữ cho tên sự kiện / thể loại / label & nội dung input thành trắng */
-.event-form-wrapper .form-group label,
-.event-form-wrapper label.required-label,
+
 .event-form-section .form-group label {
   color: #fff !important;
+}
+.event-form-wrapper label.required-label{
+  color:#fff !important;
+}
+.event-form-wrapper .form-group label {
+color:#ffffff;
 }
 
 /* Nội dung trong input/select/textarea hiển thị chữ trắng */
@@ -1387,4 +1392,13 @@ input[type=number] {
 /* Đảm bảo tất cả chữ trong event-card đều đen */
 .event-card * {
     color: #000 !important;
+}
+.form-control {
+    background-color:#000000; /* Nền hồng pastel nhẹ */
+    color: #000000; /* Chữ đen */
+}
+
+.form-control::placeholder {
+    color: #000000; /* Placeholder đen */
+    font-style: italic;
 }

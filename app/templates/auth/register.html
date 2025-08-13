@@ -4,17 +4,14 @@
     <meta charset="UTF-8">
     <title>Đăng ký</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles_auth_pages.css') }}">
-    <style>
-
-    </style>
 </head>
 <body>
 <div class="login-container">
     <h2>Đăng Ký</h2>
     <form method="POST">
         <div class="form-group">
-            <label for="username">Tên người dùng</label>
-            <input type="text" id="username" name="username" required>
+            <label for="fullname">Họ và tên</label>
+            <input type="text" id="fullname" name="fullname" required>
         </div>
 
         <div class="form-group">
@@ -23,10 +20,29 @@
         </div>
 
         <div class="form-group">
+            <label for="gender">Giới tính</label>
+            <select id="gender" name="gender" required>
+                <option value="">-- Chọn giới tính --</option>
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+                <option value="Khác">Khác</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="dob">Ngày sinh</label>
+            <input type="date" id="dob" name="dob" required>
+        </div>
+
+        <div class="form-group">
+            <label for="number_phone">Số điện thoại</label>
+            <input type="text" id="number_phone" name="number_phone" required>
+        </div>
+
+        <div class="form-group">
             <label for="password">Mật khẩu</label>
             <input type="password" id="password" name="password" required>
         </div>
-
 
         <button type="submit" class="btn-login">Đăng ký</button>
     </form>
@@ -34,7 +50,5 @@
         Bạn đã có tài khoản? <a href="{{ url_for('auth.login') }}">Đăng nhập</a>
     </p>
 </div>
-
 </body>
-</html>
 </html>

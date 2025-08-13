@@ -1,0 +1,303 @@
+{% extends "event_organizer/layout_event_organizer/base.html" %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/report.css') }}" />
+<div class="topbar">
+    <h2>{% block header %}Thống kê {% endblock %}</h2>
+    <div class="account-wrapper">
+        <div class="account" onclick="toggleDropdown()">
+            Tài khoản <i class="fa fa-caret-down"></i>
+        </div>
+        <div class="dropdown" id="accountDropdown">
+            <a>Thông tin cá nhân</a>
+            <a>Đăng xuất</a>
+        </div>
+    </div>
+</div>
+
+<div class="report-container">
+  <!-- Banner -->
+  <div class="report-banner fade-up">
+    <h2>Thống kê cho Người tổ chức</h2>
+    <p>Tổng quan doanh thu & vé bán</p>
+    <div class="filters">
+      <div class="filter-item">
+        <label>Từ ngày</label>
+        <input type="date" id="startDate" />
+      </div>
+      <div class="filter-item">
+        <label>Đến ngày</label>
+        <input type="date" id="endDate" />
+      </div>
+      <div class="filter-item">
+        <label>Sự kiện</label>
+        <select id="eventSelect">
+          <option value="">Tất cả</option>
+          {% for e in events %}
+          <option value="{{ e.id }}">{{ e.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button id="applyFilters" class="export-btn">Áp dụng</button>
+    </div>
+
+    <div class="summary">
+      <div class="summary-card">
+        <div class="summary-title">Doanh thu</div>
+        <div class="summary-value" id="sumRevenue">0 VND</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-title">Vé đã bán</div>
+        <div class="summary-value" id="sumTickets">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Doanh thu theo thời gian -->
+  <div class="report-card fade-up">
+    <div class="chart-header">
+      <h4>Doanh thu theo thời gian</h4>
+      <div>
+        <select id="groupBy">
+          <option value="day">Ngày</option>
+          <option value="month">Tháng</option>
+          <option value="year">Năm</option>
+        </select>
+        <select id="revenueDateType">
+          <option value="line">Đường</option>
+          <option value="bar">Cột</option>
+        </select>
+        <button class="export-btn" data-chart="revenueDateChart">PNG</button>
+      </div>
+    </div>
+    <div class="chart-container">
+      <canvas id="revenueDateChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Doanh thu theo loại vé -->
+  <div class="report-card fade-up">
+    <div class="chart-header">
+      <h4>Doanh thu theo loại vé</h4>
+      <div>
+        <select id="ticketTypeChartType">
+          <option value="bar">Cột</option>
+          <option value="pie">Tròn</option>
+          <option value="doughnut">Vòng tròn</option>
+          <option value="polarArea">Vùng cực</option>
+        </select>
+        <button class="export-btn" data-chart="revenueTicketChart">PNG</button>
+      </div>
+    </div>
+    <div class="chart-container">
+      <canvas id="revenueTicketChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Vé bán ra theo sự kiện -->
+  <div class="report-card fade-up">
+    <div class="chart-header">
+      <h4>Vé bán ra theo sự kiện</h4>
+      <div>
+        <button class="export-btn" data-chart="ticketsByEventChart">PNG</button>
+      </div>
+    </div>
+    <div class="chart-container">
+      <canvas id="ticketsByEventChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Đã bán vs còn lại -->
+  <div class="report-card fade-up">
+    <div class="chart-header">
+      <h4>Tình trạng vé theo sự kiện (Đã bán / Còn lại)</h4>
+      <div>
+        <button class="export-btn" data-chart="ticketStockChart">PNG</button>
+      </div>
+    </div>
+    <div class="chart-container">
+      <canvas id="ticketStockChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Top khách hàng -->
+  <div class="report-card fade-up">
+    <div class="chart-header">
+      <h4>Top khách hàng</h4>
+      <div>
+        <a class="export-btn" href="{{ url_for('report.export_top_customers') }}">⬇CSV</a>
+      </div>
+    </div>
+    <div id="topCustomersTable" class="chart-table"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<script>
+const API = "{{ url_for('report.dashboard') }}".replace(/\/$/, "");
+
+const fmtVND = (n) => (n || 0).toLocaleString() + " VND";
+
+function exportPNG(id) {
+  const canvas = document.getElementById(id);
+  const link = document.createElement("a");
+  link.href = canvas.toDataURL("image/png");
+  link.download = id + ".png";
+  link.click();
+}
+document.querySelectorAll(".export-btn[data-chart]").forEach(btn=>{
+  btn.addEventListener("click", ()=> exportPNG(btn.dataset.chart));
+});
+
+function datalabelsOptions() {
+  return {
+    datalabels: {
+      color: '#333',
+      font: { weight: 'bold', size: 11 },
+      formatter: (v, ctx) => {
+        const data = ctx.chart.data.datasets[0].data;
+        const total = data.reduce((s,x)=>s+Number(x||0),0);
+        const pct = total>0 ? (v/total*100).toFixed(1) : 0;
+        return (typeof v === 'number' ? v.toLocaleString() : v) + ` (${pct}%)`;
+      }
+    }
+  }
+}
+
+let revenueDateChart, revenueTicketChart, ticketsByEventChart, ticketStockChart;
+
+async function loadSummary(params) {
+  const res = await fetch(`${API}/api/summary?${params}`);
+  const js = await res.json();
+  document.getElementById("sumRevenue").textContent = fmtVND(js.total_revenue);
+  document.getElementById("sumTickets").textContent = (js.total_tickets || 0).toLocaleString();
+}
+
+async function loadRevenueByDate(params) {
+  const res = await fetch(`${API}/api/revenue_by_date?${params}`);
+  const js = await res.json();
+  const type = document.getElementById("revenueDateType").value;
+  if (revenueDateChart) revenueDateChart.destroy();
+  revenueDateChart = new Chart(document.getElementById("revenueDateChart"), {
+    type, data: {
+      labels: js.labels,
+      datasets: [{
+        label: "Doanh thu",
+        data: js.values,
+        backgroundColor: ['#ff6b6b','#ffb347','#6bcfff','#b47aff','#4cd964'],
+        borderColor: '#d6336c',
+        borderWidth: 1,
+        fill: type === 'line',
+        tension: 0.3,
+        borderRadius: type === 'bar' ? 10 : 0
+      }]
+    },
+    options: { plugins: datalabelsOptions() },
+    plugins: [ChartDataLabels]
+  });
+}
+
+async function loadRevenueByTicket(params) {
+  const res = await fetch(`${API}/api/revenue_by_ticket?${params}`);
+  const js = await res.json();
+  const type = document.getElementById("ticketTypeChartType").value;
+  if (revenueTicketChart) revenueTicketChart.destroy();
+  revenueTicketChart = new Chart(document.getElementById("revenueTicketChart"), {
+    type, data: {
+      labels: js.labels,
+      datasets: [{
+        label: "Doanh thu",
+        data: js.values,
+        backgroundColor: ['#ff6b6b','#ffb347','#6bcfff','#b47aff','#4cd964'],
+        borderColor: '#d6336c',
+        borderWidth: 1
+      }]
+    },
+    options: { plugins: datalabelsOptions() },
+    plugins: [ChartDataLabels]
+  });
+}
+
+async function loadTicketsByEvent(params) {
+  const res = await fetch(`${API}/api/tickets_by_event?${params}`);
+  const js = await res.json();
+  if (ticketsByEventChart) ticketsByEventChart.destroy();
+  ticketsByEventChart = new Chart(document.getElementById("ticketsByEventChart"), {
+    type: "bar",
+    data: {
+      labels: js.labels,
+      datasets: [{
+        label: "Vé bán ra",
+        data: js.values,
+        backgroundColor: '#b47aff',
+        borderRadius: 8
+      }]
+    },
+    options: { indexAxis: 'y', plugins: datalabelsOptions() },
+    plugins: [ChartDataLabels]
+  });
+}
+
+async function loadTicketStock(params) {
+  const res = await fetch(`${API}/api/ticket_stock?${params}`);
+  const js = await res.json();
+  if (ticketStockChart) ticketStockChart.destroy();
+  ticketStockChart = new Chart(document.getElementById("ticketStockChart"), {
+    type: "bar",
+    data: {
+      labels: js.labels,
+      datasets: [
+        { label: "Đã bán", data: js.sold, backgroundColor: '#ff6b6b' },
+        { label: "Còn lại", data: js.remaining, backgroundColor: '#6bcfff' }
+      ]
+    },
+    options: { scales: { x: { stacked: true }, y: { stacked: true }}, plugins: datalabelsOptions() },
+    plugins: [ChartDataLabels]
+  });
+}
+
+async function loadTopCustomers(params) {
+  const res = await fetch(`${API}/api/top_customers?${params}`);
+  const js = await res.json();
+  const div = document.getElementById("topCustomersTable");
+  let html = `<table><thead><tr><th>Khách hàng</th><th>Vé</th><th>Doanh thu</th></tr></thead><tbody>`;
+  js.rows.forEach(r=>{
+    html += `<tr><td>${r.name}</td><td>${r.tickets}</td><td>${fmtVND(r.spent)}</td></tr>`;
+  });
+  html += `</tbody></table>`;
+  div.innerHTML = html;
+}
+
+function buildParams() {
+  const start = document.getElementById("startDate").value;
+  const end = document.getElementById("endDate").value;
+  const event_id = document.getElementById("eventSelect").value;
+  const group_by = document.getElementById("groupBy").value;
+  const usp = new URLSearchParams();
+  if (start) usp.set("start", start);
+  if (end) usp.set("end", end);
+  if (event_id) usp.set("event_id", event_id);
+  if (group_by) usp.set("group_by", group_by);
+  return usp.toString();
+}
+
+async function reloadAll() {
+  const params = buildParams();
+  await Promise.all([
+    loadSummary(params),
+    loadRevenueByDate(params),
+    loadRevenueByTicket(params),
+    loadTicketsByEvent(params),
+    loadTicketStock(params),
+    loadTopCustomers(params)
+  ]);
+}
+
+document.getElementById("applyFilters").addEventListener("click", reloadAll);
+document.getElementById("revenueDateType").addEventListener("change", ()=>loadRevenueByDate(buildParams()));
+document.getElementById("ticketTypeChartType").addEventListener("change", ()=>loadRevenueByTicket(buildParams()));
+document.getElementById("groupBy").addEventListener("change", ()=>loadRevenueByDate(buildParams()));
+
+window.addEventListener("load", reloadAll);
+</script>
+{% endblock %}

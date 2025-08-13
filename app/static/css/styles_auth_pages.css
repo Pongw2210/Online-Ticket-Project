@@ -99,3 +99,55 @@ body {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+/* Style cho select */
+.form-group select {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid rgba(255, 182, 193, 0.5);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s ease;
+    appearance: none; /* Ẩn mũi tên mặc định */
+    background-image: url("data:image/svg+xml;utf8,<svg fill='%23ff4fa3' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+}
+.form-group select:focus {
+    border-color: #ff69b4;
+    box-shadow: 0 0 12px rgba(255, 105, 180, 0.5);
+}
+
+/* Style cho input type=date */
+.form-group input[type="date"] {
+    width: 100%;
+    padding: 14px 16px;
+    border: 1px solid rgba(255, 182, 193, 0.5);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+.form-group input[type="date"]:focus {
+    border-color: #ff69b4;
+    box-shadow: 0 0 12px rgba(255, 105, 180, 0.5);
+}
+/* Font chữ cho tất cả input, select, date */
+.form-group input,
+.form-group select {
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+}
+
+/* Label đồng bộ font */
+.form-group label {
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+}
