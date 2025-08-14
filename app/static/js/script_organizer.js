@@ -162,34 +162,29 @@ function validateStep2() {
 }
 
 function goToNextStep() {
-    const allSections = document.querySelectorAll('.step-section');       // nội dung các bước
-    const stepsProgress = document.querySelectorAll('.step-progress .step'); // thanh tiến trình
+    const allSections = document.querySelectorAll('.step-section');
+    const stepsProgress = document.querySelectorAll('.step-progress .step');
     const btnNext = document.querySelector('.btn-next');
 
     const currentIndex = Array.from(allSections).findIndex(el => el.classList.contains('active'));
 
-     if (currentIndex === 0 && !validateStep1()) {
-        return;
-    }
+    if (currentIndex === 0 && !validateStep1()) return;
+    if (currentIndex === 1 && !validateStep2()) return;
 
-    if (currentIndex ===1 && ! validateStep2()){
-        return;
+    // Nếu chuyển từ bước 2 sang bước 3 => load vé
+    if (currentIndex === 1) {
+        loadTicketTypesToStep3();
     }
 
     if (currentIndex < allSections.length - 1) {
-        // Ẩn bước hiện tại
         allSections[currentIndex].classList.remove('active');
-
-        // Hiện bước tiếp theo
         allSections[currentIndex + 1].classList.add('active');
 
-        // Cập nhật thanh tiến trình
         stepsProgress.forEach((step, i) => {
             if (i <= currentIndex + 1) step.classList.add('active');
             else step.classList.remove('active');
         });
 
-        // Nếu bước tiếp theo là bước cuối (bước 3) thì đổi nút thành "Lưu"
         if (currentIndex + 1 === allSections.length - 1) {
             btnNext.innerText = 'Lưu';
             btnNext.onclick = submitEventForm;
@@ -202,17 +197,28 @@ function goToNextStep() {
 
 function goToPrevStep() {
     const allSteps = document.querySelectorAll('.step-section');
+    const stepsProgress = document.querySelectorAll('.step-progress .step');
+    const btnNext = document.querySelector('.btn-next');
+
     const currentIndex = Array.from(allSteps).findIndex(el => el.classList.contains('active'));
 
     if (currentIndex > 0) {
         allSteps[currentIndex].classList.remove('active');
         allSteps[currentIndex - 1].classList.add('active');
 
-        const stepsProgress = document.querySelectorAll('.step-progress .step');
         stepsProgress.forEach((step, i) => {
             if (i <= currentIndex - 1) step.classList.add('active');
             else step.classList.remove('active');
         });
+
+        // Reset nút Next
+        if (currentIndex - 1 === allSteps.length - 1) {
+            btnNext.innerText = 'Lưu';
+            btnNext.onclick = submitEventForm;
+        } else {
+            btnNext.innerText = 'Tiếp tục';
+            btnNext.onclick = goToNextStep;
+        }
     }
 }
 
@@ -260,7 +266,6 @@ function addTicketType() {
     toggleRequiresSeatCheckbox();
 }
 
-
 function showToast(message, duration = 3000) {
     const container = document.getElementById("toast-container");
 
@@ -283,17 +288,20 @@ function showToast(message, duration = 3000) {
     }, duration);
 }
 
-function submitEventForm(){
+function submitEventForm() {
     const formData = new FormData();
+
+    // === Ảnh sự kiện ===
     const imageInput = document.getElementById("imageUpload");
     const previewImage = document.getElementById("preview-img");
 
     if (imageInput.files.length > 0) {
-        formData.append("image", imageInput.files[0]);  // ảnh mới
+        formData.append("image", imageInput.files[0]); // ảnh mới
     } else if (previewImage && previewImage.src) {
-        formData.append("existing_image_url", previewImage.src);  // giữ ảnh cũ
+        formData.append("existing_image_url", previewImage.src); // giữ ảnh cũ
     }
 
+    // === Thông tin cơ bản ===
     formData.append("name_event", document.getElementById("name_event").value);
     formData.append("event_format", document.querySelector('input[name="event_format"]:checked')?.value);
     formData.append("event_type", document.getElementById("event_type").value);
@@ -312,17 +320,18 @@ function submitEventForm(){
         formData.append("livestream_url", document.getElementById("livestream_url").value);
     }
 
+    // === Ghế ngồi ===
     const hasSeatCheckbox = document.getElementById("has_seat");
     formData.append("has_seat", hasSeatCheckbox && hasSeatCheckbox.checked ? "true" : "false");
 
-
-    if (hasSeatCheckbox) {
+    if (hasSeatCheckbox && hasSeatCheckbox.checked) {
         const numRows = document.getElementById("num_rows")?.value || "";
         const seatsPerRow = document.getElementById("seats_per_row")?.value || "";
         formData.append("num_rows", numRows);
         formData.append("seats_per_row", seatsPerRow);
     }
-    // Loại vé
+
+    // === Vé ===
     const ticketRows = document.querySelectorAll("#ticket-types .ticket-type");
     const tickets = [];
     ticketRows.forEach(row => {
@@ -336,7 +345,39 @@ function submitEventForm(){
     });
     formData.append("tickets", JSON.stringify(tickets));
 
-    // Gửi dữ liệu
+    // === Khuyến mãi ===
+    const promoRows = document.querySelectorAll("#promo-list .promo-item");
+    const promos = [];
+
+    promoRows.forEach(row => {
+        const select = row.querySelector(".select-ticket-types"); // class thay vì id
+        let selectedTickets = Array.from(select?.selectedOptions || []).map(opt => opt.value);
+
+        // Nếu chọn "all", map ra tất cả vé hiện có
+        if (selectedTickets.includes("all")) {
+            selectedTickets = Array.from(document.querySelectorAll('#ticket-types .ticket_name'))
+                                   .map(input => input.value.trim())
+                                   .filter(name => name);
+        }
+
+        promos.push({
+            code: row.querySelector(".promo_code")?.value || "",
+            value: row.querySelector(".promo_value")?.value || "",
+            quantity: row.querySelector(".promo_quantity")?.value || "",
+            start_time: row.querySelector(".promo_start_time")?.value || "",
+            end_time: row.querySelector(".promo_end_time")?.value || "",
+            ticket_types: selectedTickets
+        });
+    });
+
+    formData.append("promotions", JSON.stringify(promos));
+
+    // === Debug ===
+    for (let pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
+    }
+
+    // === Gửi dữ liệu ===
     fetch("/organizer/api/create-event", {
         method: "POST",
         body: formData
@@ -627,4 +668,117 @@ document.getElementById('has_seat').addEventListener('change', function() {
 window.addEventListener('DOMContentLoaded', () => {
     toggleRequiresSeatCheckbox();
 });
+
+
+const ticketSelect = document.getElementById('select-ticket-types');
+let ticketChoices;
+
+if (ticketSelect) {
+    ticketChoices = new Choices(ticketSelect, {
+        removeItemButton: true,
+        searchPlaceholderValue: 'Tìm loại vé...',
+        placeholder: true,
+        placeholderValue: 'Chọn loại vé'
+    });
+}
+
+function loadTicketTypesToStep3() {
+    if (!ticketChoices) return; // đảm bảo instance tồn tại
+
+    ticketChoices.clearChoices();
+
+    let choices = [{ value: 'all', label: '-- Chọn tất cả --', selected: false }];
+    const ticketInputs = document.querySelectorAll('.step-2 .ticket_name');
+
+    ticketInputs.forEach((input, idx) => {
+        const name = input.value.trim();
+        if (name) {
+            choices.push({ value: idx + 1, label: name, selected: false });
+        }
+    });
+
+    ticketChoices.setChoices(choices, 'value', 'label', false);
+}
+
+function addPromo() {
+    const promoList = document.getElementById('promo-list');
+    if (!promoList) return;
+
+    const promoDiv = document.createElement('div');
+    promoDiv.classList.add('promo-item', 'form-group', 'form-row');
+
+    promoDiv.innerHTML = `
+        <h3>Mã khuyến mãi </h3>
+        <div>
+            <label class="required-label"><span class="text-danger">*</span> Tên khuyến mãi</label>
+            <input type="text" class="promo_name" maxlength="50" placeholder="Ví dụ: Giảm giá khai trương">
+        </div>
+        <div>
+            <label class="required-label"><span class="text-danger">*</span> Mã code</label>
+            <input type="text" class="promo_code" maxlength="20" placeholder="VD: KHAITRUONG20">
+        </div>
+        <div>
+            <label class="required-label"><span class="text-danger">*</span> Giá trị giảm (% hoặc VNĐ)</label>
+            <input type="text" class="promo_value" placeholder="VD: 20% hoặc 50000">
+        </div>
+        <div>
+            <label class="required-label"><span class="text-danger">*</span> Số lượng áp dụng</label>
+            <input type="number" class="promo_quantity" min="1" placeholder="VD: 100">
+        </div>
+        <div>
+            <label class="required-label"><span class="text-danger">*</span> Ngày bắt đầu</label>
+            <input type="datetime-local" class="promo_start_time" required>
+        </div>
+        <div>
+            <label class="required-label"><span class="text-danger">*</span> Ngày kết thúc</label>
+            <input type="datetime-local" class="promo_end_time" required>
+        </div>
+        <div>
+            <label class="required-label"><span class="text-danger">*</span> Áp dụng cho loại vé</label>
+            <select class="select-ticket-types" multiple></select>
+        </div>
+        <div>
+            <button type="button" class="btn btn-danger remove-ticket">X</button>
+        </div>
+    `;
+
+    promoList.appendChild(promoDiv);
+
+    // Nút xóa promo
+    promoDiv.querySelector('.remove-ticket').addEventListener('click', () => {
+        promoDiv.remove();
+    });
+
+    // Khởi tạo select Choices.js cho select mới
+    const select = promoDiv.querySelector('.select-ticket-types');
+    if (select) {
+        // Thêm option "Chọn tất cả"
+        const allOption = document.createElement('option');
+        allOption.value = 'all';
+        allOption.textContent = '-- Chọn tất cả --';
+        select.appendChild(allOption);
+
+        // Nạp danh sách vé từ step 2
+        document.querySelectorAll('#ticket-types .ticket-type').forEach(ticketRow => {
+            const ticketName = ticketRow.querySelector('.ticket_name').value.trim();
+            if (ticketName) {
+                const option = document.createElement('option');
+                option.value = ticketName;
+                option.textContent = ticketName;
+                select.appendChild(option);
+            }
+        });
+
+        // Khởi tạo Choices riêng cho select động
+        new Choices(select, {
+            removeItemButton: true,
+            placeholderValue: 'Chọn loại vé',
+            searchPlaceholderValue: 'Tìm vé...'
+        });
+    }
+}
+
+
+
+
 

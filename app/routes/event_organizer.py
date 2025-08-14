@@ -1,21 +1,16 @@
 import string
+import json
 
 from flask import Blueprint, render_template, redirect, url_for,request, jsonify, session
 from flask_login import login_required, current_user
 
 from app import dao,db
 from app.data.models import UserEnum, Event, EventOffline, EventOnline, TicketType, EventFormatEnum, EventTypeEnum, \
-    StatusEventEnum, EventRejectionLog, Seat, StatusSeatEnum
+    StatusEventEnum, EventRejectionLog, Seat, StatusSeatEnum, DiscountTypeEnum, Promotion, TicketPromotion
 import cloudinary.uploader
 from datetime import datetime
 
 event_organizer_bp = Blueprint("event_organizer", __name__, url_prefix="/organizer")
-#
-# def check_login():
-#     """Kiểm tra đăng nhập và trả về user"""
-#     if "user_id" not in session:
-#         return None
-#     return User.query.get(session["user_id"])
 
 @event_organizer_bp.route("/home")
 def home():
@@ -78,11 +73,12 @@ def create_event_api():
         start_time = request.form.get("start_time")
         end_time = request.form.get("end_time")
         tickets = request.form.get("tickets")
-        has_seat_str = request.form.get("has_seat", "false")  # từ form gửi lên string "true"/"false"
-        has_seat = True if has_seat_str.lower() == "true" else False
+        promotions = request.form.get("promotions")
+        has_seat_str = request.form.get("has_seat", "false")
+        has_seat = has_seat_str.lower() == "true"
 
         num_rows = seats_per_row = None
-        if has_seat == True:
+        if has_seat:
             num_rows = request.form.get("num_rows")
             seats_per_row = request.form.get("seats_per_row")
 
@@ -98,11 +94,10 @@ def create_event_api():
             event_type=EventTypeEnum[event_type],
             start_datetime=datetime.fromisoformat(start_time),
             end_datetime=datetime.fromisoformat(end_time),
-            organizer_id=current_user.event_organizer.id  # cần đăng nhập
+            organizer_id=current_user.event_organizer.id
         )
-
         db.session.add(new_event)
-        db.session.flush()  # để lấy event_id
+        db.session.flush()  # lấy event_id
 
         # Thêm địa điểm
         if event_format == "offline":
@@ -124,34 +119,68 @@ def create_event_api():
             db.session.add(event_online)
 
         # Thêm vé
-        import json
         ticket_list = json.loads(tickets)
+        ticket_objects = []
         for t in ticket_list:
             ticket = TicketType(
                 name=t['name'],
                 price=float(t['price']),
                 quantity=int(t['quantity']),
                 requires_seat=bool(t.get('requires_seat', False)),
-                benefits = t['benefits'],
+                benefits=t['benefits'],
                 event_id=new_event.id
             )
             db.session.add(ticket)
+            ticket_objects.append(ticket)
 
+        # Tạo ghế nếu có chỗ ngồi
         if has_seat and num_rows and seats_per_row:
-                num_rows = int(num_rows)
-                seats_per_row = int(seats_per_row)
-                # Mã hàng ghế từ A-Z (tối đa 26 hàng)
-                row_labels = list(string.ascii_uppercase)[:num_rows]
+            num_rows = int(num_rows)
+            seats_per_row = int(seats_per_row)
+            row_labels = list(string.ascii_uppercase)[:num_rows]
+            for row_label in row_labels:
+                for seat_num in range(1, seats_per_row + 1):
+                    seat_code = f"{row_label}{seat_num}"
+                    seat = Seat(
+                        event_id=new_event.id,
+                        seat_code=seat_code,
+                        status=StatusSeatEnum.TRONG
+                    )
+                    db.session.add(seat)
 
-                for row_label in row_labels:
-                    for seat_num in range(1, seats_per_row + 1):
-                        seat_code = f"{row_label}{seat_num}"
-                        seat = Seat(
-                            event_id = new_event.id,
-                            seat_code = seat_code,
-                            status = StatusSeatEnum.TRONG
-                        )
-                        db.session.add(seat)
+        # Thêm mã khuyến mãi
+        promotions_list = json.loads(promotions)
+        for promo in promotions_list:
+            value_str = promo['value']
+            if '%' in value_str:
+                discount_type = DiscountTypeEnum.PHAN_TRAM
+                discount_value = float(value_str.replace('%',''))
+            else:
+                discount_type = DiscountTypeEnum.SO_TIEN
+                discount_value = float(value_str)
+
+            apply_all = "all" in promo['ticket_types']
+
+            new_promo = Promotion(
+                code=promo['code'],
+                discount_type=discount_type,
+                discount_value=discount_value,
+                start_date=datetime.fromisoformat(promo['start_time']),
+                end_date=datetime.fromisoformat(promo['end_time']),
+                apply_all=apply_all
+            )
+            db.session.add(new_promo)
+            db.session.flush()  # lấy new_promo.id
+
+            # Nếu không apply tất cả, lưu vào bảng phụ TicketPromotion
+            if not apply_all:
+                for tid in promo.get('ticket_types', []):
+                    ticket = next((t for t in ticket_objects if str(t.id) == str(tid)), None)
+                    if ticket:
+                        db.session.add(TicketPromotion(
+                            promotion_id=new_promo.id,
+                            ticket_type_id=ticket.id
+                        ))
 
         db.session.commit()
         return jsonify({"success": True})
@@ -160,6 +189,7 @@ def create_event_api():
         db.session.rollback()
         print("Error:", e)
         return jsonify({"success": False, "message": "Lỗi khi tạo sự kiện."}), 500
+
 
 @event_organizer_bp.route('/api/<int:event_id>/hide',methods=['POST'])
 def hide_event_api(event_id):

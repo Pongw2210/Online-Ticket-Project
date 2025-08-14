@@ -4,7 +4,6 @@ from app import db
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, Text, Time, Float, Boolean
 from enum import Enum as RoleEnum
 from flask_login import UserMixin
-import enum
 import hashlib
 
 class UserEnum(RoleEnum):
@@ -36,6 +35,10 @@ class EventTypeEnum(RoleEnum):
     NGHE_THUAT = "Sân khấu & Nghệ thuật"
     THE_THAO = "Thể thao"
     KHAC = "Khác"
+
+class DiscountTypeEnum(RoleEnum):
+    PHAN_TRAM = "Phần trăm"
+    SO_TIEN = "Số tiền"
 
 class Base(db.Model):
     __abstract__ = True
@@ -95,6 +98,12 @@ class User(Base,UserMixin):
             return self.admin.fullname
         return self.username
 
+class TicketPromotion(Base):
+    __tablename__ = 'ticket_promotion'
+
+    promotion_id = Column(Integer, ForeignKey("promotion.id"))
+    ticket_type_id = Column(Integer, ForeignKey("ticket_type.id"))
+
 class TicketType(Base):
     __tablename__ = 'ticket_type'
     name = Column(String(50))
@@ -102,7 +111,9 @@ class TicketType(Base):
     quantity = Column(Integer, nullable= False)
     benefits = Column(Text)
     event_id = Column(Integer, ForeignKey("event.id"), nullable=False)
-    requires_seat = Column(Boolean, default=False)   #thể hiện loại vé có được chọn ghế hay ngồi ngẫu nhiên
+    requires_seat = Column(Boolean, default=False)
+
+    promotions = relationship(TicketPromotion, backref="ticket_type", lazy=True)
 
     @property
     def benefits_list(self):
@@ -185,9 +196,21 @@ class Seat(Base):
 class BookingSeat(Base):
     __tablename__ = 'booking_seat'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
     booking_id = Column(Integer, ForeignKey('booking.id'), nullable=False)
     seat_id = Column(Integer, ForeignKey('seat.id'), nullable=False)
 
     booking = relationship("Booking", back_populates="booking_seats")
     seat = relationship("Seat")
+
+class Promotion(Base):
+    __tablename__ = 'promotion'
+
+    code = Column(String(50), unique=True, nullable=False)
+    discount_type = Column(Enum(DiscountTypeEnum), nullable=False)
+    discount_value = Column(Float, nullable=False)
+    start_date = Column(DateTime, nullable=False)
+    end_date = Column(DateTime, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    apply_all =  Column(Boolean, default=False)
+
+    tickets = relationship(TicketPromotion, backref="promotion", lazy=True)

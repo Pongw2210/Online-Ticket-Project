@@ -1,5 +1,5 @@
 import uuid
-from flask import Blueprint, render_template, flash, session
+from flask import Blueprint, render_template, flash, session, current_app
 from flask_login import current_user
 from app.data.models import Event, EventTypeEnum, Seat, BookingSeat, Booking, StatusBookingEnum, BookingDetail, \
     TicketType, StatusSeatEnum, StatusEventEnum
@@ -13,16 +13,17 @@ import datetime
 import random
 import string
 
+from app.utils import send_ticket_email
 
 events_bp = Blueprint("events", __name__)
 
 @events_bp.route("/")
 def home():
     search = request.args.get("q", "")
-    events = Event.query.filter_by(status=StatusEventEnum.DA_DUYET).all()
+    # bắt đầu từ query, chưa .all()
+    events = Event.query.filter_by(status=StatusEventEnum.DA_DUYET)
 
     if search:
-        # Map từ query string sang Enum
         mapping = {
             "Nhạc sống": EventTypeEnum.NHAC_SONG,
             "Sân khấu & Nghệ thuật": EventTypeEnum.NGHE_THUAT,
@@ -34,10 +35,10 @@ def home():
         if event_type_enum:
             events = events.filter(Event.event_type == event_type_enum)
         else:
-            # Nếu không khớp enum, tìm theo tên
             events = events.filter(Event.name.ilike(f"%{search}%"))
 
-    # events = events.order_by(Event.start_datetime.desc()).all()
+    # Chỉ .all() khi đã filter xong
+    events = events.order_by(Event.start_datetime.desc()).all()
     return render_template("home.html", events=events, search=search)
 
 @events_bp.route('/event/<int:event_id>')
@@ -300,6 +301,35 @@ def payment_return_vnpay():
                 seat_obj.status = StatusSeatEnum.DA_DAT.name
 
         db.session.commit()
+        tickets_for_email = []
+        for detail in booking.booking_details:
+            ticket_type = detail.ticket_type
+            if not ticket_type or not ticket_type.event:
+                continue
+
+            # Ghế lấy từ booking.booking_seats
+            seat_codes = [bs.seat.seat_code for bs in booking.booking_seats]
+
+            ticket_info = {
+                "ticket_id": detail.id,
+                "event": ticket_type.event.name,
+                "event_time": ticket_type.event.start_datetime,
+                "event_address": getattr(
+                    ticket_type.event.event_offline, "location", "Online"
+                ) if ticket_type.event.event_format == "OFFLINE" else "Online",
+                "seat": seat_codes,
+                "user": booking.user.fullname
+            }
+            tickets_for_email.append(ticket_info)
+
+        # Gửi email
+        with current_app.app_context():
+            try:
+                send_ticket_email(booking.user.email, tickets_for_email)
+                print(f"Email vé đã gửi tới {booking.user.email}")
+            except Exception as e:
+                print(f"Lỗi gửi email: {e}")
+
         return redirect(url_for("events.home", _anchor="payment-success"))
     else:
         booking.status = StatusBookingEnum.DA_HUY

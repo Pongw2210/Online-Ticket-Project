@@ -8,7 +8,7 @@
 
 :root {
   --main-green: #2ecc71;
-  --main-green-hover: #27ae60;
+  --main-green-hover: #2ecc71;
 }
 
 body {
@@ -1402,3 +1402,48 @@ input[type=number] {
 .event-card * {
     color: #000 !important;
 }
+
+/* Container của select Choices */
+.choices {
+    background-color: #1e1e1e !important; /* Nền tối */
+    border: 1px solid #444 !important;    /* Viền xám */
+    border-radius: 6px !important;        /* Bo góc */
+}
+
+/* Ô hiển thị giá trị đã chọn */
+.choices__inner {
+    background-color: #1e1e1e !important;
+    color: #fff !important;
+    border: none !important;
+    min-height: 40px !important;
+    padding: 5px 8px !important;
+}
+
+/* Ô search khi đang nhập */
+.choices__input.choices__input--cloned {
+    background-color: #1e1e1e !important;
+    color: #fff !important;
+    border: none !important;
+}
+
+/* Dropdown list */
+.choices__list--dropdown {
+    background-color: #1e1e1e !important;
+    color: #333 !important;
+    border: 1px solid #444 !important;
+}
+
+/* Item trong dropdown */
+.choices__list--dropdown .choices__item {
+    color:#95a5a6 !important;
+}
+
+/* Ô search khi đang nhập trong dropdown */
+.choices__list--dropdown .choices__input.choices__input--cloned {
+    background-color: #2a2a2a !important; /* Xám đen hơn nền chính */
+    color: black!important;
+    border: 1px solid #444 !important; /* Viền nhẹ để tách bạch */
+    padding: 6px 8px !important;
+    border-radius: 4px !important;
+}
+
