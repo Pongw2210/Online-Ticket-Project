@@ -2,7 +2,7 @@ import uuid
 from flask import Blueprint, render_template, flash, session
 from flask_login import current_user
 from app.data.models import Event, EventTypeEnum, Seat, BookingSeat, Booking, StatusBookingEnum, BookingDetail, \
-    TicketType
+    TicketType, StatusSeatEnum, StatusEventEnum
 from app import dao, db
 import requests
 import hmac
@@ -19,7 +19,7 @@ events_bp = Blueprint("events", __name__)
 @events_bp.route("/")
 def home():
     search = request.args.get("q", "")
-    events = Event.query
+    events = Event.query.filter_by(status=StatusEventEnum.DA_DUYET).all()
 
     if search:
         # Map từ query string sang Enum
@@ -37,7 +37,7 @@ def home():
             # Nếu không khớp enum, tìm theo tên
             events = events.filter(Event.name.ilike(f"%{search}%"))
 
-    events = events.order_by(Event.start_datetime.desc()).all()
+    # events = events.order_by(Event.start_datetime.desc()).all()
     return render_template("home.html", events=events, search=search)
 
 @events_bp.route('/event/<int:event_id>')
@@ -64,6 +64,7 @@ def pay_ticket(event_id):
 @events_bp.route("/booking/create", methods=["POST"])
 def create_booking():
     data = request.get_json()
+    print(data)
     tickets = data.get("tickets", [])
     total_price = data.get("totalPrice")
     event_id = data.get("eventId")
@@ -75,7 +76,6 @@ def create_booking():
         return jsonify({"success": False, "message": "Chưa đăng nhập"}), 401
 
     try:
-        # Tạo booking tổng, không cần ticket_type_id hoặc quantity ở đây nữa
         booking = Booking(
             user_id=current_user.id,
             event_id=event_id,
@@ -96,15 +96,23 @@ def create_booking():
             db.session.add(detail)
             db.session.flush()  # để có detail.id
 
-            # Nếu vé yêu cầu chọn ghế, lưu ghế
-            if t.get("requires_seat"):
-                for seat_code in t.get("selected_seats", []):
-                    seat = Seat.query.filter_by(event_id=event_id, seat_code=seat_code).first()
-                    if not seat:
-                        db.session.rollback()
-                        return jsonify({"success": False, "message": f"Seat {seat_code} không tồn tại"}), 400
-                    booking_seat = BookingSeat(booking_id=booking.id, seat_id=seat.id)
-                    db.session.add(booking_seat)
+            for seat_info in t.get("seats", []):
+                seat_id = seat_info.get("seat_id")
+                seat_code = seat_info.get("seat_code")
+
+                seat = Seat.query.filter_by(id=seat_id).with_for_update().first()
+                if not seat:
+                    db.session.rollback()
+                    return jsonify({"success": False, "message": f"Seat {seat_code} không tồn tại"}), 400
+                if seat.status != StatusSeatEnum.TRONG:
+                    db.session.rollback()
+                    return jsonify({"success": False, "message": f"Seat {seat_code} đã được đặt"}), 400
+
+                booking_seat = BookingSeat(
+                    booking_id=booking.id,
+                    seat_id=seat.id
+                )
+                db.session.add(booking_seat)
 
         db.session.commit()
         return jsonify({"success": True, "bookingId": booking.id})
@@ -190,10 +198,14 @@ def payment_return():
             if ticket_type:
                 ticket_type.quantity = max(ticket_type.quantity - detail.quantity, 0)
 
+        for seat_link in booking.booking_seats:
+            seat_obj = Seat.query.get(seat_link.seat_id)
+            if seat_obj:
+                seat_obj.status = StatusSeatEnum.DA_DAT
+
         db.session.commit()
         return redirect(url_for("events.home", _anchor="payment-success"))
     else:
-        BookingDetail.query.filter_by(booking_id=booking.id).delete()
         booking.status = StatusBookingEnum.DA_HUY
         db.session.commit()
         return redirect(url_for("events.home", _anchor="payment-failed"))
@@ -281,20 +293,33 @@ def payment_return_vnpay():
             if ticket_type:
                 ticket_type.quantity = max(ticket_type.quantity - detail.quantity, 0)
 
+        # Cập nhật trạng thái ghế
+        for seat in booking.booking_seats:
+            seat_obj = Seat.query.filter_by(id=seat.seat_id).first()
+            if seat_obj:
+                seat_obj.status = StatusSeatEnum.DA_DAT.name
+
         db.session.commit()
         return redirect(url_for("events.home", _anchor="payment-success"))
     else:
-
-        BookingDetail.query.filter_by(booking_id=booking.id).delete()
-        # BookingSeat.query.filter_by(booking_id=booking.id).delete()
-
         booking.status = StatusBookingEnum.DA_HUY
         db.session.commit()
         return redirect(url_for("events.home", _anchor="payment-failed"))
-
 
 @events_bp.route("/payment/ipn", methods=["GET"])
 def payment_ipn_vnpay():
     params = request.args.to_dict()
     print("IPN từ VNPAY:", params)
     return "OK", 200
+
+@events_bp.route("/api/seats/<int:event_id>")
+def get_seats(event_id):
+    seats = Seat.query.filter_by(event_id=event_id).all()
+    seat_list = []
+    for seat in seats:
+        seat_list.append({
+            "id": seat.id,
+            "name": seat.seat_code,
+            "occupied": seat.status != StatusSeatEnum.TRONG
+        })
+    return jsonify(seat_list)

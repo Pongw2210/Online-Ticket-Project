@@ -224,26 +224,26 @@ function addTicketType() {
 
     newTicket.innerHTML = `
         <div>
-            <label class="required-label"><span class="text-danger">*</span> Tên vé</label>
+            <label class="required-label-ticket"><span class="text-danger">*</span> Tên vé</label>
             <input type="text" class="ticket_name" placeholder="Ví dụ: Vé thường">
         </div>
         <div>
-            <label class="required-label"><span class="text-danger">*</span> Giá vé(VNĐ)</label>
+            <label class="required-label-ticket"><span class="text-danger">*</span> Giá vé(VNĐ)</label>
             <input type="number" class="ticket_price" min="0" placeholder="100000">
         </div>
         <div>
-           <label class="required-label"><span class="text-danger">*</span> Số lượng</label>
+           <label class="required-label-ticket"><span class="text-danger">*</span> Số lượng</label>
             <input type="number" class="ticket_quantity" min="1" placeholder="50">
         </div>
         <div class="requires-seat-container" style="display:none; align-self:center; padding-left:10px;">
-            <label>
+            <label  style="color: #000000 !important;">
                 <input type="checkbox" class="requires_seat" required>
                 Yêu cầu chọn ghế
             </label>
         </div>
 
         <div>
-            <label class="required-label">
+            <label class="required-label-ticket">
                 <span class="text-danger">*</span> Lợi ích
             </label>
             <input type="text" class="ticket_benefits" placeholder="Hãy nhập với cấu trúc lợi ích 1 | lợi ích 2">
@@ -571,6 +571,8 @@ function showConfirmDeleteForm(eventId) {
 
 function confirmDelete() {
     if (!selectedEventId) return;
+
+    console.log("Deleting event:", selectedEventId);
 
     fetch(`/organizer/api/${selectedEventId}/delete`, {
         method: "DELETE"

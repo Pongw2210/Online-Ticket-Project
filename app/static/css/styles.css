@@ -1358,3 +1358,103 @@ a:hover {
 .card-location, .event-location, .location {
     color: #555555;
 }
+
+.seat-selection {
+    margin-top: 10px;
+}
+
+.select-seat-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    background-color: #ff4d88; /* hồng đậm */
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.select-seat-btn:hover {
+    background-color: #e63973; /* hồng đậm hơn khi hover */
+    transform: scale(1.05);
+}
+
+.select-seat-btn:active {
+    background-color: #cc3366;
+    transform: scale(0.98);
+}
+
+/* Modal overlay */
+.seat-modal {
+    display: none; /* Ẩn mặc định */
+    position: fixed;
+    z-index: 999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+}
+
+/* Khung modal */
+.seat-modal-content {
+    background-color: #fff;
+    margin: 80px auto;
+    padding: 20px;
+    border-radius: 10px;
+    width: 500px;
+    max-width: 90%;
+    text-align: center;
+}
+
+/* Nút đóng */
+.close-btn {
+    float: right;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* Lưới ghế */
+.seat-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 40px);
+    gap: 8px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+/* Ghế */
+.seat {
+    width: 40px;
+    height: 40px;
+    background-color: #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    line-height: 40px;
+    font-size: 14px;
+}
+
+.seat.selected {
+    background-color: #ff4d88;
+    color: #fff;
+}
+
+.seat.occupied {
+    background-color: #999;
+    cursor: not-allowed;
+}
+
+/* Nút xác nhận */
+.confirm-seat-btn {
+    background-color: #ff4d88;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 15px;
+}

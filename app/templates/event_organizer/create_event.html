@@ -167,32 +167,32 @@
                     <div id="ticket-types">
                         <div class="ticket-type form-group form-row">
                             <div>
-                                <label class="required-label">
+                                <label class="required-label-ticket">
                                     <span class="text-danger">*</span> Tên vé
                                 </label>
                                 <input type="text" class="ticket_name" placeholder="Ví dụ: Vé thường">
                             </div>
                             <div>
-                                <label class="required-label">
+                                <label class="required-label-ticket">
                                     <span class="text-danger">*</span> Giá vé(VNĐ)
                                 </label>
                                 <input type="number" class="ticket_price" min="0" placeholder="100000">
                             </div>
                             <div>
-                                <label class="required-label">
+                                <label class="required-label-ticket">
                                     <span class="text-danger">*</span> Số lượng
                                 </label>
                                 <input type="number" class="ticket_quantity" min="1" placeholder="50">
                             </div>
                             <div class="form-group requires-seat-container"
                                  style="display:none; align-self:center; padding-left:10px;">
-                                <label>
+                                <label  style="color: #000000 !important;">
                                     <input type="checkbox" class="requires_seat" required>
                                     Yêu cầu chọn ghế
                                 </label>
                             </div>
                             <div>
-                                <label class="required-label">
+                                <label class="required-label-ticket">
                                     <span class="text-danger">*</span> Lợi ích
                                 </label>
                                 <input type="text" class="ticket_benefits"
@@ -207,6 +207,8 @@
 
                 <div class="event-form-section step-section step-3">
                     <h3>Mã khuyến mãi</h3>
+                    <button type="button" class="btn btn-save" onclick="addTicketType()">+ Thêm loại vé</button>
+                </div>
 
                 </div>
 

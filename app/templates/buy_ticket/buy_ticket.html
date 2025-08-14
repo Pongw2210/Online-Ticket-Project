@@ -11,7 +11,7 @@
                 <div class="ticket-name">{{ ticket.name }}</div>
                 <ul class="ticket-benefits">
                     {% for b in ticket.benefits_list %}
-                        <li>{{ b }}</li>
+                    <li>{{ b }}</li>
                     {% endfor %}
                 </ul>
                 <div class="ticket-price">
@@ -22,9 +22,7 @@
                 </div>
 
                 <div class="quantity-selector">
-                    <button onclick="decreaseTicket('{{ ticket.id }}')"
-                            class="decrease">-</button>
-
+                    <button onclick="decreaseTicket('{{ ticket.id }}')" class="decrease">-</button>
                     <input type="number" min="0" max="{{ ticket.quantity }}" value="0"
                            name="quantity_{{ ticket.id }}"
                            class="quantity-input"
@@ -33,14 +31,20 @@
                            data-price="{{ ticket.price }}"
                            data-name="{{ ticket.name }}"
                            onchange="manualTicketChange('{{ ticket.id }}')">
-
-                    <button onclick="increaseTicket('{{ ticket.id }}')"
-                            class="increase">+</button>
+                    <button onclick="increaseTicket('{{ ticket.id }}')" class="increase">+</button>
                 </div>
+
+                {% if ticket.requires_seat %}
+                <div class="seat-selection">
+                    <button class="select-seat-btn"
+                            onclick="openSeatSelection('{{ ticket.id }}', '{{ event.id }}')">
+                        Chọn ghế
+                    </button>
+                </div>
+                {%endif%}
             </div>
             <div class="ticket-right">
-                <img src="{{ event.image_url }}"
-                     class="ticket-image">
+                <img src="{{ event.image_url }}" class="ticket-image">
             </div>
         </div>
         {% endfor %}
@@ -57,4 +61,17 @@
            onclick="goToCheckout()">Tiếp tục >></a>
     </div>
 </div>
+
+<!-- Modal chọn ghế -->
+<div id="seat-modal" class="seat-modal">
+    <div class="seat-modal-content">
+        <span class="close-btn" onclick="closeSeatSelection()">&times;</span>
+        <h3>Chọn ghế</h3>
+        <div id="seat-grid" class="seat-grid"></div>
+        <div class="seat-actions">
+            <button onclick="confirmSeatSelection()" class="confirm-seat-btn">Xác nhận</button>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

@@ -141,9 +141,8 @@ class Event(Base):
     ticket_types = relationship("TicketType", backref="event", cascade="all, delete")
     event_offline = relationship(EventOffline, uselist=False, backref="event", cascade="all, delete")
     event_online = relationship(EventOnline, uselist=False, backref="event", cascade="all, delete")
-
-    # Thêm quan hệ với bảng ghi lý do từ chối
     rejection_logs = relationship("EventRejectionLog", backref="event", cascade="all, delete")
+    seats = relationship("Seat", backref="event", cascade="all, delete")
 
 class EventRejectionLog(Base):
     __tablename__ = 'event_rejection_log'
@@ -180,10 +179,8 @@ class Seat(Base):
     __tablename__ = 'seat'
 
     event_id = Column(Integer, ForeignKey('event.id'), nullable=False)
-    seat_code = Column(String(10), nullable=False)  # VD: "A1", "B3"
-    status = Column(String(20), default="available")  # trạng thái: available, booked, etc.
-
-    event = relationship("Event", backref="seats")
+    seat_code = Column(String(10), nullable=False)
+    status = Column(Enum(StatusSeatEnum), default= StatusSeatEnum.TRONG)
 
 class BookingSeat(Base):
     __tablename__ = 'booking_seat'

@@ -326,7 +326,7 @@ a.btn-create:hover {
 
 .required-label {
   font-weight: 700;
-  color: white;
+  color: black;
 }
 
 .inline-link {
@@ -690,7 +690,7 @@ label.required-label {
     font-weight: 500;
     margin-bottom: 8px;
     display: block;
-    color: #e0e0e0;
+    color: black;
     font-size: 14px;
 }
 
@@ -766,7 +766,8 @@ label.required-label {
     min-width: 260px; /* rộng hơn chút để đỡ gãy dòng */
 }
 
-label.required-label {
+label.required-label-ticket {
+    color:black,
     font-size: 15px;
     margin-bottom: 10px; /* khoảng cách giữa label và input */
 }
@@ -1341,9 +1342,22 @@ a.btn-create {
 .event-form-wrapper .form-group label,
 .event-form-wrapper label.required-label,
 .event-form-section .form-group label {
-  color: #fff !important;
+    color: #fff !important;
 }
 
+.event-form-wrapper label.required-label-ticket{
+    color: black !important;
+}
+
+.requires-seat-container label {
+    color: #000;
+    font-weight: normal;
+}
+
+.requires-seat-container input[type="checkbox"]:checked + label {
+    color: #000;
+    font-weight: bold;
+}
 /* Nội dung trong input/select/textarea hiển thị chữ trắng */
 .event-form-wrapper input[type="text"],
 .event-form-wrapper input[type="number"],

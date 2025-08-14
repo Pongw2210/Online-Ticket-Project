@@ -5,7 +5,7 @@ from flask_login import login_required, current_user
 
 from app import dao,db
 from app.data.models import UserEnum, Event, EventOffline, EventOnline, TicketType, EventFormatEnum, EventTypeEnum, \
-    StatusEventEnum, EventRejectionLog, Seat
+    StatusEventEnum, EventRejectionLog, Seat, StatusSeatEnum
 import cloudinary.uploader
 from datetime import datetime
 
@@ -147,9 +147,9 @@ def create_event_api():
                     for seat_num in range(1, seats_per_row + 1):
                         seat_code = f"{row_label}{seat_num}"
                         seat = Seat(
-                            event_id=new_event.id,
-                            seat_code=seat_code,
-                            status="available"
+                            event_id = new_event.id,
+                            seat_code = seat_code,
+                            status = StatusSeatEnum.TRONG
                         )
                         db.session.add(seat)
 

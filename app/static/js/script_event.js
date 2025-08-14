@@ -70,8 +70,97 @@ function updateStock(ticketId, newStock) {
     stockEl.textContent = `Số vé còn lại: ${newStock}`;
 }
 
-function formatPrice(price) {
-    return new Intl.NumberFormat('vi-VN').format(price) + 'đ';
+let seatSelections = {};
+let currentTicketId = null;
+let maxSeats = 0;
+
+function openSeatSelection(ticketId, eventId) {
+    currentTicketId = ticketId;
+
+    const qtyInput = document.getElementById(`quantity-${ticketId}`);
+    maxSeats = parseInt(qtyInput.value) || 0;
+
+    if (maxSeats === 0) {
+        alert("Vui lòng chọn số lượng vé trước khi chọn ghế!");
+        return;
+    }
+
+    fetch(`/api/seats/${eventId}`)
+        .then(res => res.json())
+        .then(data => {
+            console.log(data);
+            let preselectedSeats = (seatSelections[ticketId] || []).map(s => s.seat_code);
+            renderSeatGrid(data, preselectedSeats);
+            document.getElementById("seat-modal").style.display = "block";
+        })
+        .catch(err => {
+            console.error("Lỗi tải ghế:", err);
+            alert("Không thể tải danh sách ghế!");
+        });
+}
+
+function renderSeatGrid(seats, preselectedSeats) {
+    const seatGrid = document.getElementById("seat-grid");
+    seatGrid.innerHTML = "";
+    let selectedSeats = [...preselectedSeats];
+
+    seats.forEach(seat => {
+        const seatEl = document.createElement("div");
+        seatEl.classList.add("seat");
+        seatEl.innerText = seat.name;
+
+        // Set data-id và data-code cho seat để dùng khi confirm
+        seatEl.dataset.id = seat.id;       // id ghế trong DB
+        seatEl.dataset.code = seat.name;   // mã ghế hiển thị
+
+        if (seat.occupied) {
+            seatEl.classList.add("occupied");
+        } else {
+            if (selectedSeats.includes(seat.name)) {
+                seatEl.classList.add("selected");
+            }
+            seatEl.onclick = () => toggleSeat(seat.name, seatEl, selectedSeats);
+        }
+
+        seatGrid.appendChild(seatEl);
+    });
+
+    seatGrid.dataset.selectedSeats = JSON.stringify(selectedSeats);
+}
+
+function toggleSeat(seatNumber, seatElement, selectedSeats) {
+    if (seatElement.classList.contains("occupied")) return;
+
+    if (seatElement.classList.contains("selected")) {
+        seatElement.classList.remove("selected");
+        let index = selectedSeats.indexOf(seatNumber);
+        if (index > -1) selectedSeats.splice(index, 1);
+    } else {
+        if (selectedSeats.length >= maxSeats) {
+            alert(`Bạn chỉ được chọn tối đa ${maxSeats} ghế!`);
+            return;
+        }
+        seatElement.classList.add("selected");
+        selectedSeats.push(seatNumber);
+    }
+
+    document.getElementById("seat-grid").dataset.selectedSeats = JSON.stringify(selectedSeats);
+}
+
+function closeSeatSelection() {
+    document.getElementById("seat-modal").style.display = "none";
+}
+
+function confirmSeatSelection() {
+    let selectedSeats = Array.from(document.querySelectorAll(".seat.selected")).map(seatEl => ({
+        seat_id: parseInt(seatEl.dataset.id),   // ID trong DB
+        seat_code: seatEl.dataset.code          // Mã hiển thị
+    }));
+
+    seatSelections[currentTicketId] = selectedSeats;
+
+    updateSummary();
+    closeSeatSelection();
 }
 
 function updateSummary() {
@@ -83,15 +172,19 @@ function updateSummary() {
 
     let totalTickets = 0;
     let totalPrice = 0;
-    let ticketInputs = document.querySelectorAll('.quantity-input');
 
-    ticketInputs.forEach(input => {
-        let qty = parseInt(input.value);
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        let qty = parseInt(input.value) || 0;
         if (qty > 0) {
             let name = input.getAttribute('data-name');
             let price = parseInt(input.getAttribute('data-price'));
+            let ticketId = input.getAttribute('data-ticket-id');
+            let seats = seatSelections[ticketId] || [];
+            let seatCodes = seats.map(s => s.seat_code).join(', ');
+            let seatInfo = seatCodes ? ` [Ghế: ${seatCodes}]` : '';
+
             let li = document.createElement('li');
-            li.textContent = `${name} x${qty} — ${formatPrice(price * qty)}`;
+            li.textContent = `${name} x${qty} — ${formatPrice(price * qty)}${seatInfo}`;
             summaryList.appendChild(li);
 
             totalTickets += qty;
@@ -110,31 +203,34 @@ function goToCheckout() {
     let continueBtn = document.getElementById('continue-btn');
     let eventId = continueBtn.getAttribute('data-event-id');
 
-    // Thu thập các vé đã chọn
     let tickets = [];
     document.querySelectorAll('.quantity-input').forEach(input => {
-        let qty = parseInt(input.value);
+        let qty = parseInt(input.value) || 0;
         if (qty > 0) {
+            let ticketId = input.getAttribute('data-ticket-id');
+            let selectedSeats = seatSelections[ticketId] || [];
+
             tickets.push({
-                id: input.getAttribute('data-ticket-id'),
+                id: ticketId,
                 name: input.getAttribute('data-name'),
-                price: input.getAttribute('data-price'),
-                quantity: qty
+                price: parseInt(input.getAttribute('data-price')),
+                quantity: qty,
+                seats: selectedSeats
             });
         }
     });
 
     if (tickets.length === 0) {
         alert('Vui lòng chọn ít nhất một vé để tiếp tục.');
-        event.preventDefault();
         return;
     }
 
-    // Lưu dữ liệu vào sessionStorage (hoặc localStorage) để trang thanh toán dùng
     sessionStorage.setItem('checkoutEventId', eventId);
     sessionStorage.setItem('checkoutTickets', JSON.stringify(tickets));
-}
 
+    // Có thể thêm điều hướng trang thanh toán ở đây nếu cần
+    // window.location.href = '/checkout';
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     let tickets = JSON.parse(sessionStorage.getItem('checkoutTickets')) || [];
@@ -156,9 +252,11 @@ document.addEventListener('DOMContentLoaded', () => {
         let itemPrice = parseInt(ticket.price) * ticket.quantity;
         totalPrice += itemPrice;
 
+        let seatCodes = ticket.seats.map(s => s.seat_code).join(', ');
+
         summaryDiv.innerHTML += `
             <div class="summary-row">
-                <div>${ticket.name}</div>
+                <div>${ticket.name} ${seatCodes ? '(' + seatCodes + ')' : ''}</div>
                 <div>${ticket.quantity}</div>
             </div>
             <div class="summary-row muted">
@@ -171,6 +269,11 @@ document.addEventListener('DOMContentLoaded', () => {
     subtotalEl.textContent = totalPrice.toLocaleString() + ' đ';
     totalEl.textContent = totalPrice.toLocaleString() + ' đ';
 });
+
+function formatPrice(value) {
+    return value.toLocaleString('vi-VN') + ' đ';
+}
+
 
 
 let minutes = 14; let seconds = 30;
@@ -316,5 +419,7 @@ function payment_vnpay() {
         }
     });
 }
+
+
 
 

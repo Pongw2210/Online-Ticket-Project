@@ -36,6 +36,15 @@ def seed_event_organizer_user():
                              role=UserEnum.NGUOI_TO_CHUC)
     uEvent_organizer1.event_organizer = event_organizer1
     db.session.add(uEvent_organizer1)
+    # db.session.commit()
+    #
+    event_organizer2= EventOrganizer(fullname="Test", email="tbn@gmail.com", gender="Nữ")
+    db.session.add(event_organizer2)
+    uEvent_organizer2 = User(username="userNguoiToChuc1", email="usertochnuc1@gmail.com",
+                             password=str(hashlib.md5("123".encode('utf-8')).hexdigest()),
+                             role=UserEnum.NGUOI_TO_CHUC)
+    uEvent_organizer2.event_organizer = event_organizer2
+    db.session.add(uEvent_organizer2)
     db.session.commit()
 
 def seed_event_offline():

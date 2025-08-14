@@ -4,8 +4,6 @@ from flask_sqlalchemy import SQLAlchemy
 import cloudinary
 from app.admin_view import flask_admin
 
-
-
 db = SQLAlchemy()
 login = LoginManager()
 
