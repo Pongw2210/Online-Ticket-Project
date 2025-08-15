@@ -2,7 +2,7 @@ import uuid
 from flask import Blueprint, render_template, flash, session, current_app
 from flask_login import current_user
 from app.data.models import Event, EventTypeEnum, Seat, BookingSeat, Booking, StatusBookingEnum, BookingDetail, \
-    TicketType, StatusSeatEnum, StatusEventEnum
+    TicketType, StatusSeatEnum, StatusEventEnum, EventFormatEnum
 from app import dao, db
 import requests
 import hmac
@@ -301,28 +301,57 @@ def payment_return_vnpay():
                 seat_obj.status = StatusSeatEnum.DA_DAT.name
 
         db.session.commit()
-        tickets_for_email = []
-        for detail in booking.booking_details:
-            ticket_type = detail.ticket_type
-            if not ticket_type or not ticket_type.event:
-                continue
 
-            # Ghế lấy từ booking.booking_seats
-            seat_codes = [bs.seat.seat_code for bs in booking.booking_seats]
+        # ==== Lấy dữ liệu vé để gửi email ====
+        tickets_for_email = []
+        booking_details = BookingDetail.query.filter_by(booking_id=booking.id).all()
+
+        for detail in booking_details:
+            ticket_type = detail.ticket_type
+            event = ticket_type.event
+
+            seat_display = None
+            event_address = "Chưa có địa điểm"
+
+            if event.event_format == EventFormatEnum.OFFLINE:
+                # Lấy thông tin địa điểm offline
+                event_offline = getattr(event, "event_offline", None)
+                event_address = getattr(event_offline, "location", "Chưa có địa điểm")
+
+                if getattr(event_offline, "has_seat", 0) == 1:
+                    if ticket_type.requires_seat == 1:
+                        # Lấy danh sách ghế của booking
+                        seat_codes = [
+                            s.seat.code for s in Seat.query
+                            .join(BookingSeat, BookingSeat.seat_id == Seat.id)
+                            .filter(BookingSeat.booking_id == booking.id)
+                            .all()
+                        ]
+                        seat_display = seat_codes
+                    else:
+                        seat_display = "Sẽ được sắp xếp ghế sau khi check-in"
+                else:
+                    seat_display = None
+
+            else:  # ONLINE
+                event_online = getattr(event, "event_online", None)
+                event_address = getattr(event_online, "meeting_url", "Online")
+                seat_display = None
 
             ticket_info = {
                 "ticket_id": detail.id,
-                "event": ticket_type.event.name,
-                "event_time": ticket_type.event.start_datetime,
-                "event_address": getattr(
-                    ticket_type.event.event_offline, "location", "Online"
-                ) if ticket_type.event.event_format == "OFFLINE" else "Online",
-                "seat": seat_codes,
+                "event": event.name,
+                "ticket_type": ticket_type.name,
+                "event_time": event.start_datetime,
+                "event_address": event_address,
+                "seat": seat_display,
+                "quantity": detail.quantity,
                 "user": booking.user.fullname
             }
+
             tickets_for_email.append(ticket_info)
 
-        # Gửi email
+            # Gửi email
         with current_app.app_context():
             try:
                 send_ticket_email(booking.user.email, tickets_for_email)

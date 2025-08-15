@@ -1,21 +1,15 @@
 import qrcode
-import base64
-from io import BytesIO
 import json
+from io import BytesIO
+from datetime import datetime
 
 from flask import current_app
 from flask_mail import Message
 from app import mail
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import mm
-from PIL import Image
 
-# =============================
-# QR CODE GENERATOR
-# =============================
 def generate_ticket_qr(ticket_info):
-    data = json.dumps(ticket_info, default=str)
+
+    data = json.dumps(ticket_info, default=str, ensure_ascii=False)
     qr = qrcode.QRCode(version=1, box_size=10, border=4)
     qr.add_data(data)
     qr.make(fit=True)
@@ -25,101 +19,134 @@ def generate_ticket_qr(ticket_info):
     buffered.seek(0)
     return buffered
 
-def qr_to_base64(ticket_info):
-    buffered = generate_ticket_qr(ticket_info)
-    img_base64 = base64.b64encode(buffered.getvalue()).decode()
-    return f"data:image/png;base64,{img_base64}"
 
-# =============================
-# GENERATE PDF FOR MULTIPLE TICKETS
-# =============================
-def generate_tickets_pdf(tickets):
-    buffer = BytesIO()
-    c = canvas.Canvas(buffer, pagesize=A4)
-    width, height = A4
-    y_pos = height - 30*mm
-
-    for t in tickets:
-        c.setFont("Helvetica-Bold", 14)
-        c.drawString(20*mm, y_pos, f"Sự kiện: {t['event']}")
-        y_pos -= 8*mm
-        c.setFont("Helvetica", 12)
-        event_time_str = t['event_time'].strftime("%d/%m/%Y %H:%M") if t.get('event_time') else "Chưa có"
-        c.drawString(20*mm, y_pos, f"Thời gian: {event_time_str}")
-        y_pos -= 6*mm
-        c.drawString(20*mm, y_pos, f"Địa điểm: {t.get('event_address','Chưa có')}")
-        y_pos -= 6*mm
-        seats_str = ", ".join(t['seat'])
-        c.drawString(20*mm, y_pos, f"Vé ID: {t['ticket_id']}")
-        y_pos -= 6*mm
-        c.drawString(20*mm, y_pos, f"Ghế: {seats_str}")
-        y_pos -= 6*mm
-        c.drawString(20*mm, y_pos, f"Khách: {t['user']}")
-        y_pos -= 10*mm
-
-        # Chuyển BytesIO QR code sang PIL Image
-        qr_img_buffer = generate_ticket_qr(t)
-        qr_img_buffer.seek(0)
-        qr_pil = Image.open(qr_img_buffer)
-
-        c.drawInlineImage(qr_pil, 150*mm, y_pos, width=40*mm, height=40*mm)
-        y_pos -= 50*mm
-
-        if y_pos < 60*mm:
-            c.showPage()
-            y_pos = height - 30*mm
-
-    c.save()
-    buffer.seek(0)
-    return buffer
-
-# =============================
-# SEND EMAIL HTML + PDF
-# =============================
 def send_ticket_email(to_email, tickets):
-    """
-    tickets: list dict chứa ticket info
-    """
-    # PDF
-    pdf_buffer = generate_tickets_pdf(tickets)
-
-    # HTML
-    html = """
-    <html>
-    <body style="font-family: Arial,sans-serif; background-color:#f4f4f4; padding:20px;">
-        <h2 style="color:#333;">🎫 Vé sự kiện của bạn</h2>
-        <p>Dưới đây là thông tin vé đã mua. Bạn có thể quét QR code hoặc tải PDF đính kèm.</p>
-    """
-    for t in tickets:
-        seats_str = ", ".join(t["seat"])
-        event_time_str = t['event_time'].strftime("%d/%m/%Y %H:%M") if t.get('event_time') else "Chưa có"
-        qr_base64 = qr_to_base64(t)
-        html += f"""
-        <div style="background-color:#fff; padding:15px; margin-bottom:20px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
-            <h3 style="margin:0; color:#444;">Sự kiện: {t['event']}</h3>
-            <p style="margin:5px 0;">Thời gian: {event_time_str}</p>
-            <p style="margin:5px 0;">Địa điểm: {t.get('event_address','Chưa có')}</p>
-            <p style="margin:5px 0;">Vé ID: {t['ticket_id']}</p>
-            <p style="margin:5px 0;">Ghế: {seats_str}</p>
-            <img src="{qr_base64}" alt="QR code vé" width="150" style="margin-top:10px;"/>
-        </div>
+    html_parts = [
         """
-    html += """
-        <p style="color:#666;">Vui lòng giữ mã QR này để check-in sự kiện.</p>
-    </body>
-    </html>
-    """
+        <html>
+        <body style="
+            margin:0;
+            padding:0;
+            font-family: Arial, sans-serif;
+            background-color:#f0f2f5;
+            color:#333;
+        ">
+            <!-- Header -->
+            <div style="
+                text-align:center;
+                padding:30px 10px;
+                background: linear-gradient(145deg, #ffe6f0, #fff0f5);
+            ">
+                <h1 style="margin:0; color:#d81b60;">🎫 Vé sự kiện của bạn</h1>
+                <p style="margin:5px 0 0 0; color:#555;">Bạn có thể quét QR code để check-in. Giữ vé này cẩn thận!</p>
+            </div>
+        """
+    ]
 
+    inline_images = []
+
+    for idx, t in enumerate(tickets):
+        # Ghế
+        seats = t.get("seat")
+        seats_str = ", ".join(seats) if isinstance(seats, list) else str(seats or "—")
+
+        quantity = t.get("quantity", 1)
+
+        # Thời gian
+        event_time = t.get("event_time")
+        if isinstance(event_time, datetime):
+            event_time_str = event_time.strftime("%d/%m/%Y %H:%M")
+        else:
+            event_time_str = str(event_time or "Chưa có")
+
+        # QR code
+        cid = f"qr{idx}"
+        qr_buf = generate_ticket_qr(t)
+        inline_images.append((cid, qr_buf.getvalue()))
+
+        # Địa điểm
+        event_address = t.get("event_address", "Chưa có")
+        if str(event_address).startswith("http"):
+            address_html = f'<a href="{event_address}" target="_blank" style="color:#d81b60;">{event_address}</a>'
+        else:
+            address_html = f'<span style="color:#333;">{event_address}</span>'
+
+        # HTML vé
+        html_parts.append(f"""
+            <div style="
+                background: linear-gradient(145deg, #ffffff, #ffe6f0);
+                padding:25px;
+                margin:20px auto;
+                border-radius:15px;
+                box-shadow:0 8px 20px rgba(0,0,0,0.12);
+                display:flex;
+                flex-wrap:wrap;
+                align-items:center;
+                max-width:600px;
+            ">
+                <div style="flex:1; min-width:200px;">
+                    <h3 style="
+                        margin:0 0 10px 0;
+                        color:#d81b60;
+                        font-size:18px;
+                    ">{t['event']}</h3>
+                    <p style="margin:4px 0; font-size:14px; color:#555;"><strong>Loại vé:</strong> {t.get('ticket_type','—')}</p>
+                    <p style="margin:4px 0; font-size:14px;"><strong>Thời gian:</strong> {event_time_str}</p>
+                    <p style="margin:4px 0; font-size:14px;"><strong>Địa điểm:</strong> {address_html}</p>
+                    <p style="margin:4px 0; font-size:14px;"><strong>Vé ID:</strong> {t['ticket_id']}</p>
+                    <p style="margin:4px 0; font-size:14px;"><strong>Ghế:</strong> {seats_str}</p>
+                    <p style="margin:4px 0; font-size:14px;"><strong>Số lượng:</strong> {quantity}</p>
+                    <p style="margin:4px 0; font-size:14px; color:#555;"><strong>Người sở hữu:</strong> {t.get('user','—')}</p>
+                </div>
+                <div style="flex-shrink:0; text-align:center; margin-top:10px;">
+                    <img src="cid:{cid}" alt="QR code vé" width="150" style="
+                        border:3px solid #d81b60;
+                        border-radius:12px;
+                        box-shadow:0 4px 12px rgba(216,27,96,0.3);
+                    "/>
+                </div>
+            </div>
+        """)
+
+    # Footer
+    html_parts.append("""
+        <div style="
+            text-align:center;
+            padding:20px 10px;
+            color:#777;
+            font-size:12px;
+        ">
+            <p>Vui lòng giữ mã QR này để check-in sự kiện.</p>
+            <p>&copy;2024 TicketBox Clone. Tất cả quyền được bảo lưu.</p>
+            <p>Phát triển bởi QLDAPM Team </p>
+        </div>
+        </body>
+        </html>
+    """)
+
+    html_content = "\n".join(html_parts)
+
+    # Gửi email
     with current_app.app_context():
         msg = Message(
             subject="🎫 Vé sự kiện của bạn",
             recipients=[to_email],
-            html=html,
-            sender=current_app.config['MAIL_USERNAME']
+            html=html_content,
+            sender=current_app.config.get("MAIL_USERNAME")
         )
-        msg.attach("tickets.pdf", "application/pdf", pdf_buffer.read())
+
+        # Đính kèm QR code inline
+        for cid, data in inline_images:
+            msg.attach(
+                filename=f"{cid}.png",
+                content_type="image/png",
+                data=data,
+                disposition="inline",
+                headers={"Content-ID": f"<{cid}>"}
+            )
+
         try:
             mail.send(msg)
-            print(f"Email vé đã gửi tới {to_email}")
+            print(f"✅ Email vé đã gửi tới {to_email}")
         except Exception as e:
-            print(f"Lỗi gửi email: {e}")
+            print(f"❌ Lỗi gửi email: {e}")
