@@ -18,7 +18,7 @@ def seed_admin_user():
     db.session.commit()
 
 def seed_customer_user():
-    cus1 = Customer(fullname="Nguyễn Ngọc Anh", email="nna@gmail.com", gender="Nữ", dob=datetime(2000, 1, 1),
+    cus1 = Customer(fullname="Nguyễn Ngọc Anh", email="2254052006bong@ou.edu.vn", gender="Nữ", dob=datetime(2000, 1, 1),
                     number_phone="0987654321")
     db.session.add(cus1)
     ucus1 = User(username="userKhachHang", email="2254052006bong@ou.edu.vn", password=str(hashlib.md5("123".encode('utf-8')).hexdigest()),
