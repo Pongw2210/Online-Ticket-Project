@@ -1,6 +1,6 @@
 import uuid
 from flask import Blueprint, render_template, flash, session, current_app
-from flask_login import current_user
+from flask_login import current_user, login_required
 from app.data.models import Event, EventTypeEnum, Seat, BookingSeat, Booking, StatusBookingEnum, BookingDetail, \
     TicketType, StatusSeatEnum, StatusEventEnum, EventFormatEnum
 from app import dao, db
@@ -382,3 +382,53 @@ def get_seats(event_id):
             "occupied": seat.status != StatusSeatEnum.TRONG
         })
     return jsonify(seat_list)
+
+
+@events_bp.route('/my-ticket')
+@login_required
+def my_tickets():
+    # Lấy tất cả booking đã thanh toán của user
+    bookings = Booking.query.filter_by(user_id=current_user.id, status=StatusBookingEnum.DA_THANH_TOAN).all()
+
+    tickets_for_user = []
+    for booking in bookings:
+        for detail in booking.booking_details:
+            ticket_type = detail.ticket_type
+            event = ticket_type.event
+
+            seat_display = None
+            event_address = "Chưa có địa điểm"
+
+            if event.event_format == EventFormatEnum.OFFLINE:
+                event_offline = getattr(event, "event_offline", None)
+                event_address = getattr(event_offline, "location", "Chưa có địa điểm")
+
+                if getattr(event_offline, "has_seat", 0) == 1:
+                    if ticket_type.requires_seat == 1:
+                        seat_codes = [
+                            s.seat.code for s in Seat.query
+                            .join(BookingSeat, BookingSeat.seat_id == Seat.id)
+                            .filter(BookingSeat.booking_id == booking.id)
+                            .all()
+                        ]
+                        seat_display = seat_codes
+                    else:
+                        seat_display = "Sẽ được sắp xếp ghế sau khi check-in"
+            else:
+                event_online = getattr(event, "event_online", None)
+                event_address = getattr(event_online, "meeting_url", "Online")
+                seat_display = None
+
+            ticket_info = {
+                "ticket_id": detail.id,
+                "event": event.name,
+                "ticket_type": ticket_type.name,
+                "event_time": event.start_datetime,
+                "event_address": event_address,
+                "seat": seat_display,
+                "quantity": detail.quantity,
+                "user": current_user.fullname
+            }
+            tickets_for_user.append(ticket_info)
+
+    return render_template("my_tickets.html", tickets=tickets_for_user)

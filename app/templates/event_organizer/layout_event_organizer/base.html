@@ -14,7 +14,9 @@
         <div class="logo">
             <img src="https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612717/icons8-ticket-50_yn9dlx.png"
                  alt="logo">
-            <h2>Organizer Center</h2>
+<a href="{{ url_for('event_organizer.home') }}" style="text-decoration:none; color:#d81b60; font-family: Arial, sans-serif;">
+    <h2 style="margin:0; font-size:19px;">Organizer Center</h2>
+</a>
         </div>
         <ul>
             <li class="{% if request.endpoint == 'event_organizer.home' %}active{% endif %}">

@@ -1,178 +1,32 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Vé của tôi</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='images/icons8-ticket-50.png') }}" type="image/png">
-</head>
-<body>
-    <header>
-        <div class="logo">
-            <a href="/"><img src="{{ url_for('static', filename='images/icons8-ticket-100.png') }}" alt="Ticketbox Logo"
-                             class="logo-img"></a>
-        </div>
-        <form class="search-bar" method="get" action="/">
-            <input type="text" name="q" value="" placeholder="Bạn tìm gì hôm nay?">
-            <button type="submit">Tìm kiếm</button>
-        </form>
+{% extends 'layout/base.html' %}
+{% block title %}Vé của tôi{% endblock %}
+{% block content %}
+<h2>Vé của tôi</h2>
 
-        <div class="header-actions">
-            <a href="{{ url_for('event_organizer.create_event') }}" class="create-event">
-                <span>Tạo sự kiện</span>
-            </a>
-            <a href="{{ url_for('events.my_tickets') }}" class="my-ticket">
-                <img src="{{ url_for('static', filename='images/icons8-ticket-30.png') }}" alt="ticket icon"
-                     class="ticket-icon">
-                <span>Vé của tôi</span>
-            </a>
-        </div>
-
-        <div class="auth-links">
-            {% if current_user %}
-                👋 Xin chào, <strong>{{ current_user.fullname }}</strong> |
-                <a href="{{ url_for('auth.logout') }}">Đăng xuất</a>
+<div style="display:flex; flex-wrap:wrap; gap:20px;">
+    {% for t in tickets %}
+    <div style="
+        background: linear-gradient(145deg, #ffffff, #ffe6f0);
+        padding:20px;
+        border-radius:15px;
+        box-shadow:0 6px 18px rgba(0,0,0,0.12);
+        width:280px;
+        flex-shrink:0;
+    ">
+        <h3 style="margin:0 0 10px 0; color:#d81b60;">{{ t.event }}</h3>
+        <p style="margin:4px 0; font-size:14px; color:#555;"><strong>Loại vé:</strong> {{ t.ticket_type }}</p>
+        <p style="margin:4px 0; font-size:14px;"><strong>Thời gian:</strong> {{ t.event_time.strftime('%d/%m/%Y %H:%M') if t.event_time else 'Chưa có' }}</p>
+        <p style="margin:4px 0; font-size:14px;"><strong>Địa điểm:</strong> 
+            {% if t.event_address.startswith('http') %}
+                <a href="{{ t.event_address }}" target="_blank" style="color:#d81b60;">{{ t.event_address }}</a>
             {% else %}
-                <a href="{{ url_for('auth.login') }}">Đăng nhập</a> |
-                <a href="{{ url_for('auth.register') }}">Đăng ký</a>
+                {{ t.event_address }}
             {% endif %}
-        </div>
-    </header>
-
-    <div class="nav">
-        <a href="{{ url_for('events.home', q='Nhạc sống') }}">Nhạc sống</a>
-        <a href="{{ url_for('events.home', q='Sân khấu & Nghệ thuật') }}">Sân khấu & Nghệ thuật</a>
-        <a href="{{ url_for('events.home', q='Thể thao') }}">Thể thao</a>
-        <a href="{{ url_for('events.home', q='Khác') }}">Khác</a>
+        </p>
+        <p style="margin:4px 0; font-size:14px;"><strong>Vé ID:</strong> {{ t.ticket_id }}</p>
+        <p style="margin:4px 0; font-size:14px;"><strong>Ghế:</strong> {{ t.seat if t.seat else '—' }}</p>
+        <p style="margin:4px 0; font-size:14px;"><strong>Số lượng:</strong> {{ t.quantity }}</p>
     </div>
-
-    <div class="my-tickets-container">
-        {% if current_user %}
-        <div class="user-info-section" style="background: rgba(76, 175, 80, 0.1); border: 1px solid #4CAF50; border-radius: 8px; padding: 15px; margin: 20px 0; text-align: center;">
-            <div style="color: #4CAF50; font-weight: bold; margin-bottom: 10px;">👤 Thông tin tài khoản</div>
-            <div style="font-size: 16px; margin-bottom: 5px;">
-                <strong>Tên:</strong> {{ current_user.fullname }}
-            </div>
-            <div style="font-size: 14px; color: #666; margin-bottom: 5px;">
-                <strong>Email:</strong> {{ current_user.email }}
-            </div>
-            <div style="font-size: 14px; color: #666;">
-                <strong>Vai trò:</strong> {{ current_user.role.value if current_user.role else 'Khách hàng' }}
-            </div>
-        </div>
-        {% endif %}
-        
-        <div class="my-tickets-header">
-            <h1 class="my-tickets-title">🎫 Vé của tôi</h1>
-            <p class="my-tickets-subtitle">Xem tất cả vé đã đặt của bạn</p>
-        </div>
-
-        {% if bookings %}
-            {% for booking in bookings %}
-            <div class="ticket-card {{ booking.status }}">
-                <div class="ticket-info-left">
-                    <div class="event-name">{{ booking.event.name }}</div>
-                    <div class="info-row"><span class="info-label">Loại vé:</span><span class="info-value">{{ booking.ticket_type.name }}</span></div>
-                    <div class="info-row"><span class="info-label">Số lượng:</span><span class="info-value">{{ booking.quantity }} vé</span></div>
-                    <div class="info-row"><span class="info-label">Tổng tiền:</span><span class="info-value">{{ "{:,.0f}".format(booking.total_price) }} đ</span></div>
-                    <div class="info-row"><span class="info-label">Địa điểm:</span><span class="info-value">
-                        {% if booking.event.event_offline %}
-                            {{ booking.event.event_offline.location }}
-                        {% else %}
-                            Online Event
-                        {% endif %}
-                    </span></div>
-                    <div class="info-row"><span class="info-label">Ngày diễn ra:</span><span class="info-value">{{ booking.event.start_datetime.strftime('%d/%m/%Y %H:%M') }}</span></div>
-                    <div class="info-row"><span class="info-label">Trạng thái:</span><span class="status-badge status-confirmed">Đã xác nhận</span></div>
-                    <div class="info-row"><span class="info-label">Ngày đặt:</span><span class="info-value">{{ booking.booking_date if booking.booking_date else 'Chưa có thông tin' }}</span></div>
-                </div>
-                <div class="ticket-info-right">
-                    <div class="seats-title">🎯 Ghế đã chọn:</div>
-                    <div style="margin-bottom:10px;" id="seats-{{ booking.id }}">
-                        {% if booking.selected_seats %}
-                            {% if booking.selected_seats != '[]' %}
-                                <span style="color:#888;">Đang tải ghế...</span>
-                            {% else %}
-                                <span style="color:#888;">Chưa chọn ghế</span>
-                            {% endif %}
-                        {% else %}
-                            <span style="color:#888;">Chưa chọn ghế</span>
-                        {% endif %}
-                    </div>
-                    <div class="qr-code" id="qr-{{ booking.id }}">
-                        <img src="{{ booking.qr_img_url }}" alt="QR Code vé" style="width: 200px; height: 200px;"/>
-                    </div>
-                </div>
-            </div>
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-            <script>
-                (function() {
-                    var qr = new QRious({
-                        element: document.getElementById('qr-{{ booking.id }}'),
-                        value: 'Sự kiện: {{ booking.event.name }} | Loại vé: {{ booking.ticket_type.name }} | Số lượng: {{ booking.quantity }} | Ngày: {{ booking.event.start_datetime.strftime("%d/%m/%Y %H:%M") }}',
-                        size: 120
-                    });
-                    
-                    // Parse và hiển thị ghế đã chọn
-                    var seatsContainer = document.getElementById('seats-{{ booking.id }}');
-                    var selectedSeats = '{{ booking.selected_seats|safe }}';
-                    
-                    if (selectedSeats && selectedSeats !== '[]' && selectedSeats !== 'null') {
-                        try {
-                            var seats = JSON.parse(selectedSeats);
-                            if (Array.isArray(seats) && seats.length > 0) {
-                                var seatsHtml = '';
-                                seats.forEach(function(seat) {
-                                    if (seat && seat.trim()) {
-                                        seatsHtml += '<span class="seat-tag">' + seat.trim() + '</span>';
-                                    }
-                                });
-                                seatsContainer.innerHTML = seatsHtml;
-                            } else {
-                                seatsContainer.innerHTML = '<span style="color:#888;">Chưa chọn ghế</span>';
-                            }
-                        } catch (e) {
-                            console.error('Lỗi parse JSON seats:', e);
-                            seatsContainer.innerHTML = '<span style="color:#888;">Lỗi hiển thị ghế</span>';
-                        }
-                    } else {
-                        seatsContainer.innerHTML = '<span style="color:#888;">Chưa chọn ghế</span>';
-                    }
-                })();
-            </script>
-            {% endfor %}
-        {% else %}
-            <div class="no-tickets">
-                <div class="no-tickets-icon">🎫</div>
-                <h2>Bạn chưa có vé nào</h2>
-                <p>Hãy khám phá các sự kiện thú vị và đặt vé ngay!</p>
-                <a href="{{ url_for('events.home') }}" class="back-btn">← Về trang chủ</a>
-            </div>
-        {% endif %}
-    </div>
-
-<!-- Footer với bản quyền -->
-<footer class="footer">
-    <div class="footer-content">
-        <div class="footer-section">
-            <h3>TicketBox Clone</h3>
-            <p>Hệ thống đặt vé sự kiện trực tuyến</p>
-        </div>
-        <div class="footer-section">
-            <h4>Liên hệ</h4>
-            <p>Email: info@ticketboxclone.com</p>
-            <p>Điện thoại: 1900-xxxx</p>
-        </div>
-        <div class="footer-section">
-            <h4>Theo dõi</h4>
-            <p>Facebook | Instagram | Twitter</p>
-        </div>
-    </div>
-    <div class="footer-bottom">
-        <p>&copy; 2024 TicketBox Clone. Tất cả quyền được bảo lưu.</p>
-        <p>Phát triển bởi QLDAPM Team</p>
-    </div>
-</footer>
-
-<script src="{{ url_for('static', filename='js/script.js') }}"></script>
-</body>
-</html> 
+    {% endfor %}
+</div>
+{% endblock %}

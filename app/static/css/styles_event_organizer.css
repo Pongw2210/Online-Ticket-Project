@@ -1164,7 +1164,7 @@ input.error, textarea.error, select.error {
 body, .main, .sidebar, .event-form-wrapper, .event-form-section,
 .tab-content, .event-card, .upload-box {
   background-color: #ffe4ec !important; /* Hồng pastel nhạt */
-  color: #333 !important; /* Giữ chữ dễ đọc */
+  color: #fff0f5 !important; /* Giữ chữ dễ đọc */
 }
 
 /* Viền và border */
@@ -1206,9 +1206,12 @@ input,
 select,
 textarea,
 label,
-h1, h2, h3, h4, h5, h6 {
+h1, h2, h3, h5, h6 {
   font-weight: 600 !important; /* Đậm vừa */
   color: #000 !important;      /* Màu đen */
+}
+h4{
+    color: white
 }
 
 .event-card .title {
