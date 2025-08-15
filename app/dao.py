@@ -1,5 +1,7 @@
 import hashlib
-from app.data.models import User, EventTypeEnum, Event, StatusEventEnum, TicketType
+from app.data.models import User, EventTypeEnum, Event, StatusEventEnum, TicketType,Booking
+from app import db
+from sqlalchemy import func
 
 
 def get_user_by_id(user_id):

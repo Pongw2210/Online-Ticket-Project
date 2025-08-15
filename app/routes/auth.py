@@ -1,15 +1,8 @@
-
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from app import db, dao, login
 from app.data.models import User, UserEnum, Customer
-from flask_login import login_user, logout_user
-from datetime import datetime
-
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
-from app import db, dao, login
-from app.data.models import User, UserEnum
 from flask_login import current_user, login_user, logout_user
-
+from datetime import datetime
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -28,11 +21,13 @@ def register():
         password = request.form.get("password")
 
         # Chuyển đổi ngày sinh
-        try:
-            dob = datetime.strptime(dob_str, "%Y-%m-%d")
-        except Exception:
-            flash("Ngày sinh không hợp lệ!")
-            return redirect(url_for("auth.register"))
+        dob = None
+        if dob_str:
+            try:
+                dob = datetime.strptime(dob_str, "%Y-%m-%d")
+            except ValueError:
+                flash("Ngày sinh không hợp lệ!")
+                return redirect(url_for("auth.register"))
 
         # Kiểm tra email đã tồn tại
         if User.query.filter_by(email=email).first():
@@ -41,13 +36,13 @@ def register():
 
         # Tạo user mới
         new_user = User(
-            username=email,  # Hoặc bạn muốn tách username riêng
+            username=email,  # hoặc tách username riêng
             email=email,
             role=UserEnum.KHACH_HANG
         )
         new_user.set_password(password)
         db.session.add(new_user)
-        db.session.flush()  # Để lấy new_user.id mà chưa commit
+        db.session.flush()  # lấy new_user.id mà chưa commit
 
         # Tạo customer mới gắn với user
         new_customer = Customer(
@@ -59,35 +54,29 @@ def register():
             user_id=new_user.id
         )
         db.session.add(new_customer)
-
-        # Commit cả hai bản ghi
         db.session.commit()
 
         flash("Đăng ký thành công. Vui lòng đăng nhập.")
         return redirect(url_for("auth.login"))
 
-
     return render_template("auth/register.html")
-
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        username = request.form["username"]
-        password = request.form["password"]
+        username = request.form.get("username")
+        password = request.form.get("password")
 
         user = dao.auth_user(username, password)
 
         if user:
             login_user(user)
 
-            #  Admin → chuyển về trang Flask-Admin
-
+            # Điều hướng theo role
             if user.role == UserEnum.ADMIN:
                 return redirect("/admin/")
-
             elif user.role == UserEnum.NGUOI_TO_CHUC:
-                return redirect(url_for('event_organizer.home'))
+                return redirect(url_for("event_organizer.home"))
             else:
                 return redirect(url_for("events.home"))
         else:

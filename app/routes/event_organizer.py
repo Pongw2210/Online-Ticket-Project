@@ -5,9 +5,12 @@ from flask_login import login_required, current_user
 
 from app import dao,db
 from app.data.models import UserEnum, Event, EventOffline, EventOnline, TicketType, EventFormatEnum, EventTypeEnum, \
-    StatusEventEnum, EventRejectionLog, Seat
+    StatusEventEnum, EventRejectionLog, Seat, StatusSeatEnum
 import cloudinary.uploader
 from datetime import datetime
+from app.data.models import EventOrganizer
+
+
 
 event_organizer_bp = Blueprint("event_organizer", __name__, url_prefix="/organizer")
 #
@@ -22,7 +25,7 @@ def home():
     # current_user = check_login()
     if not current_user:
         return redirect(url_for("auth.login"))
-    
+
     # Chỉ cho phép người tổ chức vào
     if current_user.role != UserEnum.NGUOI_TO_CHUC:
         return redirect(url_for("events.home"))
@@ -46,7 +49,7 @@ def create_event():
     # current_user = check_login()
     if not current_user:
         return redirect(url_for("auth.login"))
-    
+
     if current_user.role != UserEnum.NGUOI_TO_CHUC:
         return redirect(url_for("events.home"))
     event_type = dao.load_event_type_enum()
@@ -129,8 +132,7 @@ def create_event_api():
         for t in ticket_list:
             ticket = TicketType(
                 name=t['name'],
-                price=float(t['price']),
-                quantity=int(t['quantity']),
+                price=float(t['price']),quantity=int(t['quantity']),
                 requires_seat=bool(t.get('requires_seat', False)),
                 benefits = t['benefits'],
                 event_id=new_event.id
@@ -147,9 +149,9 @@ def create_event_api():
                     for seat_num in range(1, seats_per_row + 1):
                         seat_code = f"{row_label}{seat_num}"
                         seat = Seat(
-                            event_id=new_event.id,
-                            seat_code=seat_code,
-                            status="available"
+                            event_id = new_event.id,
+                            seat_code = seat_code,
+                            status = StatusSeatEnum.TRONG
                         )
                         db.session.add(seat)
 
@@ -160,6 +162,7 @@ def create_event_api():
         db.session.rollback()
         print("Error:", e)
         return jsonify({"success": False, "message": "Lỗi khi tạo sự kiện."}), 500
+
 
 @event_organizer_bp.route('/api/<int:event_id>/hide',methods=['POST'])
 def hide_event_api(event_id):
@@ -307,4 +310,5 @@ def delete_event_api(event_id):
     db.session.commit()
 
     return jsonify({"message": "Xóa sự kiện thành công."}), 200
+
 

@@ -1,0 +1,441 @@
+{% extends 'admin/master.html' %}
+{% block body %}
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+  body {
+    background: linear-gradient(135deg, #fff0f5, #ffffff); /* Hồng trắng pastel */
+    color: #333;
+    font-family: 'Poppins', sans-serif;
+    padding: 20px 15px;
+    min-height: 100vh;
+  }
+  h2 {
+    font-weight: 700;
+    font-size: 1.9rem;
+    color: #222;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  .container-fluid {
+    max-width: 1180px;
+    margin: 0 auto;
+    background: rgba(255,255,255,0.9);
+    padding: 24px 28px;
+    border-radius: 14px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+    backdrop-filter: blur(6px);
+  }
+  .cards {
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-bottom:16px;
+  }
+  .card {
+    flex:1 1 230px;
+    background: linear-gradient(135deg, #ffe4ec, #ffffff); /* Hồng nhạt */
+    border-radius:12px;
+    padding:14px 16px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.04);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    transition: all 0.2s ease-in-out;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  }
+  .card .meta {
+    font-size:0.9rem;
+    color:#666;
+  }
+  .card .value {
+    font-weight:700;
+    font-size:1.25rem;
+  }
+  .controls {
+    display:flex;
+    gap:8px;
+    align-items:center;
+    margin-bottom:16px;
+    flex-wrap:wrap;
+  }
+  .controls input[type="date"] {
+    padding:6px 10px;
+    border-radius:8px;
+    border:1px solid #ddd;
+    font-family:inherit;
+  }
+  .controls button,
+  .controls a {
+    padding:8px 12px;
+    border-radius:8px;
+    border:none;
+    background:#d63384;
+    color:#fff;
+    text-decoration:none;
+    cursor:pointer;
+    font-family:inherit;
+    transition: background 0.2s ease;
+  }
+  .controls button:hover,
+  .controls a:hover {
+    background:#b0276b;
+  }
+  .controls .secondary {
+    background:#6c757d;
+  }
+  .controls .secondary:hover {
+    background:#555b61;
+  }
+  .stat-section {
+    margin-top: 12px;
+  }
+  .cols {
+    display:flex;
+    gap:18px;
+  }
+  .col {
+    flex:1;
+    min-width:280px;
+  }
+  table {
+    width:100%;
+    border-collapse:collapse;
+    margin-top:8px;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  table th {
+    background:#fce4ec;
+    font-weight:600;
+    padding:10px;
+    text-align:left;
+    border-bottom:1px solid #f8bbd0;
+  }
+  table td {
+    padding:8px 10px;
+    border-bottom:1px solid #f1f1f1;
+  }
+  table tbody tr:hover {
+    background-color: #fce4ec;
+  }
+  .muted {
+    color:#777;
+    font-size:0.9rem;
+  }
+  @media (max-width:900px) {
+    .cols { flex-direction:column; }
+    .cards{flex-direction:column;}
+  }
+  canvas {
+    width:100% !important;
+    max-height:360px;
+  }
+  .top-list {
+    max-height:260px;
+    overflow:auto;
+  }
+  .filter-highlight {
+    background:#fff7e6 !important;
+  }
+  /* Hành động */
+  .action-card {
+    background: linear-gradient(135deg, #ffe4ec, #fff);
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    text-align: center;
+  }
+  .btn-action {
+    background: #d63384;
+    color: #fff;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  .btn-action:hover {
+    background: #b0276b;
+  }
+  .btn-action i {
+    font-size: 1rem;
+  }
+</style>
+
+</head>
+
+<div class="container-fluid">
+  <h2> Thống Kê</h2>
+
+  <!-- Controls -->
+  <div class="controls">
+    <label class="muted">Khoảng:</label>
+    <input id="startDate" type="date" value="{{ start_date }}">
+    <input id="endDate" type="date" value="{{ end_date }}">
+    <button id="applyFilter">Áp dụng</button>
+    <a id="exportCsv" href="{{ url_for('.index') }}?start={{ start_date }}&end={{ end_date }}&export=csv" class="secondary">Xuất CSV</a>
+    <button id="printPdf" class="secondary">In / Lưu PDF</button>
+    <label class="muted" style="margin-left:8px;">(Click biểu đồ để lọc bảng)</label>
+  </div>
+
+  <!-- Cards -->
+  <div class="cards">
+    <div class="card">
+      <div>
+        <div class="meta">Tổng sự kiện</div>
+        <div class="value">{{ total_events }}</div>
+      </div>
+      <div class="muted">Số loại: {{ event_labels|length }}</div>
+    </div>
+    <div class="card">
+      <div>
+        <div class="meta">Tổng người dùng</div>
+        <div class="value">{{ total_users }}</div>
+      </div>
+      <div class="muted">Vai trò: {{ user_labels|length }}</div>
+    </div>
+    <div class="card">
+      <div>
+        <div class="meta">Tổng vé (khoảng)</div>
+        <div class="value">{{ total_bookings }}</div>
+      </div>
+      <div class="muted">
+        {% if bookings_pct is not none %}
+          {% if bookings_pct >= 0 %}
+            <span style="color:green;">▲ {{ bookings_pct }}%</span>
+          {% else %}
+            <span style="color:red;">▼ {{ bookings_pct|abs }}%</span>
+          {% endif %}
+        {% else %}
+          -
+        {% endif %}
+      </div>
+    </div>
+    <div class="card">
+      <div>
+        <div class="meta">Doanh thu (khoảng)</div>
+        <div class="value">
+          {% if total_revenue is not none %}
+            {{ "{:,.2f}".format(total_revenue) }}
+          {% else %}
+            N/A
+          {% endif %}
+        </div>
+      </div>
+      <div class="muted">Đơn vị: theo DB</div>
+    </div>
+  </div>
+
+  <div class="cols">
+    <!-- Charts -->
+    <div class="col">
+      <div class="stat-section">
+        <label class="muted">Loại thống kê:</label>
+        <select id="statSelect">
+          <option value="event" {% if current_tab=='event' %}selected{% endif %}>Sự kiện</option>
+          <option value="user" {% if current_tab=='user' %}selected{% endif %}>Người dùng</option>
+          <option value="booking" {% if current_tab=='booking' %}selected{% endif %}>Đặt vé</option>
+        </select>
+      </div>
+
+      <div id="stat-event" class="stat-section">
+        <h5>Sự kiện theo loại</h5>
+        <canvas id="eventChart"></canvas>
+        <table id="table-event">
+          <thead><tr><th>Loại</th><th>Số lượng</th></tr></thead>
+          <tbody>
+            {% for label, count in event_table %}
+            <tr data-label="{{ label|e }}"><td>{{ label }}</td><td>{{ count }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div id="stat-user" class="stat-section" style="display:none;">
+        <h5>Người dùng theo vai trò</h5>
+        <canvas id="userChart"></canvas>
+        <table id="table-user">
+          <thead><tr><th>Vai trò</th><th>Số lượng</th></tr></thead>
+          <tbody>
+            {% for label, count in user_table %}
+            <tr data-label="{{ label|e }}"><td>{{ label }}</td><td>{{ count }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div id="stat-booking" class="stat-section" style="display:none;">
+        <h5>Đặt vé theo ngày</h5>
+        <canvas id="bookingChart"></canvas>
+        <table id="table-booking">
+          <thead><tr><th>Ngày</th><th>Số vé</th></tr></thead>
+          <tbody>
+            {% for label, count in booking_table %}
+            <tr data-label="{{ label|e }}"><td>{{ label }}</td><td>{{ count }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Top lists -->
+    <div class="col">
+      <div class="stat-section">
+        <h5>Top 5 sự kiện</h5>
+        <div class="top-list">
+          <table>
+            <thead><tr><th>STT</th><th>Sự kiện</th><th>Số vé</th></tr></thead>
+            <tbody>
+              {% for e in top_events %}
+              <tr><td>{{ loop.index }}</td><td>{{ e.title }}</td><td>{{ e.count }}</td></tr>
+              {% else %}
+              <tr><td colspan="3" class="muted">Chưa có dữ liệu</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="stat-section">
+        <h5>Top 5 người dùng</h5>
+        <div class="top-list">
+          <table>
+            <thead><tr><th>STT</th><th>Người dùng</th><th>Số vé</th></tr></thead>
+            <tbody>
+              {% for u in top_users %}
+              <tr><td>{{ loop.index }}</td><td>{{ u.name }}</td><td>{{ u.count }}</td></tr>
+              {% else %}
+              <tr><td colspan="3" class="muted">Chưa có dữ liệu</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Hành động -->
+      <div class="stat-section action-card">
+
+        <button id="resetFilter" class="btn-action"><i></i> Hiển Thị Tất Cả</button>
+        <p class="muted">Click vào biểu đồ để lọc bảng tương ứng.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<script>
+  const eventLabels = {{ event_labels|tojson }};
+  const eventData = {{ event_data|tojson }};
+  const userLabels = {{ user_labels|tojson }};
+  const userData = {{ user_data|tojson }};
+  const bookingLabels = {{ booking_labels|tojson }};
+  const bookingData = {{ booking_data|tojson }};
+
+  const startDateInput = document.getElementById('startDate');
+  const endDateInput = document.getElementById('endDate');
+  const applyFilter = document.getElementById('applyFilter');
+  const exportCsv = document.getElementById('exportCsv');
+  const printPdf = document.getElementById('printPdf');
+  const resetFilter = document.getElementById('resetFilter');
+  const statSelect = document.getElementById('statSelect');
+
+  function showTab(tab) {
+    document.getElementById('stat-event').style.display = tab === 'event' ? 'block' : 'none';
+    document.getElementById('stat-user').style.display = tab === 'user' ? 'block' : 'none';
+    document.getElementById('stat-booking').style.display = tab === 'booking' ? 'block' : 'none';
+  }
+  showTab("{{ current_tab }}");
+  statSelect.addEventListener('change', (e) => { showTab(e.target.value); });
+
+  function createChart(ctx, type, labels, data, colors) {
+    return new Chart(ctx, {
+      type: type,
+      data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderColor: colors }] },
+      plugins: [ChartDataLabels],
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          datalabels: {
+            formatter: (value, ctx) => {
+              const sum = ctx.chart.data.datasets[0].data.reduce((a,b) => a + b, 0);
+              return (!sum || value === 0) ? '' : ((value / sum) * 100).toFixed(1) + '%';
+            },
+            color: '#fff',
+            font: { weight: '600', size: 11 }
+          },
+          legend: { display: true }
+        }
+      }
+    });
+  }
+
+  let eventChart = createChart(document.getElementById('eventChart'), 'doughnut', eventLabels, eventData, ['#FF6384','#36A2EB','#FFCE56','#8BC34A','#FF9F40']);
+  let userChart = createChart(document.getElementById('userChart'), 'bar', userLabels, userData, ['#4BC0C0','#9966FF','#FF9F40']);
+  let bookingChart = createChart(document.getElementById('bookingChart'), 'line', bookingLabels, bookingData, ['#36A2EB']);
+
+  function setupChartFilter(chart, tableSelector) {
+    chart.canvas.addEventListener('click', (evt) => {
+      const points = chart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
+      if (!points.length) return;
+      const idx = points[0].index;
+      const label = chart.data.labels[idx];
+      filterTableByLabel(tableSelector, label);
+    });
+  }
+  function filterTableByLabel(tableSelector, label) {
+    const table = document.querySelector(tableSelector);
+    if (!table) return;
+    const rows = table.querySelectorAll('tbody tr');
+    let any = false;
+    rows.forEach(r => {
+      const v = r.getAttribute('data-label');
+      if (v === label) { r.style.display = ''; r.classList.add('filter-highlight'); any = true; }
+      else { r.style.display = 'none'; r.classList.remove('filter-highlight'); }
+    });
+    if (!any) rows.forEach(r => { r.style.display = ''; r.classList.remove('filter-highlight'); });
+  }
+  setupChartFilter(eventChart, '#table-event');
+  setupChartFilter(userChart, '#table-user');
+  setupChartFilter(bookingChart, '#table-booking');
+
+  resetFilter.addEventListener('click', () => {
+    document.querySelectorAll('table tbody tr').forEach(r => { r.style.display = ''; r.classList.remove('filter-highlight'); });
+  });
+
+  applyFilter.addEventListener('click', () => {
+    const s = startDateInput.value, e = endDateInput.value;
+    if (!s || !e) return alert('Vui lòng chọn start & end');
+    const params = new URLSearchParams(window.location.search);
+    params.set('start', s);
+    params.set('end', e);
+    params.set('tab', statSelect.value);
+    window.location.search = params.toString();
+  });
+
+  function updateExportHref() {
+    const s = startDateInput.value, e = endDateInput.value;
+    const params = new URLSearchParams();
+    if (s) params.set('start', s);
+    if (e) params.set('end', e);
+    exportCsv.href = "{{ url_for('.index') }}" + '?' + params.toString() + '&export=csv';
+  }
+  startDateInput.addEventListener('change', updateExportHref);
+  endDateInput.addEventListener('change', updateExportHref);
+  updateExportHref();
+
+  printPdf.addEventListener('click', () => { window.print(); });
+</script>
+{% endblock %}

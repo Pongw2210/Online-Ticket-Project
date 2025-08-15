@@ -1,24 +1,27 @@
 from datetime import datetime
 from sqlalchemy.orm import relationship
-from app import db
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, Text, Time, Float, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, Text, Float, Boolean
 from enum import Enum as RoleEnum
 from flask_login import UserMixin
-
-import enum
 import hashlib
+from app.extensions import db  # Dùng db từ extensions
 
+
+
+# ===== ENUMS =====
 
 class UserEnum(RoleEnum):
-    KHACH_HANG = "Khách hàng "
+    KHACH_HANG = "Khách hàng"
     NGUOI_TO_CHUC = "Người tổ chức"
     ADMIN = "Người quản trị"
 
+
 class StatusEventEnum(RoleEnum):
-    DA_DUYET = "Đã duyệt "
+    DA_DUYET = "Đã duyệt"
     DANG_DUYET = "Đang duyệt"
     TU_CHOI = "Từ chối"
-    DA_AN = "Đã ẩn "
+    DA_AN = "Đã ẩn"
+
 
 class StatusBookingEnum(RoleEnum):
     CHO_THANH_TOAN = "Chờ thanh toán"
@@ -30,8 +33,9 @@ class StatusSeatEnum(RoleEnum):
     DA_DAT = "Đã đặt"
 
 class EventFormatEnum(RoleEnum):
-    ONLINE ="Trực tuyến"
+    ONLINE = "Trực tuyến"
     OFFLINE = "Trực tiếp"
+
 
 class EventTypeEnum(RoleEnum):
     NHAC_SONG = "Nhạc sống"
@@ -39,19 +43,24 @@ class EventTypeEnum(RoleEnum):
     THE_THAO = "Thể thao"
     KHAC = "Khác"
 
+
+# ===== BASE MODEL =====
 class Base(db.Model):
     __abstract__ = True
     id = Column(Integer, primary_key=True, autoincrement=True)
     __table_args__ = {'extend_existing': True}
 
+
+# ===== USER TYPES =====
 class Customer(Base):
     __tablename__ = 'customer'
-    fullname = Column(String(100),nullable=False)
+    fullname = Column(String(100), nullable=False)
     email = Column(String(100), nullable=False)
     gender = Column(String(10), nullable=False)
     dob = Column(DateTime, nullable=False)
     number_phone = Column(String(10), nullable=False)
-    user_id = Column(Integer,ForeignKey('user.id'),nullable=False)
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+
 
 class EventOrganizer(Base):
     __tablename__ = 'event_organizer'
@@ -60,6 +69,8 @@ class EventOrganizer(Base):
     gender = Column(String(10), nullable=False)
     user_id = Column(Integer, ForeignKey('user.id'), nullable=True)
 
+
+
 class Admin(Base):
     __tablename__ = 'admin'
     fullname = Column(String(100), nullable=False)
@@ -67,17 +78,22 @@ class Admin(Base):
     gender = Column(String(10), nullable=False)
     user_id = Column(Integer, ForeignKey('user.id'), nullable=True)
 
-class User(Base,UserMixin):
+
+
+# ===== USER MODEL =====
+class User(Base, UserMixin):
     __tablename__ = 'user'
-    username = Column(String(50),unique=True,nullable=False)
+    username = Column(String(50), unique=True, nullable=False)
     email = Column(String(100), unique=True, nullable=False)
-    password = Column(String(50),nullable=False)
-    avatar = Column(String(300),default="https://res.cloudinary.com/dgqx9xde1/image/upload/v1744899995/User1_cmpdyi.jpg")
+    password = Column(String(50), nullable=False)
+    avatar = Column(String(300), default="https://res.cloudinary.com/dgqx9xde1/image/upload/v1744899995/User1_cmpdyi.jpg")
     role = Column(Enum(UserEnum), default=UserEnum.KHACH_HANG)
     joined_date = Column(DateTime, default=datetime.utcnow)
+
     customer = relationship(Customer, uselist=False, backref="user", cascade="all, delete")
     event_organizer = relationship(EventOrganizer, uselist=False, backref="user", cascade="all, delete")
     admin = relationship(Admin, uselist=False, backref="user", cascade="all, delete")
+   ##bookings = relationship("Booking", backref="user", cascade="all, delete")
 
     def set_password(self, password):
         """Hash password và lưu vào database"""
@@ -97,11 +113,23 @@ class User(Base,UserMixin):
             return self.admin.fullname
         return self.username
 
+    @property
+    def total_tickets_bought(self):
+        """Tổng vé đã mua"""
+        return sum(b.quantity for b in self.bookings)
+
+    @property
+    def total_spent(self):
+        """Tổng tiền đã chi"""
+        return sum(b.total_price for b in self.bookings)
+
+
+# ===== TICKET TYPE =====
 class TicketType(Base):
     __tablename__ = 'ticket_type'
     name = Column(String(50))
     price = Column(Float)
-    quantity = Column(Integer, nullable= False)
+    quantity = Column(Integer, nullable=False)
     benefits = Column(Text)
     event_id = Column(Integer, ForeignKey("event.id"), nullable=False)
     requires_seat = Column(Boolean, default=False)   #thể hiện loại vé có được chọn ghế hay ngồi ngẫu nhiên
@@ -110,18 +138,23 @@ class TicketType(Base):
     def benefits_list(self):
         return [b.strip() for b in self.benefits.split('|')] if self.benefits else []
 
+
+# ===== EVENT FORMATS =====
 class EventOffline(Base):
     __tablename__ = 'event_offline'
     venue_name = Column(String(255), nullable=False)
     location = Column(String(255), nullable=False)
     has_seat = Column(Boolean, default=False)
-    event_id = Column(Integer, ForeignKey('event.id'), nullable=False,unique=True)
+    event_id = Column(Integer, ForeignKey('event.id'), nullable=False, unique=True)
+
 
 class EventOnline(Base):
     __tablename__ = 'event_online'
     livestream_url = Column(String(255), nullable=False)
     event_id = Column(Integer, ForeignKey('event.id'), nullable=False, unique=True)
 
+
+# ===== EVENT MODEL =====
 class Event(Base):
     __tablename__ = 'event'
     name = Column(String(255), nullable=False)
@@ -143,17 +176,34 @@ class Event(Base):
     ticket_types = relationship("TicketType", backref="event", cascade="all, delete")
     event_offline = relationship(EventOffline, uselist=False, backref="event", cascade="all, delete")
     event_online = relationship(EventOnline, uselist=False, backref="event", cascade="all, delete")
-
-    # Thêm quan hệ với bảng ghi lý do từ chối
     rejection_logs = relationship("EventRejectionLog", backref="event", cascade="all, delete")
+    seats = relationship("Seat", backref="event", cascade="all, delete")
 
+    @property
+    def ticket_count(self):
+        """Tổng số vé đã bán"""
+        return sum(b.quantity for b in self.bookings)
+
+    @property
+    def revenue(self):
+        """Tổng doanh thu"""
+        return sum(b.total_price for b in self.bookings)
+
+    @property
+    def bookings_count(self):
+        """Số lượt đặt vé"""
+        return len(self.bookings)
+
+
+# ===== EVENT REJECTION LOG =====
 class EventRejectionLog(Base):
     __tablename__ = 'event_rejection_log'
-
     event_id = Column(Integer, ForeignKey('event.id'), nullable=False)
     reason = Column(Text, nullable=False)
     rejected_at = Column(DateTime, default=datetime.utcnow)
 
+
+# ===== BOOKING MODEL =====
 class Booking(Base):
     __tablename__ = 'booking'
 
@@ -182,10 +232,8 @@ class Seat(Base):
     __tablename__ = 'seat'
 
     event_id = Column(Integer, ForeignKey('event.id'), nullable=False)
-    seat_code = Column(String(10), nullable=False)  # VD: "A1", "B3"
-    status = Column(String(20), default="available")  # trạng thái: available, booked, etc.
-
-    event = relationship("Event", backref="seats")
+    seat_code = Column(String(10), nullable=False)
+    status = Column(Enum(StatusSeatEnum), default= StatusSeatEnum.TRONG)
 
 class BookingSeat(Base):
     __tablename__ = 'booking_seat'

@@ -1,11 +1,8 @@
 from flask import Flask
 from flask_login import LoginManager
-from flask_sqlalchemy import SQLAlchemy
 import cloudinary
-
-
-#Khai báo db và login
-db = SQLAlchemy()
+from app.admin_view import flask_admin
+from app.extensions import db  #  Dùng db từ extensions
 login = LoginManager()
 
 def create_app():
@@ -26,12 +23,15 @@ def create_app():
 
     #Khởi tạo các extensions
     db.init_app(app)
-    login.init_app(app)
-    login.login_view = "auth.login"
+
 
     # IMPORT SAU khi db & login đã init
     from app.admin_view import init_admin
     init_admin(app)
+
+    login.init_app(app)
+    login.login_view = "auth.login"
+
 
     # Đăng ký các blueprint
     from app.routes import auth
@@ -47,10 +47,13 @@ def create_app():
     app.register_blueprint(admin.admin_bp)
 
 
+
     from app.routes.report import report_bp
     app.register_blueprint(report_bp)
 
 
 
     return app
+
+
 
