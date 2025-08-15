@@ -75,10 +75,12 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 24px;
+  max-width: 95%;
+  margin: 0 auto;
 }
 
 .event-info {
-  max-width: 75%;
+  max-width: 90%;
 }
 
 .event-title {
@@ -100,9 +102,9 @@ body {
 
 /* ===== Countdown Timer ===== */
 .countdown {
-  min-width: 130px;
+  min-width: 180px;
   background-color: var(--white);
-  padding: 18px;
+  padding: 20px 26px;
   border-radius: 18px;
   text-align: center;
   box-shadow: 0 4px 14px var(--shadow-medium);
@@ -127,32 +129,64 @@ body {
 
 /* ===== Page Layout ===== */
 .container {
-  max-width: 1200px;
+  max-width: 800px;
   margin: 28px auto;
   padding: 0 20px;
   display: flex;
-  gap: 28px;
+  flex-direction: column; /* Luôn hiển thị dọc */
+  gap: 20px;
 }
 
-.left {
-  flex: 1;
+.left, .right {
+  width: 100%;
 }
 
 .right {
-  width: 340px;
+  order: 2; /* Thông tin đơn hàng xuống dưới */
+}
+
+.left {
+  order: 1; /* Form thanh toán lên trên */
+}
+
+/* Căn giữa nội dung khi cần */
+.left, .right {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Giữ nguyên style các card */
+.summary-card {
+  background-color: var(--white);
+  color: var(--text-dark);
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 1px solid #f0f0f0;
+  box-shadow: 0 4px 12px var(--shadow-light);
+  user-select: none;
 }
 
 /* ===== Section Titles ===== */
+.section-title,
 h3.section-title {
-  color: var(--pink-dark);
-  letter-spacing: 0.5px;
-  margin-bottom: 14px;
-  font-weight: 700;
-  user-select: none;
+  font-size: 28px;              /* To hơn */
+  font-weight: 900;              /* Đậm nhất */
+  text-transform: uppercase;
+  color: #b33951;                /* Hồng đậm */
+  text-align: center;            /* Căn giữa */
+  letter-spacing: 1px;           /* Giãn chữ nhẹ */
+  text-shadow: 2px 2px 5px rgba(179, 55, 81, 0.3); /* Bóng chữ */
+  margin-bottom: 20px;
 }
 
 /* ===== Cards ===== */
 .card {
+  display: flex;
+  align-items: center;       /* Căn giữa ảnh và text */
+  justify-content: space-between;
+  gap: 20px;
   background-color: var(--white);
   padding: 20px;
   border-radius: var(--radius);
@@ -164,6 +198,21 @@ h3.section-title {
 
 .card:hover {
   box-shadow: 0 8px 24px var(--shadow-strong);
+}
+
+/* Nội dung text bên trái */
+.card-content {
+  flex: 1;
+}
+
+/* Ảnh sự kiện bên phải */
+.card img {
+  width: 200px;
+  height: 130px;
+  object-fit: cover;
+  border-radius: 8px;
+  background-color: #ffe6ef;
+  padding: 6px;
 }
 
 /* ===== Forms and Inputs ===== */
@@ -287,30 +336,16 @@ label {
 }
 
 .total {
-  font-size: 20px;
-  font-weight: 800;
-  color: var(--pink-dark);
-  user-select: none;
+  font-size: 22px;
+  font-weight: 900;
+  color: #b33951; /* hồng đậm hơn */
+  text-shadow: 1px 1px 3px rgba(179, 55, 81, 0.3);
 }
-
 /* ===== Checkout Footer Sticky ===== */
 .checkout-footer {
   position: sticky;
   top: 18px;
   z-index: 10;
-}
-
-/* ===== Card Images ===== */
-.card img {
-  width: 100%;
-  max-height: 180px;
-  object-fit: contain;
-  display: block;
-  margin: 0 auto;
-  border-radius: 8px;
-  background-color: #ffe6ef; /* hồng pastel nhạt rõ hơn */
-  padding: 6px;
-  user-select: none;
 }
 
 /* ===== Responsive ===== */
@@ -325,7 +360,16 @@ label {
   .event-info {
     max-width: 100%;
   }
+  .card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .card img {
+    width: 100%;
+    height: auto;
+  }
 }
+
 body {
   background-color: #fdeaf0;
   font-family: 'Inter', sans-serif;
@@ -349,15 +393,6 @@ h2.title {
   font-size: 28px;
   margin-bottom: 24px;
   letter-spacing: 0.02em;
-}
-
-.card {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(233, 154, 177, 0.2);
-  padding: 20px;
-  margin-bottom: 30px;
-  border: 1px solid #f2d7de;
 }
 
 .card label {
@@ -456,4 +491,23 @@ h2.title {
   h2.title {
     font-size: 24px;
   }
+}
+/* Làm chữ THANH TOÁN đậm và to hơn */
+.section-title,
+h3.section-title {
+  font-size: 24px;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #d6336c;
+}
+
+/* Làm nút Thanh toán đậm hơn */
+#payBtn2 {
+  background-color: #b33951; /* màu hồng đậm */
+  font-weight: 900; /* đậm chữ */
+  font-size: 16px; /* to hơn một chút */
+}
+
+#payBtn2:hover {
+  background-color: #9b2d46; /* màu đậm hơn khi hover */
 }

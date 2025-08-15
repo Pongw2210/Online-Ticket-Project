@@ -6,6 +6,7 @@ from enum import Enum as RoleEnum
 from flask_login import UserMixin
 import hashlib
 
+
 class UserEnum(RoleEnum):
     KHACH_HANG = "Khách hàng "
     NGUOI_TO_CHUC = "Người tổ chức"

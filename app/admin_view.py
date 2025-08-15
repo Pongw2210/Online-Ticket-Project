@@ -1,10 +1,13 @@
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
+from flask_admin.menu import MenuLink
 
 flask_admin = Admin(name="Ticket Admin", template_mode="bootstrap4")
 
-class EventView(ModelView) :
-    pass
+
+flask_admin.add_link(MenuLink(name="Duyệt sự kiện", url="/admin/approve-events"))
+flask_admin.add_link(MenuLink(name="Đăng xuất", url="/logout"))
+
 
 def init_admin(app):
     from app import db

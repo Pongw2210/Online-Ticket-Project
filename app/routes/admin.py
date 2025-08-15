@@ -4,12 +4,17 @@ from app import db
 from datetime import datetime
 from app.data.models import StatusEventEnum
 
+
+
 admin_bp = Blueprint('admin_view', __name__, url_prefix='/admin')
 
 @admin_bp.route("/approve-events")
 def approve_events():
     events = Event.query.filter_by(status=StatusEventEnum.DANG_DUYET).all()
     return render_template("admin/approval.html", events=events)
+@admin_bp.route("/admin")
+def admin_dashboard():
+    return render_template("admin/dashboard.html")
 
 
 @admin_bp.route("/approve/<int:event_id>", methods=["POST"])
