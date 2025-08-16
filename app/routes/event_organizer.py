@@ -6,7 +6,7 @@ from flask_login import login_required, current_user
 
 from app import dao,db
 from app.data.models import UserEnum, Event, EventOffline, EventOnline, TicketType, EventFormatEnum, EventTypeEnum, \
-    StatusEventEnum, EventRejectionLog, Seat, StatusSeatEnum, DiscountTypeEnum, Promotion, TicketPromotion
+    StatusEventEnum, EventRejectionLog, Seat, StatusSeatEnum, DiscountTypeEnum, Voucher, TicketVoucher
 import cloudinary.uploader
 from datetime import datetime
 
@@ -23,11 +23,12 @@ def home():
         return redirect(url_for("events.home"))
 
     organizer_id = current_user.event_organizer.id
+    search_query = request.args.get("q", "").strip()
 
-    approved_events = dao.load_approved_events(organizer_id)
-    pending_events  = dao.load_pending_events(organizer_id)
-    hidden_events  = dao.load_hidden_events(organizer_id)
-    rejected_events  = dao.load_rejected_events(organizer_id)
+    approved_events = dao.load_approved_events(organizer_id,search_query)
+    pending_events  = dao.load_pending_events(organizer_id,search_query)
+    hidden_events  = dao.load_hidden_events(organizer_id,search_query)
+    rejected_events  = dao.load_rejected_events(organizer_id,search_query)
 
     return render_template("event_organizer/home_event_organizer.html",
                            current_user=current_user,
@@ -147,41 +148,6 @@ def create_event_api():
                         status=StatusSeatEnum.TRONG
                     )
                     db.session.add(seat)
-
-        # Thêm mã khuyến mãi
-        promotions_list = json.loads(promotions)
-        for promo in promotions_list:
-            value_str = promo['value']
-            if '%' in value_str:
-                discount_type = DiscountTypeEnum.PHAN_TRAM
-                discount_value = float(value_str.replace('%',''))
-            else:
-                discount_type = DiscountTypeEnum.SO_TIEN
-                discount_value = float(value_str)
-
-            apply_all = "all" in promo['ticket_types']
-
-            new_promo = Promotion(
-                code=promo['code'],
-                discount_type=discount_type,
-                discount_value=discount_value,
-                start_date=datetime.fromisoformat(promo['start_time']),
-                end_date=datetime.fromisoformat(promo['end_time']),
-                apply_all=apply_all
-            )
-            db.session.add(new_promo)
-            db.session.flush()  # lấy new_promo.id
-
-            # Nếu không apply tất cả, lưu vào bảng phụ TicketPromotion
-            if not apply_all:
-                for tid in promo.get('ticket_types', []):
-                    ticket = next((t for t in ticket_objects if str(t.id) == str(tid)), None)
-                    if ticket:
-                        db.session.add(TicketPromotion(
-                            promotion_id=new_promo.id,
-                            ticket_type_id=ticket.id
-                        ))
-
         db.session.commit()
         return jsonify({"success": True})
 
@@ -189,7 +155,6 @@ def create_event_api():
         db.session.rollback()
         print("Error:", e)
         return jsonify({"success": False, "message": "Lỗi khi tạo sự kiện."}), 500
-
 
 @event_organizer_bp.route('/api/<int:event_id>/hide',methods=['POST'])
 def hide_event_api(event_id):
@@ -338,3 +303,100 @@ def delete_event_api(event_id):
 
     return jsonify({"message": "Xóa sự kiện thành công."}), 200
 
+@event_organizer_bp.route("/api/<int:event_id>/ticket-types")
+def get_ticket_types(event_id):
+    ticket_types = TicketType.query.filter_by(event_id=event_id).all()
+    return jsonify([
+        {"id": t.id, "name": t.name, "price": t.price}
+        for t in ticket_types
+    ])
+
+@event_organizer_bp.route('/api/create-voucher', methods=['POST'])
+def create_voucher():
+    try:
+        data = request.get_json()
+
+        event_id = int(data.get("event_id"))
+        code = data.get("code", "").strip()
+        discount_value_raw = data.get("discount_value", "").strip()
+        quantity = int(data.get("quantity", 1))
+        start_date = datetime.fromisoformat(data.get("start_date"))
+        end_date = datetime.fromisoformat(data.get("end_date"))
+        apply_all = data.get("apply_all", False)
+        ticket_ids = data.get("ticket_ids", [])
+
+        # Xác định discount_type
+        if "%" in discount_value_raw:
+            discount_type = DiscountTypeEnum.PHAN_TRAM
+            discount_value = float(discount_value_raw.replace("%",""))
+        else:
+            discount_type = DiscountTypeEnum.SO_TIEN
+            discount_value = float(discount_value_raw)
+
+        # Check trùng mã voucher trong cùng sự kiện
+        if db.session.query(Voucher).filter_by(code=code, event_id=event_id).first():
+            return jsonify({"error": "Mã voucher đã tồn tại trong sự kiện này"}), 400
+
+        # Tạo voucher mới
+        voucher = Voucher(
+            event_id=event_id,
+            code=code,
+            discount_type=discount_type,
+            discount_value=discount_value,
+            quantity=quantity,
+            start_date=start_date,
+            end_date=end_date,
+            apply_all=apply_all
+        )
+        db.session.add(voucher)
+        db.session.commit()  # Commit để có voucher.id
+
+        # Lưu TicketVoucher nếu không áp dụng tất cả vé
+        if not apply_all and ticket_ids:
+            ticket_vouchers = [
+                TicketVoucher(promotion_id=voucher.id, ticket_type_id=int(tid))
+                for tid in ticket_ids
+            ]
+            db.session.add_all(ticket_vouchers)
+            db.session.commit()
+
+        return jsonify({"message": "Tạo voucher thành công", "voucher_id": voucher.id}), 201
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+@event_organizer_bp.route("/api/save-ticket", methods=["POST"])
+def save_ticket():
+    data = request.get_json()
+
+    event_id = data.get("event_id")
+    name = data.get("name")
+    quantity = data.get("quantity")
+    price = data.get("price")
+    benefits = data.get("benefit")
+    requires_seat = data.get("requires_seat", 0)
+
+    if not event_id or not name or not quantity or not price:
+        return jsonify({"success": False, "message": "Thiếu dữ liệu"})
+
+    existing_ticket = TicketType.query.filter_by(event_id=event_id, name=name).first()
+    if existing_ticket:
+        return jsonify({"success": False, "message": "Tên vé đã tồn tại trong sự kiện này"})
+
+    try:
+        ticket = TicketType(
+            event_id=event_id,
+            name=name,
+            quantity=quantity,
+            price=price,
+            benefits=benefits,
+            requires_seat=requires_seat
+        )
+        db.session.add(ticket)
+        db.session.commit()
+
+        return jsonify({"success": True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "message": str(e)})

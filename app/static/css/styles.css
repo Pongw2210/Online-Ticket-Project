@@ -1458,3 +1458,94 @@ a:hover {
     cursor: pointer;
     margin-top: 15px;
 }
+
+/* Modal overlay */
+#voucherModal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* Modal box */
+#voucherModal .modal-box {
+    background: #fff;
+    padding: 20px 25px;
+    border-radius: 12px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    position: relative;
+}
+
+/* Modal title */
+#voucherModal h3 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+/* Voucher list */
+#voucherList {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px 0;
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #eee;
+    border-radius: 8px;
+}
+
+#voucherList li {
+    padding: 10px 12px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#voucherList li:hover {
+    background: #f0f4ff;
+}
+
+/* Buttons */
+#voucherModal button {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#voucherModal .btn-apply {
+    background-color: #2b6df0;
+    color: #fff;
+    margin-right: 10px;
+}
+
+#voucherModal .btn-apply:hover {
+    background-color: #1a4fc1;
+}
+
+#voucherModal .btn-cancel {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+#voucherModal .btn-cancel:hover {
+    background-color: #dcdcdc;
+}
+
+/* Scrollbar cho danh sách voucher */
+#voucherList::-webkit-scrollbar {
+    width: 6px;
+}
+
+#voucherList::-webkit-scrollbar-thumb {
+    background-color: rgba(43,109,240,0.5);
+    border-radius: 3px;
+}

@@ -1,0 +1,131 @@
+/* Nền tổng thể */
+body {
+    background: linear-gradient(135deg, #ffd6eb, #ffe6f7);
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    color: #333;
+}
+
+/* Card profile */
+.card {
+    border-radius: 20px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+/* Header card */
+.card-header {
+    background: linear-gradient(135deg, #f78fb3, #f6a6d6);
+    color: white;
+    font-weight: 600;
+    font-size: 1.3rem;
+}
+
+/* Avatar */
+#avatarPreview {
+    border: 5px solid #f6a6d6;
+    border-radius: 50%;
+    width: 160px;
+    height: 160px;
+    object-fit: cover;
+    transition: transform 0.3s ease-in-out;
+}
+
+#avatarPreview:hover {
+    transform: scale(1.08);
+}
+
+/* Button */
+.btn {
+    border-radius: 10px;
+    padding: 0.5rem 1.3rem;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+/* Chọn ảnh */
+.btn-outline-primary {
+    border: 2px solid #f78fb3;
+    color: #f78fb3;
+    background-color: white;
+}
+
+.btn-outline-primary:hover {
+    background: #f78fb3;
+    color: white;
+}
+
+/* Lưu thay đổi */
+.btn-primary {
+    background: linear-gradient(135deg, #f6a6d6, #f78fb3);
+    border: none;
+}
+
+.btn-primary:hover {
+    opacity: 0.85;
+}
+
+/* Table info */
+.table th {
+    width: 30%;
+    font-weight: 600;
+    color: #f78fb3;
+}
+
+.table td {
+    color: #555;
+}
+/* Container */
+.container {
+    max-width: 1100px;  /* cho container rộng hơn */
+    margin: 0 auto;
+}
+
+/* Card profile */
+.card {
+    border-radius: 20px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    padding: 2rem;           /* thêm khoảng cách bên trong */
+    min-height: 500px;       /* card cao hơn */
+}
+
+/* Header card */
+.card-header {
+    background: linear-gradient(135deg, #f78fb3, #f6a6d6);
+    color: white;
+    font-weight: 600;
+    font-size: 1.5rem;       /* chữ to hơn */
+    padding: 1.2rem;
+    text-align: center;
+}
+
+/* Avatar */
+#avatarPreview {
+    border: 5px solid #f6a6d6;
+    border-radius: 50%;
+    width: 200px;            /* to hơn */
+    height: 200px;
+    object-fit: cover;
+    transition: transform 0.3s ease-in-out;
+}
+
+#avatarPreview:hover {
+    transform: scale(1.08);
+}
+
+/* Thông tin user */
+.table {
+    font-size: 1.05rem;      /* chữ to hơn */
+}
+
+.table th {
+    width: 35%;
+    font-weight: 600;
+    color: #f78fb3;
+}
+
+.table td {
+    color: #555;
+}

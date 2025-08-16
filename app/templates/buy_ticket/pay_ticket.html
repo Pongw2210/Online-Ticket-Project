@@ -9,29 +9,29 @@
             <div class="meta">
                 <div>
                     {% if event.event_format.name == 'OFFLINE' %}
-                        {{ event.event_offline.location }}
+                    {{ event.event_offline.location }}
                     {% else %}
-                        Trực tuyến
+                    Trực tuyến
                     {% endif %}
                 </div>
                 <div>🕒 {{event.start_datetime}}</div>
             </div>
         </div>
 
-     <div class="countdown" aria-hidden="true">
-    <div style="
+        <div class="countdown" aria-hidden="true">
+            <div style="
         font-size:14px;
         color:#000000;
         margin-bottom:8px;
     ">
-        Hoàn tất đặt vé trong
-    </div>
-    <div class="time">
-        <div class="digit" id="cd-min">14</div>
-        <div style="align-self:center;color:#000000;">:</div>
-        <div class="digit" id="cd-sec">30</div>
-    </div>
-</div>
+                Hoàn tất đặt vé trong
+            </div>
+            <div class="time">
+                <div class="digit" id="cd-min">14</div>
+                <div style="align-self:center;color:#000000;">:</div>
+                <div class="digit" id="cd-sec">30</div>
+            </div>
+        </div>
     </div>
 </section>
 
@@ -49,8 +49,7 @@
         <div class="card">
             <label>Mã khuyến mãi</label>
             <div class="voucher">
-                <input class="input" placeholder="Thêm khuyến mãi" style="flex:1">
-                <button class="btn secondary">Chọn voucher</button>
+                <button class="btn secondary" onclick="showVoucherModal({{event.id}})">Chọn voucher</button>
             </div>
         </div>
 
@@ -71,42 +70,57 @@
         </div>
     </div>
 
-<aside class="right">
-    <div class="checkout-footer">
-        <!-- Thông tin đặt vé -->
-        <div class="summary-card">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                <div style="font-weight:700">Thông tin đặt vé</div>
-                <a href="{{ url_for('events.buy_ticket', event_id=event.id) }}"
-                   style="font-size:13px;color:#2b6df0;text-decoration:none">Chọn lại vé</a>
+    <aside class="right">
+        <div class="checkout-footer">
+            <!-- Thông tin đặt vé -->
+            <div class="summary-card">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                    <div style="font-weight:700">Thông tin đặt vé</div>
+                    <a href="{{ url_for('events.buy_ticket', event_id=event.id) }}"
+                       style="font-size:13px;color:#2b6df0;text-decoration:none">Chọn lại vé</a>
+                </div>
+
+                <!-- Container để JS render vé -->
+                <div id="ticket-summary"></div>
             </div>
 
-            <!-- Container để JS render vé -->
-            <div id="ticket-summary"></div>
+            <!-- Thông tin đơn hàng -->
+            <div class="summary-card" style="padding:18px;">
+                <div style="font-weight:700;margin-bottom:10px">Thông tin đơn hàng</div>
+                <div class="summary-row">
+                    <div class="muted">Tạm tính</div>
+                    <div id="subtotal">0 đ</div>
+                </div>
+                <div class="summary-row">
+                    <div class="muted">Voucher</div>
+                    <div id="voucher-name" class="muted"> Chưa sử dụng voucher </div>
+                </div>
+                <div style="height:1px;background:rgba(0,0,0,0.06);margin:10px 0"></div>
+                <div class="summary-row">
+                    <div style="font-weight:700">Tổng tiền</div>
+                    <div class="total" id="total-price">0 đ</div>
+                </div>
+                <div style="font-size:12px;color:#6b6b6b;margin-top:10px">
+                    Bằng việc tiến hành đặt mua, bạn đã đồng ý với
+                    <a href="#">Điều Kiện Giao Dịch Chung</a>
+                </div>
+                <div style="margin-top:12px;display:flex;gap:8px">
+                    <button class="btn" style="flex:1" id="payBtn2" onclick="handlePayment()">Thanh toán</button>
+                </div>
+            </div>
         </div>
-
-        <!-- Thông tin đơn hàng -->
-        <div class="summary-card" style="padding:18px;">
-            <div style="font-weight:700;margin-bottom:10px">Thông tin đơn hàng</div>
-            <div class="summary-row">
-                <div class="muted">Tạm tính</div>
-                <div id="subtotal">0 đ</div>
-            </div>
-            <div style="height:1px;background:rgba(0,0,0,0.06);margin:10px 0"></div>
-            <div class="summary-row">
-                <div style="font-weight:700">Tổng tiền</div>
-                <div class="total" id="total-price">0 đ</div>
-            </div>
-            <div style="font-size:12px;color:#6b6b6b;margin-top:10px">
-                Bằng việc tiến hành đặt mua, bạn đã đồng ý với
-                <a href="#">Điều Kiện Giao Dịch Chung</a>
-            </div>
-            <div style="margin-top:12px;display:flex;gap:8px">
-                <button class="btn" style="flex:1" id="payBtn2" onclick="handlePayment()">Thanh toán</button>
-            </div>
-        </div>
-    </div>
-</aside>
+    </aside>
 
 </main>
+<div id="voucherModal">
+    <div class="modal-box">
+        <h3>Chọn voucher</h3>
+        <ul id="voucherList"></ul>
+        <div style="text-align:right">
+            <button class="btn-cancel" onclick="closeVoucherModal()">Huỷ</button>
+        </div>
+    </div>
+</div>
+
+
 {%endblock%}

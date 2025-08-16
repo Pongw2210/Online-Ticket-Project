@@ -28,10 +28,6 @@
             <div class="circle">2</div>
             <div class="label">Thời gian & Loại vé</div>
         </div>
-        <div class="step">
-            <div class="circle">3</div>
-            <div class="label">Mã khuyến mãi</div>
-        </div>
         <div class="step-buttons">
             <button class="btn btn-prev" onclick="goToPrevStep()">Quay lại</button>
             <button class="btn btn-next" onclick="goToNextStep()">Tiếp tục</button>
@@ -204,64 +200,6 @@
                     </div>
 
                     <button type="button" class="btn btn-save" onclick="addTicketType()">+ Thêm loại vé</button>
-                </div>
-
-                <div class="event-form-section step-section step-3  ">
-                    <h3>Mã khuyến mãi 1</h3>
-
-                    <div id="promo-list">
-                        <div class="promo-item form-group form-row">
-                            <div>
-                                <label class="required-label">
-                                    <span class="text-danger">*</span> Tên khuyến mãi
-                                </label>
-                                <input type="text" class="promo_name" maxlength="50"
-                                       placeholder="Ví dụ: Giảm giá khai trương">
-                            </div>
-                            <div>
-                                <label class="required-label">
-                                    <span class="text-danger">*</span> Mã code
-                                </label>
-                                <input type="text" class="promo_code" maxlength="20" placeholder="VD: KHAITRUONG20">
-                            </div>
-                            <div>
-                                <label class="required-label">
-                                    <span class="text-danger">*</span> Giá trị giảm (% hoặc VNĐ)
-                                </label>
-                                <input type="text" class="promo_value" placeholder="VD: 20% hoặc 50000">
-                            </div>
-                            <div>
-                                <label class="required-label">
-                                    <span class="text-danger">*</span> Số lượng áp dụng
-                                </label>
-                                <input type="number" class="promo_quantity" min="1" placeholder="VD: 100">
-                            </div>
-                            <div>
-                                <label class="required-label">
-                                    <span class="text-danger">*</span> Ngày bắt đầu
-                                </label>
-                                <input type="datetime-local" id="promo_start_time" name="promo_start_time" required>
-                            </div>
-                            <div>
-                                <label class="required-label">
-                                    <span class="text-danger">*</span> Ngày kết thúc
-                                </label>
-                                <input type="datetime-local" id="promo_end_time" name="promo_end_time" required>
-                            </div>
-
-                            <div>
-                                <label class="required-label">
-                                    <span class="text-danger">*</span> Áp dụng cho loại vé
-                                </label>
-                                <select id="select-ticket-types" name="ticket_types[]" multiple>
-
-                                </select>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <button type="button" class="btn btn-save" onclick="addPromo()">+ Thêm mã khuyến mãi</button>
                 </div>
 
             </div>

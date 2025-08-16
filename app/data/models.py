@@ -102,9 +102,9 @@ class User(Base, UserMixin):
             return self.admin.fullname
         return self.username
 
-class TicketPromotion(Base):
-    __tablename__ = 'ticket_promotion'
-    promotion_id = Column(Integer, ForeignKey("promotion.id"))
+class TicketVoucher(Base):
+    __tablename__ = 'ticket_voucher'
+    promotion_id = Column(Integer, ForeignKey("voucher.id"))
     ticket_type_id = Column(Integer, ForeignKey("ticket_type.id"))
 
 
@@ -117,7 +117,7 @@ class TicketType(Base):
     event_id = Column(Integer, ForeignKey("event.id"), nullable=False)
     requires_seat = Column(Boolean, default=False)
 
-    promotions = relationship(TicketPromotion, backref="ticket_type", lazy=True)
+    promotions = relationship(TicketVoucher, backref="ticket_type", lazy=True)
 
     @property
     def benefits_list(self):
@@ -221,16 +221,18 @@ class BookingSeat(Base):
     booking = relationship("Booking", back_populates="booking_seats")
     seat = relationship("Seat")
 
-class Promotion(Base):
-    __tablename__ = 'promotion'
+class Voucher(Base):
+    __tablename__ = 'voucher'
 
     code = Column(String(50), unique=True, nullable=False)
     discount_type = Column(Enum(DiscountTypeEnum), nullable=False)
     discount_value = Column(Float, nullable=False)
+    quantity = Column(Integer, nullable=False, default=1)
     start_date = Column(DateTime, nullable=False)
     end_date = Column(DateTime, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     apply_all =  Column(Boolean, default=False)
+    event_id = Column(Integer, ForeignKey('event.id'), nullable=False)
 
-    tickets = relationship(TicketPromotion, backref="promotion", lazy=True)
+    tickets = relationship(TicketVoucher, backref="voucher", lazy=True)
 

@@ -96,3 +96,7 @@ def login():
 def logout_my_user():
     logout_user()
     return redirect(url_for("events.home"))
+
+@auth_bp.route('/user_info')
+def user_info():
+    return render_template('user_info.html')

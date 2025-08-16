@@ -3,6 +3,13 @@
 {% block title %}Trang chủ - Organizer{% endblock %}
 
 {% block content %}
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Select2 -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
 <div class="topbar">
     <h2>{% block header %}Sự kiện của tôi{% endblock %}</h2>
     <div class="topbar-right">
@@ -14,17 +21,18 @@
                 Tài khoản <i class="fa fa-caret-down"></i>
             </div>
             <div class="dropdown" id="accountDropdown">
-                <a>Thông tin cá nhân</a>
+                <a href="{{ url_for('auth.user_info')}}">Thông tin cá nhân</a>
                 <a href="{{ url_for('auth.login')}}">Đăng xuất</a>
             </div>
         </div>
     </div>
 </div>
 
-<div class="search-bar">
-    <input type="text" placeholder="Tìm kiếm sự kiện...">
-    <button>Tìm kiếm</button>
-</div>
+<form class="search-bar" method="get" action="{{ url_for('event_organizer.home') }}">
+    <input type="text" name="q" placeholder="Tìm kiếm sự kiện...">
+    <button type="submit">Tìm kiếm</button>
+</form>
+
 
 <div class="tabs">
     <button class="tab-btn active" data-tab="approved" onclick="showTab('approved', this)"> Đã duyệt</button>
@@ -48,14 +56,31 @@
                 </div>
                 <div class="action-buttons">
                     <a href="{{ url_for('events.event_detail', event_id=event.id) }}">
-                        <button>Xem chi tiết</button>
+                        <button class="btn-action btn-primary-card">Xem chi tiết</button>
                     </a>
                     <a>
-                        <button onclick="showConfirmForm({{ event.id }})">Ẩn sự kiện</button>
+                        <button class="btn-action btn-warning-card" onclick="showConfirmForm({{ event.id }})">Ẩn sự
+                            kiện
+                        </button>
                     </a>
                     <a>
-                        <button onclick="showConfirmDeleteForm({{ event.id }})">Xóa</button>
+                        <button class="btn-action btn-danger-card" onclick="showConfirmDeleteForm({{ event.id }})">Xóa
+                        </button>
                     </a>
+                    <a>
+                        <button onclick="showVoucherForm({{ event.id }})">+ Voucher</button>
+                    </a>
+                    {% if event.event_offline %}
+                    <button type="button"
+                            onclick="showTicketForm({{ event.id }}, {{ 1 if event.event_offline.has_seat else 0 }})">
+                        + Vé
+                    </button>
+                    {% else %}
+                    <button type="button"
+                            onclick="showTicketForm({{ event.id }}, 0)">
+                        + Vé
+                    </button>
+                    {% endif %}
                 </div>
 
             </div>
@@ -85,10 +110,11 @@
                 </div>
                 <div class="action-buttons">
                     <a href="{{ url_for('events.event_detail', event_id=event.id) }}">
-                        <button>Xem chi tiết</button>
+                        <button class="btn-action btn-primary-card">Xem chi tiết</button>
                     </a>
                     <a>
-                        <button class="btn-danger" onclick="showConfirmDeleteForm({{ event.id }})">Xóa</button>
+                        <button class="btn-action btn-danger-card" onclick="showConfirmDeleteForm({{ event.id }})">Xóa
+                        </button>
                     </a>
                 </div>
             </div>
@@ -119,18 +145,19 @@
                 </div>
                 <div class="action-buttons">
                     <a href="{{ url_for('events.event_detail', event_id=event.id) }}">
-                        <button>Xem chi tiết</button>
+                        <button class="btn-action btn-primary-card">Xem chi tiết</button>
                     </a>
                     <a href="{{ url_for('event_organizer.edit_event', event_id=event.id) }}">
                         <button class="btn-confirm">Chỉnh sửa sự kiện</button>
                     </a>
                     <a>
-                        <button class="btn btn-warning" onclick="viewRejectionReason({{ event.id }})">
+                        <button class="btn-action btn-secondary-card" onclick="viewRejectionReason({{ event.id }})">
                             Xem lý do
                         </button>
                     </a>
                     <a>
-                        <button onclick="showConfirmDeleteForm({{ event.id }})">Xóa</button>
+                        <button class="btn-action btn-danger-card" onclick="showConfirmDeleteForm({{ event.id }})">Xóa
+                        </button>
                     </a>
                 </div>
 
@@ -161,13 +188,15 @@
                 </div>
                 <div class="action-buttons">
                     <a href="{{ url_for('events.event_detail', event_id=event.id) }}">
-                        <button class="btn-confirm">Xem chi tiết</button>
+                        <button class="btn-action btn-primary-card">Xem chi tiết</button>
                     </a>
                     <a>
-                        <button onclick="showEvent({{ event.id }})"> Công khai</button>
+                        <button class="btn-action btn-secondary-card" onclick="showEvent({{ event.id }})"> Công khai
+                        </button>
                     </a>
                     <a>
-                        <button class="btn-danger" onclick="showConfirmDeleteForm({{ event.id }})">Xóa</button>
+                        <button class="btn-action btn-danger-card" onclick="showConfirmDeleteForm({{ event.id }})">Xóa
+                        </button>
                     </a>
                 </div>
             </div>
@@ -187,8 +216,8 @@
     <div class="modal-box">
         <p>Bạn chắc chắn muốn ẩn sự kiện này?</p>
         <div class="modal-buttons">
-            <button class="btn-confirm" onclick="confirmHide()">Đồng ý</button>
-            <button class="btn-cancel" onclick="hideConfirmForm('confirmForm')">Huỷ</button>
+            <button class="btn-action btn-secondary-card" onclick="confirmHide()">Đồng ý</button>
+            <button class="btn-action btn-cancel-card" onclick="hideConfirmForm('confirmForm')">Huỷ</button>
         </div>
     </div>
 </div>
@@ -199,7 +228,7 @@
         <p id="rejectedReasonText">Đang tải...</p> <!-- Đây là nơi lý do sẽ được hiển thị -->
 
         <div class="modal-buttons">
-            <button class="btn-cancel" onclick="hideRejectModal()">Đã hiểu</button>
+            <button class="btn-action btn-cancel-card" onclick="hideRejectModal()">Đã hiểu</button>
         </div>
     </div>
 </div>
@@ -208,11 +237,100 @@
     <div class="modal-box">
         <p>Bạn chắc chắn muốn xóa sự kiện này?</p>
         <div class="modal-buttons">
-            <button class="btn-confirm" onclick="confirmDelete()">Đồng ý</button>
-            <button class="btn-cancel" onclick="hideConfirmForm('confirmDeleteForm')">Huỷ</button>
+            <button class="btn-action btn-danger-card" onclick="confirmDelete()">Xóa</button>
+            <button class="btn-action btn-cancel-card" onclick="hideConfirmForm('confirmDeleteForm')">Huỷ</button>
 
         </div>
     </div>
 </div>
+
+<div id="voucherForm" class="modal-overlay" style="display: none;">
+    <div class="modal-box">
+        <h3 class="text-h3">Tạo Voucher cho sự kiện</h3>
+        <form id="voucherFormElement" onsubmit="event.preventDefault();">
+            <input type="hidden" name="event_id" id="voucherEventId">
+
+            <div class="form-group">
+                <label>Mã Voucher</label>
+                <input type="text" name="code" id="voucherCode" required>
+            </div>
+
+            <div class="form-group">
+                <label>Giảm giá (số hoặc %)</label>
+                <input type="text" name="discount" id="voucherDiscount" placeholder="VD: 50000 hoặc 10%" required>
+            </div>
+
+            <div class="form-group">
+                <label>Số lượng</label>
+                <input type="number" name="quantity" id="voucherQuantity" min="1" max="100" required>
+            </div>
+
+            <div class="form-group">
+                <label>Ngày bắt đầu</label>
+                <input type="date" name="start_date" id="voucherStartDate" required>
+            </div>
+
+            <div class="form-group">
+                <label>Ngày hết hạn</label>
+                <input type="date" name="end_date" id="voucherEndDate" required>
+            </div>
+
+            <div class="form-group">
+                <label>Áp dụng cho vé</label>
+                <select id="ticketTypeSelect" name="ticket_types" multiple="multiple" style="width:100%;">
+                    <!-- JS sẽ load vé -->
+                </select>
+            </div>
+
+            <div class="modal-buttons">
+                <button type="button" class="btn-action btn-primary-card" onclick="saveVoucherForm()">Lưu</button>
+                <button type="button" class="btn-action btn-cancel-card" onclick="hideVoucherForm()">Huỷ</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="ticketForm" class="modal-overlay" style="display: none;">
+    <div class="modal-box">
+        <h3 class="text-h3">Tạo thêm vé cho sự kiện</h3>
+        <form id="ticketFormElement" onsubmit="event.preventDefault();">
+            <input type="hidden" name="event_id" id="ticketEventId">
+
+            <div class="form-group">
+                <label>Tên vé</label>
+                <input type="text" name="name" id="nameTicket" required>
+            </div>
+
+            <div class="form-group">
+                <label>Số lượng</label>
+                <input type="number" name="quantity" id="ticketQuantity" min="1" required>
+            </div>
+
+            <div class="form-group">
+                <label>Giá vé</label>
+                <input type="number" name="price" id="ticketPrice" min="1" required>
+            </div>
+
+            <div class="form-group">
+                <label>Lợi ích</label>
+                <input type="text" name="benefit" id="ticketBenefit">
+            </div>
+
+            <!-- Checkbox chỉ hiện khi has_seat = 1 -->
+            <div class="form-group requires-seat-container" style="display:none; align-self:center; padding-left:10px;">
+                <label>
+                    <input type="checkbox" name="requires_seat" class="requires_seat">
+                    Yêu cầu chọn ghế
+                </label>
+            </div>
+
+            <div class="modal-buttons">
+                <button type="button" class="btn-action btn-primary-card" onclick="saveTicketForm()">Lưu</button>
+                <button type="button" class="btn-action btn-cancel-card" onclick="hideTicketForm()">Huỷ</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 
 {% endblock %}

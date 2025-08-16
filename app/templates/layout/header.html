@@ -16,7 +16,9 @@
             </a>
         </div>
         <div class="auth-links">
-            👋 Xin chào, <strong>{{ current_user.fullname or current_user.username }}</strong> |
+            <a href="/user_info">
+                👋 Xin chào, <strong>{{ current_user.fullname or current_user.username }}</strong> |
+            </a>
             <a href="/logout">Đăng xuất</a>
         </div>
     {% else %}

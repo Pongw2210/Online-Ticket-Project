@@ -26,32 +26,45 @@ def load_event_type_enum():
         for etype in EventTypeEnum
     }
 
-def load_approved_events(organizer_id):
-    events = Event.query.filter(
+def load_approved_events(organizer_id, search_query=None):
+    query = Event.query.filter(
         Event.organizer_id == organizer_id,
         Event.status == StatusEventEnum.DA_DUYET
     )
-    return events.all()
+    if search_query:
+        query = query.filter(Event.name.ilike(f"%{search_query}%"))
+    return query.all()
 
-def load_pending_events(organizer_id):
-    return Event.query.filter_by(
+
+def load_pending_events(organizer_id, search_query=None):
+    query = Event.query.filter_by(
         organizer_id=organizer_id,
         status=StatusEventEnum.DANG_DUYET
-    ).all()
+    )
+    if search_query:
+        query = query.filter(Event.name.ilike(f"%{search_query}%"))
+    return query.all()
 
-def load_rejected_events (organizer_id):
-    events = Event.query.filter(
+
+def load_rejected_events(organizer_id, search_query=None):
+    query = Event.query.filter(
         Event.organizer_id == organizer_id,
-        Event.status == StatusEventEnum.TU_CHOI)
+        Event.status == StatusEventEnum.TU_CHOI
+    )
+    if search_query:
+        query = query.filter(Event.name.ilike(f"%{search_query}%"))
+    return query.all()
 
-    return events.all()
 
-def load_hidden_events (organizer_id):
-    events = Event.query.filter(
+def load_hidden_events(organizer_id, search_query=None):
+    query = Event.query.filter(
         Event.organizer_id == organizer_id,
-        Event.status == StatusEventEnum.DA_AN)
+        Event.status == StatusEventEnum.DA_AN
+    )
+    if search_query:
+        query = query.filter(Event.name.ilike(f"%{search_query}%"))
+    return query.all()
 
-    return events.all()
 
 def get_event_by_id(event_id):
     return Event.query.get(event_id)

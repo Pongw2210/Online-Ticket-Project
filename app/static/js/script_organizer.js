@@ -171,10 +171,6 @@ function goToNextStep() {
     if (currentIndex === 0 && !validateStep1()) return;
     if (currentIndex === 1 && !validateStep2()) return;
 
-    // Nếu chuyển từ bước 2 sang bước 3 => load vé
-    if (currentIndex === 1) {
-        loadTicketTypesToStep3();
-    }
 
     if (currentIndex < allSections.length - 1) {
         allSections[currentIndex].classList.remove('active');
@@ -344,33 +340,6 @@ function submitEventForm() {
         });
     });
     formData.append("tickets", JSON.stringify(tickets));
-
-    // === Khuyến mãi ===
-    const promoRows = document.querySelectorAll("#promo-list .promo-item");
-    const promos = [];
-
-    promoRows.forEach(row => {
-        const select = row.querySelector(".select-ticket-types"); // class thay vì id
-        let selectedTickets = Array.from(select?.selectedOptions || []).map(opt => opt.value);
-
-        // Nếu chọn "all", map ra tất cả vé hiện có
-        if (selectedTickets.includes("all")) {
-            selectedTickets = Array.from(document.querySelectorAll('#ticket-types .ticket_name'))
-                                   .map(input => input.value.trim())
-                                   .filter(name => name);
-        }
-
-        promos.push({
-            code: row.querySelector(".promo_code")?.value || "",
-            value: row.querySelector(".promo_value")?.value || "",
-            quantity: row.querySelector(".promo_quantity")?.value || "",
-            start_time: row.querySelector(".promo_start_time")?.value || "",
-            end_time: row.querySelector(".promo_end_time")?.value || "",
-            ticket_types: selectedTickets
-        });
-    });
-
-    formData.append("promotions", JSON.stringify(promos));
 
     // === Debug ===
     for (let pair of formData.entries()) {
@@ -669,116 +638,185 @@ window.addEventListener('DOMContentLoaded', () => {
     toggleRequiresSeatCheckbox();
 });
 
+function showVoucherForm(eventId) {
+    // Gán event_id vào hidden input
+    document.getElementById("voucherEventId").value = eventId;
+    document.getElementById("voucherForm").style.display = "flex";
 
-const ticketSelect = document.getElementById('select-ticket-types');
-let ticketChoices;
+    const $select = $("#ticketTypeSelect");
 
-if (ticketSelect) {
-    ticketChoices = new Choices(ticketSelect, {
-        removeItemButton: true,
-        searchPlaceholderValue: 'Tìm loại vé...',
-        placeholder: true,
-        placeholderValue: 'Chọn loại vé'
-    });
-}
+    // Reset trước khi load vé mới
+    $select.empty();
 
-function loadTicketTypesToStep3() {
-    if (!ticketChoices) return; // đảm bảo instance tồn tại
-
-    ticketChoices.clearChoices();
-
-    let choices = [{ value: 'all', label: '-- Chọn tất cả --', selected: false }];
-    const ticketInputs = document.querySelectorAll('.step-2 .ticket_name');
-
-    ticketInputs.forEach((input, idx) => {
-        const name = input.value.trim();
-        if (name) {
-            choices.push({ value: idx + 1, label: name, selected: false });
-        }
-    });
-
-    ticketChoices.setChoices(choices, 'value', 'label', false);
-}
-
-function addPromo() {
-    const promoList = document.getElementById('promo-list');
-    if (!promoList) return;
-
-    const promoDiv = document.createElement('div');
-    promoDiv.classList.add('promo-item', 'form-group', 'form-row');
-
-    promoDiv.innerHTML = `
-        <h3>Mã khuyến mãi </h3>
-        <div>
-            <label class="required-label"><span class="text-danger">*</span> Tên khuyến mãi</label>
-            <input type="text" class="promo_name" maxlength="50" placeholder="Ví dụ: Giảm giá khai trương">
-        </div>
-        <div>
-            <label class="required-label"><span class="text-danger">*</span> Mã code</label>
-            <input type="text" class="promo_code" maxlength="20" placeholder="VD: KHAITRUONG20">
-        </div>
-        <div>
-            <label class="required-label"><span class="text-danger">*</span> Giá trị giảm (% hoặc VNĐ)</label>
-            <input type="text" class="promo_value" placeholder="VD: 20% hoặc 50000">
-        </div>
-        <div>
-            <label class="required-label"><span class="text-danger">*</span> Số lượng áp dụng</label>
-            <input type="number" class="promo_quantity" min="1" placeholder="VD: 100">
-        </div>
-        <div>
-            <label class="required-label"><span class="text-danger">*</span> Ngày bắt đầu</label>
-            <input type="datetime-local" class="promo_start_time" required>
-        </div>
-        <div>
-            <label class="required-label"><span class="text-danger">*</span> Ngày kết thúc</label>
-            <input type="datetime-local" class="promo_end_time" required>
-        </div>
-        <div>
-            <label class="required-label"><span class="text-danger">*</span> Áp dụng cho loại vé</label>
-            <select class="select-ticket-types" multiple></select>
-        </div>
-        <div>
-            <button type="button" class="btn btn-danger remove-ticket">X</button>
-        </div>
-    `;
-
-    promoList.appendChild(promoDiv);
-
-    // Nút xóa promo
-    promoDiv.querySelector('.remove-ticket').addEventListener('click', () => {
-        promoDiv.remove();
-    });
-
-    // Khởi tạo select Choices.js cho select mới
-    const select = promoDiv.querySelector('.select-ticket-types');
-    if (select) {
-        // Thêm option "Chọn tất cả"
-        const allOption = document.createElement('option');
-        allOption.value = 'all';
-        allOption.textContent = '-- Chọn tất cả --';
-        select.appendChild(allOption);
-
-        // Nạp danh sách vé từ step 2
-        document.querySelectorAll('#ticket-types .ticket-type').forEach(ticketRow => {
-            const ticketName = ticketRow.querySelector('.ticket_name').value.trim();
-            if (ticketName) {
-                const option = document.createElement('option');
-                option.value = ticketName;
-                option.textContent = ticketName;
-                select.appendChild(option);
-            }
-        });
-
-        // Khởi tạo Choices riêng cho select động
-        new Choices(select, {
-            removeItemButton: true,
-            placeholderValue: 'Chọn loại vé',
-            searchPlaceholderValue: 'Tìm vé...'
-        });
+    // Nếu đã có Select2 thì hủy để tránh double init
+    if ($select.hasClass("select2-hidden-accessible")) {
+        $select.select2("destroy");
     }
+
+    // Gọi API lấy vé theo eventId
+    fetch(`/organizer/api/${eventId}/ticket-types`)
+        .then(res => res.json())
+        .then(data => {
+            // Thêm option placeholder (ẩn đi)
+            $select.append(new Option("", "", false, false));
+
+            // Thêm option "Tất cả vé"
+            $select.append(new Option("Tất cả vé", "all"));
+
+            // Thêm từng loại vé
+            data.forEach(ticket => {
+                $select.append(
+                    new Option(
+                        `${ticket.name} - ${ticket.price.toLocaleString()} VND`,
+                        ticket.id
+                    )
+                );
+            });
+
+            // Init lại Select2
+            $select.select2({
+                placeholder: "Chọn vé áp dụng",
+                allowClear: true,
+                width: "100%",
+                dropdownParent: $("#voucherForm")
+            });
+
+            // Xử lý chọn "Tất cả vé"
+            $select.on("change", function () {
+                const values = $(this).val();
+                if (values && values.includes("all")) {
+                    // Nếu chọn "Tất cả", chỉ giữ lại "all"
+                    $(this).val(["all"]).trigger("change.select2");
+                }
+            });
+        })
+        .catch(err => console.error("Lỗi load vé:", err));
+}
+
+function hideVoucherForm() {
+    document.getElementById("voucherForm").style.display = "none";
+}
+
+function saveVoucherForm() {
+    // Lấy giá trị từ form
+    const eventId = document.getElementById("voucherEventId")?.value || null;
+    const code = document.getElementById("voucherCode")?.value?.trim() || "";
+    const discountValue = document.getElementById("voucherDiscount")?.value?.trim() || "";
+    const quantity = document.getElementById("voucherQuantity")?.value || 1;
+    const startDate = document.getElementById("voucherStartDate")?.value || "";
+    const endDate = document.getElementById("voucherEndDate")?.value || "";
+
+    // Lấy vé đã chọn từ Select2
+    const ticketSelect = $("#ticketTypeSelect").val() || [];
+    let apply_all = false;
+    let ticket_ids = [];
+
+    // Lấy tất cả id vé trừ option "all" và ép kiểu string
+    const allTicketIds = $("#ticketTypeSelect option")
+        .not('[value="all"]')
+        .map((i, opt) => String($(opt).val()))
+        .get();
+
+    // Kiểm tra áp dụng tất cả vé
+    if (ticketSelect.includes("all") || ticketSelect.length === allTicketIds.length) {
+        apply_all = true;
+        ticket_ids = []; // nếu áp dụng tất cả, bỏ ticket_ids
+    } else {
+        ticket_ids = ticketSelect; // chỉ lấy vé đã chọn
+    }
+
+    // Chuẩn bị payload gửi lên backend
+    const payload = {
+        event_id: eventId,
+        code,
+        discount_value: discountValue,
+        quantity,
+        start_date: startDate,
+        end_date: endDate,
+        apply_all,
+        ticket_ids
+    };
+
+    console.log("Voucher form data:", payload);
+
+    // Gửi fetch lên backend
+    fetch("/organizer/api/create-voucher", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log("API response:", data);
+        if (data.error) {
+            alert("Lưu voucher thất bại: " + data.error);
+        } else {
+            alert("Lưu voucher thành công!");
+            // Đóng modal
+            $("#voucherForm").hide();
+            // Nếu muốn, reset form
+            $("#voucherFormElement")[0].reset();
+        }
+    })
+    .catch(err => {
+        console.error("Lỗi lưu voucher:", err);
+        alert("Lưu voucher thất bại. Vui lòng thử lại!");
+    });
+}
+
+function showTicketForm(eventId, hasSeat) {
+    document.getElementById("ticketEventId").value = eventId;
+
+    // chỉ hiện checkbox khi hasSeat = 1
+    if (hasSeat === 1) {
+        document.querySelector(".requires-seat-container").style.display = "block";
+    } else {
+        document.querySelector(".requires-seat-container").style.display = "none";
+    }
+
+    document.getElementById("ticketForm").style.display = "flex";
 }
 
 
+function hideTicketForm() {
+    document.getElementById("ticketForm").style.display = "none"; // ẩn modal
+}
+
+
+function saveTicketForm() {
+    const eventId = document.getElementById("ticketEventId").value;
+    const name = document.getElementById("nameTicket").value;
+    const quantity = document.getElementById("ticketQuantity").value;
+    const price = document.getElementById("ticketPrice").value;
+    const benefit = document.getElementById("ticketBenefit").value;
+    const requiresSeat = document.querySelector(".requires_seat").checked ? 1 : 0;
+
+    fetch("/organizer/api/save-ticket", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            event_id: eventId,
+            name: name,
+            quantity: quantity,
+            price: price,
+            benefit: benefit,
+            requires_seat: requiresSeat
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            alert("Tạo vé thành công!");
+            hideTicketForm();
+            location.reload(); // refresh danh sách vé
+        } else {
+            alert("Lỗi: " + data.message);
+        }
+    })
+    .catch(err => console.error(err));
+}
 
 
 

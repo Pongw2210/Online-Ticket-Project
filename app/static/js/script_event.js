@@ -163,42 +163,6 @@ function confirmSeatSelection() {
     closeSeatSelection();
 }
 
-function updateSummary() {
-    let summaryList = document.getElementById('summary-list');
-    let totalEl = document.getElementById('summary-total');
-    let continueBtn = document.getElementById('continue-btn');
-
-    summaryList.innerHTML = '';
-
-    let totalTickets = 0;
-    let totalPrice = 0;
-
-    document.querySelectorAll('.quantity-input').forEach(input => {
-        let qty = parseInt(input.value) || 0;
-        if (qty > 0) {
-            let name = input.getAttribute('data-name');
-            let price = parseInt(input.getAttribute('data-price'));
-            let ticketId = input.getAttribute('data-ticket-id');
-            let seats = seatSelections[ticketId] || [];
-            let seatCodes = seats.map(s => s.seat_code).join(', ');
-            let seatInfo = seatCodes ? ` [Ghế: ${seatCodes}]` : '';
-
-            let li = document.createElement('li');
-            li.textContent = `${name} x${qty} — ${formatPrice(price * qty)}${seatInfo}`;
-            summaryList.appendChild(li);
-
-            totalTickets += qty;
-            totalPrice += price * qty;
-        }
-    });
-
-    totalEl.innerHTML = `<strong>🎟 x${totalTickets}</strong>`;
-
-    if (continueBtn) {
-        continueBtn.textContent = `Tiếp tục - Tổng: ${formatPrice(totalPrice)}`;
-    }
-}
-
 function goToCheckout() {
     let continueBtn = document.getElementById('continue-btn');
     let eventId = continueBtn.getAttribute('data-event-id');
@@ -234,23 +198,27 @@ function goToCheckout() {
 
 document.addEventListener('DOMContentLoaded', () => {
     let tickets = JSON.parse(sessionStorage.getItem('checkoutTickets')) || [];
+    let appliedVoucher = JSON.parse(sessionStorage.getItem('appliedVoucher')) || null;
+
     let summaryDiv = document.getElementById('ticket-summary');
     let subtotalEl = document.getElementById('subtotal');
     let totalEl = document.getElementById('total-price');
+    let voucherNameEl = document.getElementById('voucher-name'); // element hiển thị voucher
 
     if (tickets.length === 0) {
         summaryDiv.innerHTML = '<div class="muted">Chưa có vé nào được chọn</div>';
         subtotalEl.textContent = '0 đ';
         totalEl.textContent = '0 đ';
+        if (voucherNameEl) voucherNameEl.textContent = '-';
         return;
     }
 
     summaryDiv.innerHTML = '';
-    let totalPrice = 0;
+    let subtotal = 0;
 
     tickets.forEach(ticket => {
         let itemPrice = parseInt(ticket.price) * ticket.quantity;
-        totalPrice += itemPrice;
+        subtotal += itemPrice;
 
         let seatCodes = ticket.seats.map(s => s.seat_code).join(', ');
 
@@ -266,13 +234,28 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     });
 
-    subtotalEl.textContent = totalPrice.toLocaleString() + ' đ';
-    totalEl.textContent = totalPrice.toLocaleString() + ' đ';
-});
+    subtotalEl.textContent = subtotal.toLocaleString() + ' đ';
 
-function formatPrice(value) {
-    return value.toLocaleString('vi-VN') + ' đ';
-}
+    // Xử lý voucher
+    let discount = 0;
+    if (appliedVoucher) {
+        if (appliedVoucher.discount_type === "PHAN_TRAM") {
+            discount = subtotal * (appliedVoucher.discount_value / 100);
+        } else {
+            discount = appliedVoucher.discount_value;
+        }
+        discount = Math.min(discount, subtotal);
+
+        if (voucherNameEl) {
+            voucherNameEl.textContent = `${appliedVoucher.code} (-${discount.toLocaleString()} đ)`;
+        }
+    } else {
+        if (voucherNameEl) voucherNameEl.textContent = 'Không áp dụng';
+    }
+
+    let total = subtotal - discount;
+    totalEl.textContent = total.toLocaleString() + ' đ';
+});
 
 
 
@@ -420,6 +403,127 @@ function payment_vnpay() {
     });
 }
 
+function closeVoucherModal(){
+    document.getElementById('voucherModal').style.display = 'none';
+}
+
+function showVoucherModal(eventId) {
+    // Hiển thị modal
+    const modal = document.getElementById("voucherModal");
+    modal.style.display = "flex";
+
+    // Xóa danh sách cũ
+    const list = document.getElementById("voucherList");
+    list.innerHTML = "";
+
+    // Gọi API lấy voucher
+    fetch(`/api/vouchers/${eventId}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                alert("Lỗi load voucher: " + data.error);
+                return;
+            }
+
+            data.forEach(v => {
+                const li = document.createElement("li");
+                li.textContent = `${v.code} - ${v.discount_value}${v.discount_type === "PHAN_TRAM" ? "%" : "đ"}`;
+                li.onclick = () => applyVoucher(v);
+                list.appendChild(li);
+            });
+        })
+        .catch(err => console.error("Lỗi fetch voucher:", err));
+}
+
+let appliedVoucher = null; // voucher đã chọn
+
+function applyVoucher(voucher) {
+    appliedVoucher = voucher;
+
+    // Lưu voucher vào sessionStorage để các trang / lần reload còn nhớ
+    sessionStorage.setItem('appliedVoucher', JSON.stringify(voucher));
+
+    // Hiển thị voucher trên nút
+    const voucherBtn = document.querySelector('.voucher .btn');
+    if (voucherBtn) {
+        voucherBtn.textContent = `Voucher: ${voucher.code} - ${voucher.discount_value}${voucher.discount_type === "PHAN_TRAM" ? "%" : "đ"}`;
+    }
+
+    closeVoucherModal();
+
+    // Sau khi chọn voucher thì cập nhật lại tổng tiền
+    location.reload(); // cách đơn giản nhất để render lại
+    // hoặc gọi lại updateSummary() nếu bạn muốn dynamic
+}
+
+
+function updateSummary() {
+    const summaryList = document.getElementById('summary-list');
+    const totalEl = document.getElementById('summary-total');
+    const continueBtn = document.getElementById('continue-btn');
+
+    if (summaryList) summaryList.innerHTML = '';
+
+    let totalTickets = 0;
+    let totalPrice = 0;
+
+    // Lấy tất cả input số lượng (đảm bảo class .quantity-input có)
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        let qty = parseInt(input.value) || 0;
+        if (qty > 0) {
+            let name = input.getAttribute('data-name');
+            let price = parseInt(input.getAttribute('data-price')) || 0;
+            let ticketId = input.getAttribute('data-ticket-id');
+            let seats = seatSelections[ticketId] || [];
+            let seatCodes = seats.map(s => s.seat_code).join(', ');
+            let seatInfo = seatCodes ? ` [Ghế: ${seatCodes}]` : '';
+
+            if (summaryList) {
+                const li = document.createElement('li');
+                li.textContent = `${name} x${qty} — ${formatPrice(price * qty)}${seatInfo}`;
+                summaryList.appendChild(li);
+            }
+
+            totalTickets += qty;
+            totalPrice += price * qty;
+        }
+    });
+
+    console.log("Tổng vé:", totalTickets, "Tổng tiền trước giảm:", totalPrice);
+
+    // Áp voucher nếu có
+    let discount = 0;
+    let discountText = '';
+    if (appliedVoucher && totalPrice > 0) {
+        if (appliedVoucher.discount_type === "PHAN_TRAM") {
+            discount = totalPrice * (appliedVoucher.discount_value / 100);
+        } else {
+            discount = appliedVoucher.discount_value;
+        }
+
+        // Không vượt quá tổng tiền
+        discount = Math.min(discount, totalPrice);
+        totalPrice -= discount;
+        discountText = ` - Giảm: ${formatPrice(discount)} (Voucher: ${appliedVoucher.code})`;
+
+        console.log("Voucher đang áp dụng:", appliedVoucher);
+        console.log("Discount tính được:", discount, "Tổng tiền sau giảm:", totalPrice);
+    }
+
+    if (totalEl) {
+        totalEl.innerHTML = `<strong>🎟 x${totalTickets}</strong> — Tổng: ${formatPrice(totalPrice)}${discountText}`;
+    }
+
+    if (continueBtn) {
+        continueBtn.textContent = `Tiếp tục - Tổng: ${formatPrice(totalPrice)}`;
+    }
+}
+
+//document.addEventListener('DOMContentLoaded', updateSummary);
+// Format giá
+function formatPrice(value) {
+    return value.toLocaleString('vi-VN') + ' đ';
+}
 
 
 
