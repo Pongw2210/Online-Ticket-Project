@@ -1,0 +1,181 @@
+{% set base_tpl = "layout/base.html" if current_user.role.value == "Khách hàng" else "event_organizer/layout_event_organizer/base.html" %}
+{% extends base_tpl %}
+
+{% block title %}Thông tin cá nhân{% endblock %}
+{% block content %}
+<style>
+  :root{
+    --bg1:#fff0f5;
+    --bg2:#ffe4e1;
+    --card:#ffffff;
+    --primary:#ec4899;
+    --primary-600:#db2777;
+    --accent:#f472b6;
+    --text:#1f2937;
+    --muted:#6b7280;
+    --border:#fbcfe8;
+    --ring:#f9a8d4;
+  }
+  body{
+    background: radial-gradient(1200px 600px at 10% -10%, var(--bg2), transparent 60%),
+                radial-gradient(1200px 600px at 110% 10%, #ffe4f0, transparent 60%),
+                linear-gradient(180deg, var(--bg1), #fff0f5);
+    color: var(--text);
+    font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  }
+  .page-wrap{ max-width: 1100px; margin: 48px auto; padding: 0 16px; }
+  .card{ background: var(--card); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 10px 30px rgba(17,24,39,.08); overflow: hidden; }
+  .card-header{ border-bottom: 1px solid var(--border); padding: 18px 22px; background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; font-weight: 600; text-align: center; }
+  .card-body{ padding: 22px; }
+  .grid{ display: grid; gap: 22px; grid-template-columns: 1fr; }
+  @media (min-width: 992px){ .grid{ grid-template-columns: 340px 1fr; } }
+  .profile-card .avatar-wrap{ display: grid; place-items: center; margin-top: 6px; }
+  .avatar-ring{ padding: 6px; background: conic-gradient(from 180deg at 50% 50%, var(--primary), var(--accent), var(--primary)); border-radius: 999px; }
+  #avatarPreview{ width: 172px; height: 172px; object-fit: cover; border-radius: 50%; display:block; border: 6px solid #fff; box-shadow: 0 10px 20px rgba(0,0,0,.10); background: #fdf2f8; }
+  .btn-row{ display:flex; justify-content:center; gap:10px; margin-top:14px; flex-wrap: wrap; }
+  .btn{ border-radius: 999px; padding: 10px 16px; font-weight: 600; font-size: .94rem; border: 1.5px solid var(--primary); background: #fff; color: var(--primary); transition: all .2s ease; cursor: pointer; display:inline-flex; align-items:center; gap:8px; }
+  .btn:hover{ transform: translateY(-1px); }
+  .btn:disabled{ opacity:.55; cursor:not-allowed; }
+  .btn-primary{ background: var(--primary); color:#fff; border-color: var(--primary); }
+  .btn-primary:hover{ background: var(--primary-600); border-color: var(--primary-600); }
+  .hint{ text-align:center; margin-top:10px; font-size:.85rem; color:var(--muted); }
+  .info-card .section-title{ font-weight: 700; font-size: 1.05rem; margin-bottom: 14px; color: var(--primary-600); }
+  .table-modern{ width:100%; border-collapse: collapse; background: #fff; border: 1px solid var(--border); border-radius: 12px; }
+  .table-modern tr + tr { border-top: 1px dashed var(--border); }
+  .table-modern th{ width: 220px; text-align:left; padding: 14px 16px; color:#9d174d; font-weight: 700; background: #fff0f5; }
+  .table-modern td{ padding:14px 16px; color:#374151; }
+  .role-badge{ display:inline-block; padding:6px 12px; border-radius:999px; font-weight:700; font-size:.83rem; background: rgba(236,72,153,.12); color: var(--primary); border: 1px solid var(--ring); }
+  .toast { position: fixed; right: 18px; bottom: 18px; z-index: 1050; display: flex; align-items: center; gap: 8px; background: var(--accent); color: #fff; padding: 12px 16px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,.25); font-weight: 600; font-size: .92rem; display: none; }
+  .toast.show { display: flex; animation: slideUp .35s ease; }
+  .toast.success { background: var(--primary); }
+  .toast.error { background: #be123c; }
+  @keyframes slideUp { from {opacity:0; transform:translateY(8px);} to {opacity:1; transform:none;} }
+  .spinner{ width:16px; height:16px; border-radius:50%; border:2px solid rgba(255,255,255,.6); border-top-color: #fff; animation: spin .7s linear infinite; }
+  @keyframes spin{ to{ transform: rotate(360deg);} }
+</style>
+
+<div class="page-wrap">
+  <div class="grid">
+    <div class="card profile-card">
+      <div class="card-header">Hồ sơ cá nhân</div>
+      <div class="card-body">
+        <div class="avatar-wrap">
+          <div class="avatar-ring">
+            <img id="avatarPreview"
+                 src="{{ url_for('static', filename=current_user.avatar) if current_user.avatar else url_for('static', filename='img/default_avatar.png') }}"
+                 alt="Avatar">
+          </div>
+        </div>
+        <div class="btn-row">
+          <label for="avatar" class="btn btn-outline-primary">
+            <span>Chọn ảnh</span>
+            <input type="file" id="avatar" name="avatar" accept="image/*" hidden>
+          </label>
+          <button id="saveAvatarBtn" class="btn btn-primary" disabled>
+            <span class="btn-text">Lưu thay đổi</span>
+          </button>
+        </div>
+        <div class="hint">Ảnh vuông 1:1 • Tối đa 4MB • PNG/JPG/JPEG/GIF</div>
+      </div>
+    </div>
+    <div class="card info-card">
+      <div class="card-header">Thông tin tài khoản</div>
+      <div class="card-body">
+        <div class="section-title">Chi tiết</div>
+        <table class="table-modern">
+          <tbody>
+          <tr><th>ID Người dùng</th><td>{{ current_user.id }}</td></tr>
+          <tr><th>Tên đăng nhập</th><td>{{ current_user.username }}</td></tr>
+          {% set person = current_user.customer or current_user.event_organizer %}
+          {% if person %}
+          <tr><th>Họ và Tên</th><td>{{ person.fullname }}</td></tr>
+          <tr><th>Email</th><td>{{ person.email }}</td></tr>
+          {% endif %}
+          <tr><th>Vai trò</th><td><span class="role-badge">{{ current_user.role.value }}</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite">
+  <span id="toast-icon"></span>
+  <span id="toast-msg"></span>
+</div>
+
+<script>
+  const toast = document.getElementById('toast');
+  const toastIcon = document.getElementById('toast-icon');
+  const toastMsg = document.getElementById('toast-msg');
+  const fileInput = document.getElementById('avatar');
+  const previewEl = document.getElementById('avatarPreview');
+  const saveBtn = document.getElementById('saveAvatarBtn');
+
+  function showToast(msg, type='success'){
+    toastMsg.textContent = msg;
+    toast.className = 'toast show ' + (type === 'success' ? 'success' : 'error');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }
+
+  fileInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const okExt = ['image/png','image/jpeg','image/jpg','image/gif'];
+    if(!okExt.includes(file.type)){
+      showToast('Định dạng không hỗ trợ', 'error');
+      fileInput.value = ''; return;
+    }
+    if(file.size > 4 * 1024 * 1024){
+      showToast('Ảnh quá lớn (tối đa 4MB)', 'error');
+      fileInput.value = ''; return;
+    }
+    const reader = new FileReader();
+    reader.onload = e2 => {
+      previewEl.src = e2.target.result;
+      saveBtn.disabled = false;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  saveBtn.addEventListener('click', () => {
+    if(fileInput.files.length === 0) return;
+    saveBtn.disabled = true;
+    const oldHTML = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<span class="spinner"></span><span> Đang lưu...</span>';
+    const formData = new FormData();
+    formData.append('avatar', fileInput.files[0]);
+
+    fetch('{{ url_for("auth.upload_avatar") }}', {
+        method: 'POST',
+        body: formData,
+        credentials: 'same-origin'
+    })
+    .then(res => {
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+            return res.json();
+        } else {
+            return { status: 'error', message: 'Server trả về dữ liệu không hợp lệ' };
+        }
+    })
+    .then(data => {
+      if(data.status === 'success'){
+        previewEl.src = data.avatar_url;
+        showToast(data.message || 'Ảnh đã lưu thành công!', 'success');
+        fileInput.value = '';
+      } else {
+        showToast(data.message || 'Lưu ảnh thất bại', 'error');
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      showToast('Có lỗi xảy ra khi lưu ảnh', 'error');
+    })
+    .finally(() => {
+      saveBtn.innerHTML = oldHTML;
+      saveBtn.disabled = true;
+    });
+  });
+</script>
+{% endblock %}

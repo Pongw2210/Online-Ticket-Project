@@ -14,7 +14,7 @@
                 Tài khoản <i class="fa fa-caret-down"></i>
             </div>
             <div class="dropdown" id="accountDropdown">
-                <a>Thông tin cá nhân</a>
+                <a href="{{ url_for('auth.user_info')}}">Thông tin cá nhân</a>
                 <a href="{{ url_for('auth.login')}}">Đăng xuất</a>
             </div>
         </div>

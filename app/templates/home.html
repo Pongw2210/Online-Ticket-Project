@@ -3,10 +3,15 @@
 
 {% block content %}
 <div class="nav">
+    <!-- Lọc theo loại sự kiện -->
     <a href="{{ url_for('events.home', q='Nhạc sống') }}">Nhạc sống</a>
     <a href="{{ url_for('events.home', q='Sân khấu & Nghệ thuật') }}">Sân khấu & Nghệ thuật</a>
     <a href="{{ url_for('events.home', q='Thể thao') }}">Thể thao</a>
     <a href="{{ url_for('events.home', q='Khác') }}">Khác</a>
+
+    <!-- Lọc theo hình thức tổ chức -->
+    <a href="{{ url_for('events.home', q='Trực tuyến') }}">Trực tuyến</a>
+    <a href="{{ url_for('events.home', q='Trực tiếp') }}">Trực tiếp</a>
 </div>
 
 <div class="container">

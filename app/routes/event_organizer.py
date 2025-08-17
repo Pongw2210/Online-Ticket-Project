@@ -9,6 +9,13 @@ from app.data.models import UserEnum, Event, EventOffline, EventOnline, TicketTy
     StatusEventEnum, EventRejectionLog, Seat, StatusSeatEnum, DiscountTypeEnum, Promotion, TicketPromotion
 import cloudinary.uploader
 from datetime import datetime
+from app.data.models import (
+    Booking, BookingDetail, TicketType, Event,
+    User, Customer, StatusBookingEnum
+)
+
+from app.data.models import Booking, BookingDetail, Customer
+from sqlalchemy import func
 
 event_organizer_bp = Blueprint("event_organizer", __name__, url_prefix="/organizer")
 
@@ -17,7 +24,7 @@ def home():
     # current_user = check_login()
     if not current_user:
         return redirect(url_for("auth.login"))
-    
+
     # Chỉ cho phép người tổ chức vào
     if current_user.role != UserEnum.NGUOI_TO_CHUC:
         return redirect(url_for("events.home"))
@@ -41,7 +48,7 @@ def create_event():
     # current_user = check_login()
     if not current_user:
         return redirect(url_for("auth.login"))
-    
+
     if current_user.role != UserEnum.NGUOI_TO_CHUC:
         return redirect(url_for("events.home"))
     event_type = dao.load_event_type_enum()
@@ -338,3 +345,27 @@ def delete_event_api(event_id):
 
     return jsonify({"message": "Xóa sự kiện thành công."}), 200
 
+@event_organizer_bp.route("/ticket-history")
+@login_required
+def ticket_history():
+    history = (
+        db.session.query(
+            User.username,
+            Customer.fullname,
+            Customer.email,
+            Booking.created_at,
+            TicketType.name.label("ticket_type"),
+            BookingDetail.quantity,
+            (BookingDetail.unit_price * BookingDetail.quantity).label("price"),
+            Event.name.label("event_name")
+        )
+        .join(BookingDetail, BookingDetail.booking_id == Booking.id)
+        .join(TicketType, TicketType.id == BookingDetail.ticket_type_id)
+        .join(Event, Event.id == Booking.event_id)
+        .join(User, User.id == Booking.user_id)
+        .join(Customer, Customer.user_id == User.id)
+        .filter(Event.organizer_id == current_user.event_organizer.id)
+        .filter(Booking.status == StatusBookingEnum.DA_THANH_TOAN)
+        .all()
+    )
+    return render_template("event_organizer/ticket_history.html", history=history)

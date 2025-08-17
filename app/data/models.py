@@ -183,13 +183,14 @@ class EventRejectionLog(Base):
 
 class Booking(Base):
     __tablename__ = 'booking'
-
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     event_id = Column(Integer, ForeignKey('event.id'), nullable=False)
     total_price = Column(Float, nullable=False)
     booking_date = Column(DateTime, default=datetime.utcnow)
     status = Column(Enum(StatusBookingEnum), default=StatusBookingEnum.CHO_THANH_TOAN)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
+    # Quan hệ
     user = relationship("User", backref="bookings")
     event = relationship("Event", backref="bookings")
     booking_seats = relationship("BookingSeat", back_populates="booking", cascade="all, delete")
