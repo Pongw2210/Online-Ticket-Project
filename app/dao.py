@@ -72,4 +72,3 @@ def get_event_by_id(event_id):
 def load_ticket_type(event_id):
     ticket_types = TicketType.query.filter_by(event_id=event_id).all()
     return ticket_types
-

@@ -4,7 +4,7 @@ from flask_login import current_user, login_required
 from sqlalchemy.orm import joinedload
 
 from app.data.models import Event, EventTypeEnum, Seat, BookingSeat, Booking, StatusBookingEnum, BookingDetail, \
-    TicketType, StatusSeatEnum, StatusEventEnum, EventFormatEnum, Voucher, TicketVoucher
+    TicketType, StatusSeatEnum, StatusEventEnum, EventFormatEnum, Voucher, TicketVoucher, BookingVoucher
 from app import dao, db
 import requests
 import hmac
@@ -46,7 +46,11 @@ def home():
 @events_bp.route('/event/<int:event_id>')
 def event_detail(event_id):
     event = Event.query.get_or_404(event_id)
-    print("[DEBUG] image_url =", event.image_url)
+    # Kiểm tra kiểu dữ liệu
+    print("Type:", type(event.image_url))
+
+    # In an toàn, escape ký tự lạ
+    print("[DEBUG] image_url =", str(event.image_url).encode("unicode_escape"))
     min_price = None
     if event.ticket_types:
         min_price = min(ticket.price for ticket in event.ticket_types)
@@ -71,6 +75,7 @@ def create_booking():
     tickets = data.get("tickets", [])
     total_price = data.get("totalPrice")
     event_id = data.get("eventId")
+    voucher_id = data.get("voucherId")
 
     if not tickets or not total_price or not event_id:
         return jsonify({"success": False, "message": "Dữ liệu không hợp lệ"}), 400
@@ -87,6 +92,13 @@ def create_booking():
         )
         db.session.add(booking)
         db.session.flush()  # để có booking.id
+
+        if voucher_id:
+            booking_voucher = BookingVoucher(
+                booking_id =booking.id,
+                voucher_id =voucher_id
+            )
+            db.session.add(booking_voucher)
 
         for t in tickets:
             # Tạo booking detail cho từng loại vé
@@ -359,6 +371,12 @@ def payment_return_vnpay():
             if seat_obj:
                 seat_obj.status = StatusSeatEnum.DA_DAT
 
+        if booking.booking_vouchers:
+            for bv in booking.booking_vouchers:
+                voucher_obj = Voucher.query.get(bv.voucher_id)
+                if voucher_obj and voucher_obj.quantity > 0:
+                    voucher_obj.quantity -= 1
+
         db.session.commit()
 
         # ==== Lấy dữ liệu vé để gửi email ====
@@ -492,24 +510,55 @@ def my_tickets():
 
     return render_template("my_tickets.html", tickets=tickets_for_user)
 
-
-@events_bp.route("/api/vouchers/<int:event_id>", methods=["GET"])
+@events_bp.route("/api/vouchers/<int:event_id>", methods=["POST"])
 def get_event_vouchers(event_id):
     try:
-        # Lấy tất cả voucher của event
-        vouchers = Voucher.query.filter_by(event_id=event_id).all()
+        data = request.get_json()
+        tickets = data.get("tickets", [])
+
+        # Lấy ra danh sách ticket_type_id từ tickets
+        ticket_type_ids = [t.get("id") for t in tickets if "id" in t]
+
+        query = db.session.query(Voucher).filter(Voucher.event_id == event_id)
+
+        if ticket_type_ids:
+            query = query.filter(
+                (Voucher.apply_all == True)
+                | Voucher.id.in_(
+                    db.session.query(TicketVoucher.voucher_id).filter(
+                        TicketVoucher.ticket_type_id.in_(ticket_type_ids)
+                    )
+                )
+            )
+        else:
+            query = query.filter(Voucher.apply_all == True)
+
+        vouchers = query.distinct(Voucher.id).all()
 
         result = []
         for v in vouchers:
-            result.append({
+            item = {
                 "id": v.id,
                 "code": v.code,
                 "discount_value": v.discount_value,
-                "discount_type": v.discount_type.name,  # "PHAN_TRAM" hoặc "SO_TIEN"
-                "apply_all": v.apply_all
-            })
+                "discount_type": v.discount_type.name if v.discount_type else None,
+                "apply_all": v.apply_all,
+                "ticket_types": [],
+            }
 
-        return jsonify(result)
+            if not v.apply_all:
+                item["ticket_types"] = [t.ticket_type_id for t in v.ticket_vouchers]
+
+            result.append(item)
+
+        return jsonify(result), 200
 
     except Exception as e:
+        db.session.rollback()
         return jsonify({"error": str(e)}), 500
+
+
+
+
+
+

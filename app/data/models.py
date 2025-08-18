@@ -48,6 +48,7 @@ class Base(db.Model):
 
 class Customer(Base):
     __tablename__ = 'customer'
+
     fullname = Column(String(100), nullable=False)
     email = Column(String(100), nullable=False)
     gender = Column(String(10), nullable=False)
@@ -58,6 +59,7 @@ class Customer(Base):
 
 class EventOrganizer(Base):
     __tablename__ = 'event_organizer'
+
     fullname = Column(String(100), nullable=False)
     email = Column(String(100), nullable=True)
     gender = Column(String(10), nullable=False)
@@ -66,6 +68,7 @@ class EventOrganizer(Base):
 
 class Admin(Base):
     __tablename__ = 'admin'
+
     fullname = Column(String(100), nullable=False)
     email = Column(String(100), nullable=True)
     gender = Column(String(10), nullable=False)
@@ -73,6 +76,7 @@ class Admin(Base):
 
 class User(Base, UserMixin):
     __tablename__ = 'user'
+
     username = Column(String(50), unique=True, nullable=False)
     email = Column(String(100), unique=True, nullable=False)
     password = Column(String(50), nullable=False)
@@ -104,12 +108,14 @@ class User(Base, UserMixin):
 
 class TicketVoucher(Base):
     __tablename__ = 'ticket_voucher'
-    promotion_id = Column(Integer, ForeignKey("voucher.id"))
+
+    voucher_id = Column(Integer, ForeignKey("voucher.id"))
     ticket_type_id = Column(Integer, ForeignKey("ticket_type.id"))
 
 
 class TicketType(Base):
     __tablename__ = 'ticket_type'
+
     name = Column(String(50))
     price = Column(Float)
     quantity = Column(Integer, nullable=False)
@@ -117,7 +123,7 @@ class TicketType(Base):
     event_id = Column(Integer, ForeignKey("event.id"), nullable=False)
     requires_seat = Column(Boolean, default=False)
 
-    promotions = relationship(TicketVoucher, backref="ticket_type", lazy=True)
+    vouchers = relationship(TicketVoucher, backref="ticket_type", lazy=True)
 
     @property
     def benefits_list(self):
@@ -125,6 +131,7 @@ class TicketType(Base):
 
 class EventOffline(Base):
     __tablename__ = 'event_offline'
+
     venue_name = Column(String(255), nullable=False)
     location = Column(String(255), nullable=False)
     has_seat = Column(Boolean, default=False)
@@ -132,6 +139,7 @@ class EventOffline(Base):
 
 class EventOnline(Base):
     __tablename__ = 'event_online'
+
     livestream_url = Column(String(255), nullable=False)
     event_id = Column(Integer, ForeignKey('event.id'), nullable=False, unique=True)
 
@@ -174,9 +182,9 @@ class Event(Base):
         """Số lượt đặt vé"""
         return len(self.bookings)
 
-
 class EventRejectionLog(Base):
     __tablename__ = 'event_rejection_log'
+
     event_id = Column(Integer, ForeignKey('event.id'), nullable=False)
     reason = Column(Text, nullable=False)
     rejected_at = Column(DateTime, default=datetime.utcnow)
@@ -194,6 +202,7 @@ class Booking(Base):
     event = relationship("Event", backref="bookings")
     booking_seats = relationship("BookingSeat", back_populates="booking", cascade="all, delete")
     booking_details = relationship("BookingDetail", backref="booking", cascade="all, delete")
+    booking_vouchers = relationship("BookingVoucher", backref="booking", cascade="all, delete")
 
 class BookingDetail(Base):
     __tablename__ = 'booking_detail'
@@ -234,5 +243,12 @@ class Voucher(Base):
     apply_all =  Column(Boolean, default=False)
     event_id = Column(Integer, ForeignKey('event.id'), nullable=False)
 
-    tickets = relationship(TicketVoucher, backref="voucher", lazy=True)
+    ticket_vouchers = relationship("TicketVoucher", backref="voucher", lazy=True)
 
+class BookingVoucher(Base):
+    __tablename__='booking_voucher'
+
+    booking_id = Column(Integer, ForeignKey('booking.id'), nullable=False)
+    voucher_id = Column(Integer, ForeignKey('voucher.id'), nullable=False)
+
+    voucher = relationship("Voucher")

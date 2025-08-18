@@ -257,8 +257,6 @@ document.addEventListener('DOMContentLoaded', () => {
     totalEl.textContent = total.toLocaleString() + ' đ';
 });
 
-
-
 let minutes = 14; let seconds = 30;
 const minEl = document.getElementById('cd-min');
 const secEl = document.getElementById('cd-sec');
@@ -356,6 +354,9 @@ function payment_vnpay() {
 
     let totalPrice = tickets.reduce((sum, ticket) => sum + (parseInt(ticket.price) * ticket.quantity), 0);
 
+    let appliedVoucher = JSON.parse(sessionStorage.getItem('appliedVoucher')) || null;
+    let voucherId = appliedVoucher ? appliedVoucher.id : null;
+
     // Tạo booking trước
     fetch("/booking/create", {
         method: "POST",
@@ -364,6 +365,7 @@ function payment_vnpay() {
             tickets: tickets,
             totalPrice: totalPrice,
             eventId: sessionStorage.getItem('checkoutEventId'),
+            voucherId: voucherId,
         }),
     })
     .then(res => res.json())
@@ -416,23 +418,32 @@ function showVoucherModal(eventId) {
     const list = document.getElementById("voucherList");
     list.innerHTML = "";
 
-    // Gọi API lấy voucher
-    fetch(`/api/vouchers/${eventId}`)
-        .then(res => res.json())
-        .then(data => {
-            if (data.error) {
-                alert("Lỗi load voucher: " + data.error);
-                return;
-            }
+    // Lấy tickets đã chọn trong giỏ hàng
+    let tickets = JSON.parse(sessionStorage.getItem('checkoutTickets')) || [];
 
-            data.forEach(v => {
-                const li = document.createElement("li");
-                li.textContent = `${v.code} - ${v.discount_value}${v.discount_type === "PHAN_TRAM" ? "%" : "đ"}`;
-                li.onclick = () => applyVoucher(v);
-                list.appendChild(li);
-            });
-        })
-        .catch(err => console.error("Lỗi fetch voucher:", err));
+    // Gọi API lấy voucher, gửi kèm danh sách vé
+    fetch(`/api/vouchers/${eventId}`, {
+        method: "POST",  // đổi sang POST
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ tickets: tickets })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) {
+            alert("Lỗi load voucher: " + data.error);
+            return;
+        }
+
+        data.forEach(v => {
+            const li = document.createElement("li");
+            li.textContent = `${v.code} - ${v.discount_value}${v.discount_type === "PHAN_TRAM" ? "%" : "đ"}`;
+            li.onclick = () => applyVoucher(v);
+            list.appendChild(li);
+        });
+    })
+    .catch(err => console.error("Lỗi fetch voucher:", err));
 }
 
 let appliedVoucher = null; // voucher đã chọn
@@ -450,10 +461,7 @@ function applyVoucher(voucher) {
     }
 
     closeVoucherModal();
-
-    // Sau khi chọn voucher thì cập nhật lại tổng tiền
-    location.reload(); // cách đơn giản nhất để render lại
-    // hoặc gọi lại updateSummary() nếu bạn muốn dynamic
+    window.location.reload();
 }
 
 
@@ -488,10 +496,7 @@ function updateSummary() {
             totalPrice += price * qty;
         }
     });
-
-    console.log("Tổng vé:", totalTickets, "Tổng tiền trước giảm:", totalPrice);
-
-    // Áp voucher nếu có
+   // Áp voucher nếu có
     let discount = 0;
     let discountText = '';
     if (appliedVoucher && totalPrice > 0) {

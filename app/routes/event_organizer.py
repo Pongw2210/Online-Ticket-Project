@@ -74,7 +74,6 @@ def create_event_api():
         start_time = request.form.get("start_time")
         end_time = request.form.get("end_time")
         tickets = request.form.get("tickets")
-        promotions = request.form.get("promotions")
         has_seat_str = request.form.get("has_seat", "false")
         has_seat = has_seat_str.lower() == "true"
 
@@ -354,7 +353,7 @@ def create_voucher():
         # Lưu TicketVoucher nếu không áp dụng tất cả vé
         if not apply_all and ticket_ids:
             ticket_vouchers = [
-                TicketVoucher(promotion_id=voucher.id, ticket_type_id=int(tid))
+                TicketVoucher(voucher_id=voucher.id, ticket_type_id=int(tid))
                 for tid in ticket_ids
             ]
             db.session.add_all(ticket_vouchers)
