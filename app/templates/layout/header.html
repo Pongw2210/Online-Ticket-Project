@@ -14,17 +14,26 @@
                 <img src="{{ url_for('static', filename='images/icons8-ticket-30.png') }}" alt="ticket icon" class="ticket-icon">
                 <span>Vé của tôi</span>
             </a>
+
+            {% if current_user.role.value == "Khách hàng" %}
+            <a href="{{ url_for('auth.user_info') }}" class="profile-link">
+                Thông tin cá nhân
+            </a>
+            {% endif %}
         </div>
+
         <div class="auth-links">
             <a href="/user_info">
                 👋 Xin chào, <strong>{{ current_user.fullname or current_user.username }}</strong> |
             </a>
             <a href="/logout">Đăng xuất</a>
+
+
         </div>
     {% else %}
         <div class="auth-links">
-            <a href="/login">Đăng nhập</a> |
-            <a href="/register">Đăng ký</a>
+            <a href="{{ url_for('auth.login') }}">Đăng nhập</a> |
+            <a href="{{ url_for('auth.register') }}">Đăng ký</a>
         </div>
     {% endif %}
 </header>

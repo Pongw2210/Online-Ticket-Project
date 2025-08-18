@@ -1,0 +1,56 @@
+{% set base_tpl = "layout/base.html" if current_user.role.value == "Khách hàng" else "event_organizer/layout_event_organizer/base.html" %}
+{% extends base_tpl %}
+
+{% block title %}Thông tin cá nhân{% endblock %}
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles_profile.css') }}">
+<div class="page-wrap">
+  <div class="grid">
+    <div class="card profile-card">
+      <div class="card-header">Hồ sơ cá nhân</div>
+      <div class="card-body">
+        <div class="avatar-wrap">
+          <div class="avatar-ring">
+            <img id="avatarPreview"
+                 src="{{current_user.avatar}}"
+                 alt="Avatar">
+          </div>
+        </div>
+        <div class="btn-row">
+          <label for="avatar" class="btn btn-outline-primary">
+            <span>Chọn ảnh</span>
+            <input type="file" id="avatar" name="avatar" accept="image/*" hidden>
+          </label>
+          <button id="saveAvatarBtn" class="btn btn-primary" disabled>
+            <span class="btn-text">Lưu thay đổi</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="card info-card">
+      <div class="card-header">Thông tin tài khoản</div>
+      <div class="card-body">
+        <div class="section-title">Chi tiết</div>
+        <table class="table-modern">
+          <tbody>
+          <tr><th>ID Người dùng</th><td>{{ current_user.id }}</td></tr>
+          <tr><th>Tên đăng nhập</th><td>{{ current_user.username }}</td></tr>
+          {% set person = current_user.customer or current_user.event_organizer %}
+          {% if person %}
+          <tr><th>Họ và Tên</th><td>{{ person.fullname }}</td></tr>
+          <tr><th>Email</th><td>{{ person.email }}</td></tr>
+          {% endif %}
+          <tr><th>Vai trò</th><td><span class="role-badge">{{ current_user.role.value }}</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite">
+  <span id="toast-icon"></span>
+  <span id="toast-msg"></span>
+</div>
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}

@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 from flask import Blueprint, render_template, request, jsonify, Response
 from flask_login import login_required, current_user
 from sqlalchemy import func
-from sqlalchemy.orm import query_expression
 
 from app.data.models import (
     db, Event, TicketType, Booking, BookingDetail, User, Customer,
@@ -62,7 +61,6 @@ def api_summary():
     if event_id:
         q = q.filter(Event.id == event_id)
         q_tickets = q_tickets.filter(Event.id == event_id)
-
     if start:
         q = q.filter(Booking.booking_date >= start)
         q_tickets = q_tickets.filter(Booking.booking_date >= start)
@@ -119,35 +117,20 @@ def api_revenue_by_ticket():
     start = _parse_date(request.args.get("start"))
     end = _parse_date(request.args.get("end"))
     event_id = request.args.get("event_id", type=int)
-    q = db.session.query()
 
+    q = db.session.query(
+        TicketType.name.label("label"),
+        func.sum(BookingDetail.unit_price * BookingDetail.quantity).label("revenue")
+    ).join(TicketType, BookingDetail.ticket_type_id == TicketType.id) \
+     .join(Booking, BookingDetail.booking_id == Booking.id) \
+     .join(Event, Booking.event_id == Event.id) \
+     .filter(_organizer_filter(), _paid())
 
     if event_id:
-        q = db.session.query(
-            TicketType.name.label("label"),
-            func.sum(BookingDetail.unit_price * BookingDetail.quantity).label("revenue")
-        ).join(TicketType, BookingDetail.ticket_type_id == TicketType.id) \
-            .join(Booking, BookingDetail.booking_id == Booking.id) \
-            .join(Event, Booking.event_id == Event.id) \
-            .filter(_organizer_filter(), _paid())
         q = q.filter(Event.id == event_id)
     if start:
-        q = db.session.query(
-            TicketType.name.label("label"),
-            func.sum(BookingDetail.unit_price * BookingDetail.quantity).label("revenue")
-        ).join(TicketType, BookingDetail.ticket_type_id == TicketType.id) \
-            .join(Booking, BookingDetail.booking_id == Booking.id) \
-            .join(Event, Booking.event_id == Event.id) \
-            .filter(_organizer_filter(), _paid())
         q = q.filter(Booking.booking_date >= start)
     if end:
-        q = db.session.query(
-            TicketType.name.label("label"),
-            func.sum(BookingDetail.unit_price * BookingDetail.quantity).label("revenue")
-        ).join(TicketType, BookingDetail.ticket_type_id == TicketType.id) \
-            .join(Booking, BookingDetail.booking_id == Booking.id) \
-            .join(Event, Booking.event_id == Event.id) \
-            .filter(_organizer_filter(), _paid())
         q = q.filter(Booking.booking_date <= end + timedelta(days=1))
 
     data = q.group_by(TicketType.name).order_by(TicketType.name).all()
@@ -163,6 +146,7 @@ def api_revenue_by_ticket():
 def api_tickets_by_event():
     start = _parse_date(request.args.get("start"))
     end = _parse_date(request.args.get("end"))
+    event_id = request.args.get("event_id", type=int)  # Thêm lấy event_id
 
     q = db.session.query(
         Event.id, Event.name,
@@ -171,6 +155,9 @@ def api_tickets_by_event():
      .join(Event, Booking.event_id == Event.id) \
      .filter(_organizer_filter(), _paid())
 
+    # Lọc theo event_id nếu có
+    if event_id:
+        q = q.filter(Event.id == event_id)
     if start:
         q = q.filter(Booking.booking_date >= start)
     if end:
@@ -181,7 +168,6 @@ def api_tickets_by_event():
         "labels": [r.name for r in data],
         "values": [int(r.tickets or 0) for r in data]
     })
-
 
 # -------- API: Vé đã bán vs còn lại --------
 @report_bp.route("/api/ticket_stock", methods=["GET"])
