@@ -129,6 +129,16 @@ function renderSeatGrid(seats, preselectedSeats) {
 }
 
 function toggleSeat(seatNumber, seatElement, selectedSeats) {
+    // Ghế đã bị chọn cho vé khác
+    for (let ticketId in seatSelections) {
+        if (ticketId != currentTicketId) {
+            if (seatSelections[ticketId].some(s => s.seat_code === seatNumber)) {
+                alert(`Ghế ${seatNumber} đã được chọn cho vé khác!`);
+                return;
+            }
+        }
+    }
+
     if (seatElement.classList.contains("occupied")) return;
 
     if (seatElement.classList.contains("selected")) {
@@ -144,6 +154,7 @@ function toggleSeat(seatNumber, seatElement, selectedSeats) {
         selectedSeats.push(seatNumber);
     }
 
+    // Cập nhật dữ liệu ghế đã chọn cho vé hiện tại
     document.getElementById("seat-grid").dataset.selectedSeats = JSON.stringify(selectedSeats);
 }
 
@@ -153,15 +164,17 @@ function closeSeatSelection() {
 
 function confirmSeatSelection() {
     let selectedSeats = Array.from(document.querySelectorAll(".seat.selected")).map(seatEl => ({
-        seat_id: parseInt(seatEl.dataset.id),   // ID trong DB
-        seat_code: seatEl.dataset.code          // Mã hiển thị
+        seat_id: parseInt(seatEl.dataset.id),
+        seat_code: seatEl.dataset.code
     }));
 
+    // Lưu ghế đã chọn cho vé hiện tại
     seatSelections[currentTicketId] = selectedSeats;
 
-    updateSummary();
+    updateSummary(); // Cập nhật thông tin tóm tắt vé và ghế
     closeSeatSelection();
 }
+
 
 function goToCheckout() {
     let continueBtn = document.getElementById('continue-btn');

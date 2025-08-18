@@ -40,6 +40,7 @@ def register():
         gender = request.form.get("gender")
         dob_str = request.form.get("dob")
         number_phone = request.form.get("number_phone")
+        username = request.form.get("username")
         password = request.form.get("password")
 
         try:
@@ -52,7 +53,7 @@ def register():
             flash("Email đã tồn tại!")
             return redirect(url_for("auth.register"))
 
-        new_user = User(username=email, email=email, role=UserEnum.KHACH_HANG)
+        new_user = User(username=username, email=email, role=UserEnum.KHACH_HANG)
         new_user.set_password(password)
         db.session.add(new_user)
         db.session.flush()

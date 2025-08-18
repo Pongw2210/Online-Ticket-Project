@@ -201,7 +201,6 @@ class Booking(Base):
     # Quan hệ
     user = relationship("User", backref="bookings")
     event = relationship("Event", backref="bookings")
-    booking_seats = relationship("BookingSeat", back_populates="booking", cascade="all, delete")
     booking_details = relationship("BookingDetail", backref="booking", cascade="all, delete")
     booking_vouchers = relationship("BookingVoucher", backref="booking", cascade="all, delete")
 
@@ -214,6 +213,7 @@ class BookingDetail(Base):
     unit_price = Column(Float, nullable=False)
 
     ticket_type = relationship("TicketType")
+    booking_seats = relationship("BookingSeat", back_populates="booking_detail")
 
 class Seat(Base):
     __tablename__ = 'seat'
@@ -225,10 +225,10 @@ class Seat(Base):
 class BookingSeat(Base):
     __tablename__ = 'booking_seat'
 
-    booking_id = Column(Integer, ForeignKey('booking.id'), nullable=False)
+    booking_detail_id = Column(Integer, ForeignKey('booking_detail.id'), nullable=False)
     seat_id = Column(Integer, ForeignKey('seat.id'), nullable=False)
 
-    booking = relationship("Booking", back_populates="booking_seats")
+    booking_detail = relationship("BookingDetail", back_populates="booking_seats")
     seat = relationship("Seat")
 
 class Voucher(Base):
