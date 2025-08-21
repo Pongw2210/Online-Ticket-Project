@@ -1,5 +1,6 @@
 import string
 import json
+import traceback
 
 from flask import Blueprint, render_template, redirect, url_for,request, jsonify, session
 from flask_login import login_required, current_user
@@ -209,19 +210,22 @@ def edit_event(event_id):
     return render_template("event_organizer/edit_event.html",
                            current_user=current_user,
                            event_type=event_type,
-                           event=event,
+                           event = event,
                            is_offline=is_offline,
                            ticket_types=ticket_types)
 
 @event_organizer_bp.route('/api/<int:event_id>/edit', methods=['POST'])
 def edit_event_api(event_id):
+    if not current_user:
+        return jsonify({"success": False, "message": "Vui lòng đăng nhập"}), 401
+
     try:
-        # Tìm sự kiện cũ
+        # Lấy sự kiện
         event = Event.query.get(event_id)
         if not event:
             return jsonify({"success": False, "message": "Không tìm thấy sự kiện"}), 404
 
-        # Lấy ảnh mới (nếu có)
+        # === Ảnh sự kiện ===
         image_file = request.files.get("image")
         existing_image_url = request.form.get("existing_image_url")
         if image_file:
@@ -230,63 +234,90 @@ def edit_event_api(event_id):
         elif existing_image_url:
             event.image_url = existing_image_url
 
-        name = request.form.get("name_event")
-        description = request.form.get("description")
-        rules = request.form.get("rules")
-        performers = request.form.get("performers")
-        organizer = request.form.get("organizer")
+        # === Thông tin cơ bản ===
+        event.name = request.form.get("name_event")
+        event.description = request.form.get("description")
+        event.rules = request.form.get("rules")
+        event.authors = request.form.get("performers")
+        event.producers = request.form.get("organizer")
         event_format = request.form.get("event_format")
-        event_type = request.form.get("event_type")
-        start_time = request.form.get("start_time")
-        end_time = request.form.get("end_time")
-
-        # Cập nhật vào DB
-        event.name = name
-        event.description = description
-        event.rules = rules
-        event.authors = performers
-        event.producers = organizer
         event.event_format = EventFormatEnum[event_format.upper()]
-        event.event_type = EventTypeEnum[event_type]
-        event.start_datetime = datetime.fromisoformat(start_time)
-        event.end_datetime = datetime.fromisoformat(end_time)
+        event.event_type = EventTypeEnum[request.form.get("event_type")]
+        event.start_datetime = datetime.fromisoformat(request.form.get("start_time"))
+        event.end_datetime = datetime.fromisoformat(request.form.get("end_time"))
         event.status = StatusEventEnum.DANG_DUYET
 
-        # Cập nhật offline/online
+        # === Offline / Online ===
         if event.event_format == EventFormatEnum.OFFLINE:
             venue_name = request.form.get("venue_name")
             address = request.form.get("address")
-
-            if not venue_name or not address:
-                return jsonify({"success": False, "message": "Vui lòng điền đầy đủ địa điểm sự kiện"}), 400
+            has_seat_str = request.form.get("has_seat", "false")
+            has_seat = has_seat_str.lower() == "true"
+            num_rows = request.form.get("num_rows")
+            seats_per_row = request.form.get("seats_per_row")
 
             if event.event_offline:
                 event.event_offline.venue_name = venue_name
                 event.event_offline.location = address
+                event.event_offline.has_seat = has_seat
+                event.event_offline.num_rows = int(num_rows) if num_rows else None
+                event.event_offline.seats_per_row = int(seats_per_row) if seats_per_row else None
             else:
-                new_offline = EventOffline(venue_name=venue_name, location=address, event_id=event.id)
+                new_offline = EventOffline(
+                    venue_name=venue_name,
+                    location=address,
+                    has_seat=has_seat,
+                    num_rows=int(num_rows) if num_rows else None,
+                    seats_per_row=int(seats_per_row) if seats_per_row else None,
+                    event_id=event.id
+                )
                 db.session.add(new_offline)
         else:
             livestream_url = request.form.get("livestream_url")
             if event.event_online:
                 event.event_online.livestream_url = livestream_url
             else:
-                new_online = EventOnline(livestream_url=livestream_url, event_id=event.id)
+                new_online = EventOnline(
+                    livestream_url=livestream_url,
+                    event_id=event.id
+                )
                 db.session.add(new_online)
 
-        # Cập nhật các loại vé (xoá hết tạo lại đơn giản nhất)
+        # === Ticket ===
         import json
-        tickets = json.loads(request.form.get("tickets", "[]"))
+        ticket_list = json.loads(request.form.get("tickets", "[]"))
 
+        # Xóa vé cũ
         TicketType.query.filter_by(event_id=event.id).delete()
-        for t in tickets:
+
+        for t in ticket_list:
             ticket = TicketType(
                 name=t['name'],
                 price=float(t['price']),
                 quantity=int(t['quantity']),
+                requires_seat=bool(t.get('requires_seat', False)),
+                benefits=t.get('benefits', ""),
                 event_id=event.id
             )
             db.session.add(ticket)
+
+        # === Ghế nếu có chỗ ngồi ===
+        if event.event_offline and event.event_offline.has_seat:
+            # Xoá ghế cũ
+            Seat.query.filter_by(event_id=event.id).delete()
+            num_rows = event.event_offline.num_rows or 0
+            seats_per_row = event.event_offline.seats_per_row or 0
+            import string
+            row_labels = list(string.ascii_uppercase)[:num_rows]
+            for row_label in row_labels:
+                for seat_num in range(1, seats_per_row + 1):
+                    seat_code = f"{row_label}{seat_num}"
+                    seat = Seat(
+                        event_id=event.id,
+                        seat_code=seat_code,
+                        status=StatusSeatEnum.TRONG
+                    )
+                    db.session.add(seat)
 
         db.session.commit()
         return jsonify({"success": True})
@@ -294,6 +325,7 @@ def edit_event_api(event_id):
     except Exception as e:
         db.session.rollback()
         import traceback
+        print("Error:", e)
         traceback.print_exc()
         return jsonify({"success": False, "message": "Lỗi khi cập nhật sự kiện."}), 500
 

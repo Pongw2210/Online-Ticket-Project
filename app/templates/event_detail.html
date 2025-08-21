@@ -34,7 +34,10 @@
             <div class="price">Hiện chưa có vé</div>
         {% endif %}
 
-        <a href="{{ url_for('events.buy_ticket', event_id=event.id) }}" class="buy-btn">Mua vé ngay</a>
+        {% if current_user.role.value == "Khách hàng" %}
+            <a href="{{ url_for('events.buy_ticket', event_id=event.id) }}" class="buy-btn">Mua vé ngay</a>
+        {% endif %}
+
     </div>
 </div>
 

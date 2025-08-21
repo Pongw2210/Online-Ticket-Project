@@ -471,6 +471,33 @@ function hideRejectModal() {
     document.getElementById("rejectModal").style.display = "none";
 }
 
+function goToPrevStepUpdate() {
+    const allSteps = document.querySelectorAll('.step-section');
+    const stepsProgress = document.querySelectorAll('.step-progress .step');
+    const btnNext = document.querySelector('.btn-next');
+
+    const currentIndex = Array.from(allSteps).findIndex(el => el.classList.contains('active'));
+
+    if (currentIndex > 0) {
+        allSteps[currentIndex].classList.remove('active');
+        allSteps[currentIndex - 1].classList.add('active');
+
+        stepsProgress.forEach((step, i) => {
+            if (i <= currentIndex - 1) step.classList.add('active');
+            else step.classList.remove('active');
+        });
+
+        // Reset nút Next
+        if (currentIndex - 1 === allSteps.length - 1) {
+            btnNext.innerText = 'Cập nhật';
+            btnNext.onclick = submitEventFormUpdate;
+        } else {
+            btnNext.innerText = 'Tiếp tục';
+            btnNext.onclick = goToNextStepUpdate;
+        }
+    }
+}
+
 function goToNextStepUpdate() {
     const allSections = document.querySelectorAll('.step-section');       // nội dung các bước
     const stepsProgress = document.querySelectorAll('.step-progress .step'); // thanh tiến trình
@@ -535,6 +562,17 @@ function submitEventFormUpdate() {
     formData.append("start_time", document.getElementById("start_time").value);
     formData.append("end_time", document.getElementById("end_time").value);
 
+    // === Ghế ngồi ===
+    const hasSeatCheckbox = document.getElementById("has_seat");
+    formData.append("has_seat", hasSeatCheckbox && hasSeatCheckbox.checked ? "true" : "false");
+
+    if (hasSeatCheckbox && hasSeatCheckbox.checked) {
+        const numRows = document.getElementById("num_rows")?.value || "";
+        const seatsPerRow = document.getElementById("seats_per_row")?.value || "";
+        formData.append("num_rows", numRows);
+        formData.append("seats_per_row", seatsPerRow);
+    }
+
     // Format phụ thuộc hình thức
     const format = document.querySelector('input[name="event_format"]:checked')?.value;
     formData.append("event_format", format.toUpperCase());
@@ -553,10 +591,18 @@ function submitEventFormUpdate() {
         tickets.push({
             name: row.querySelector(".ticket_name")?.value,
             price: row.querySelector(".ticket_price")?.value,
-            quantity: row.querySelector(".ticket_quantity")?.value
+            quantity: row.querySelector(".ticket_quantity")?.value,
+            requires_seat: row.querySelector(".requires_seat") ? row.querySelector(".requires_seat").checked : false,
+            benefits: row.querySelector(".ticket_benefits")?.value || "",
         });
     });
     formData.append("tickets", JSON.stringify(tickets));
+
+     // === Debug: log toàn bộ FormData ===
+    console.log("=== FormData contents ===");
+    for (let pair of formData.entries()) {
+        console.log(pair[0], ":", pair[1]);
+    }
 
     // Gửi dữ liệu
     fetch(`/organizer/api/${eventId}/edit`, {

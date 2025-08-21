@@ -81,34 +81,31 @@
                         </div>
                     </div>
                     <div class="form-info-event-offline">
-                        <!-- Checkbox có chỗ ngồi -->
                         <div class="form-group">
                             <label>
-                                <input type="checkbox" name="has_seat" id="has_seat" value="true"
-                                       {% if event.event_offline and event.event_offline.has_seat== 1 %}checked{% endif
-                                       %}>
+                                <input type="checkbox" name="has_seat" id="has_seat" value="true">
                                 Có chỗ ngồi (ghế) không?
                             </label>
                         </div>
 
-                        <!-- Thiết lập chỗ ngồi -->
-                        <div id="seat-setup-section"
-                             style="display: {% if event.event_offline and event.event_offline.has_seat %}block{% else %}none{% endif %};">
+                        <div id="seat-setup-section" style="display:none; margin-top: 15px;">
                             <h4>Thiết lập chỗ ngồi</h4>
                             <div class="form-group">
                                 <label for="num_rows">Số hàng ghế:</label>
-                                <input type="number" id="num_rows" name="num_rows" min="1" max="26"
-                                       value="{{ event.event_offline.num_rows if event.event_offline else 10 }}"/>
+                                <input type="number" id="num_rows" name="num_rows" min="1" max="26" value="10"/>
                                 <small>(Tối đa 26 hàng, tương ứng A-Z)</small>
                             </div>
                             <div class="form-group">
                                 <label for="seats_per_row">Số ghế mỗi hàng:</label>
                                 <input type="number" id="seats_per_row" name="seats_per_row" min="1" max="100"
-                                       value="{{ event.event_offline.seats_per_row if event.event_offline else 15 }}"/>
+                                       value="15"/>
                             </div>
                         </div>
 
-                        <!-- Thông tin địa điểm -->
+                    </div>
+
+
+                    <div class="form-info-event-offline">
                         <div class="form-group">
                             <label class="required-label"><span class="text-danger">*</span> Tên địa điểm</label>
                             <input type="text" name="venue_name" id="venue_name" maxlength="80"
@@ -121,7 +118,8 @@
                         </div>
                         <div class="form-group">
                             <label class="required-label"><span class="text-danger">*</span> Địa chỉ cụ thể</label>
-                            <input type="text" name="address" id="address" placeholder="Địa chỉ cụ thể"
+                            <input type="text" name="address" id="address"
+                                   placeholder="Địa chỉ cụ thể"
                                    value="{{ event.event_offline.location if event.event_offline else '' }}">
                         </div>
                     </div>
@@ -205,42 +203,25 @@
                         {% for ticket in ticket_types %}
                         <div class="ticket-type form-group form-row">
                             <div>
-                                <label class="required-label-ticket">
+                                <label class="required-label">
                                     <span class="text-danger">*</span> Tên vé
                                 </label>
                                 <input type="text" class="ticket_name" name="ticket_name" value="{{ ticket.name }}"
                                        placeholder="Ví dụ: Vé thường">
                             </div>
                             <div>
-                                <label class="required-label-ticket">
+                                <label class="required-label">
                                     <span class="text-danger">*</span> Giá vé (VNĐ)
                                 </label>
                                 <input type="number" class="ticket_price" name="ticket_price" min="0"
                                        value="{{ ticket.price }}" placeholder="100000">
                             </div>
                             <div>
-                                <label class="required-label-ticket">
+                                <label class="required-label">
                                     <span class="text-danger">*</span> Số lượng
                                 </label>
                                 <input type="number" class="ticket_quantity" name="ticket_quantity" min="1"
                                        value="{{ ticket.quantity }}" placeholder="50">
-                            </div>
-                            <div class="form-group requires-seat-container"
-                                 style="display:none; align-self:center; padding-left:10px;">
-                                <label style="color: #000000 !important;">
-                                    <input type="checkbox" class="requires_seat" required
-                                           {% if ticket.requires_seat== 1 %}checked{% endif %}>
-                                    Yêu cầu chọn ghế
-                                </label>
-                            </div>
-
-                            <div>
-                                <label class="required-label-ticket">
-                                    <span class="text-danger">*</span> Lợi ích
-                                </label>
-                                <input type="text" class="ticket_benefits"
-                                       value="{{ ticket.benefits }}"
-                                       placeholder="Hãy nhập với cấu trúc lợi ích 1 | lợi ích 2">
                             </div>
                         </div>
                         {% endfor %}
@@ -248,39 +229,25 @@
                         <!-- Nếu chưa có vé nào, hiển thị 1 dòng trống để người dùng nhập -->
                         <div class="ticket-type form-group form-row">
                             <div>
-                                <label class="required-label-ticket">
+                                <label class="required-label">
                                     <span class="text-danger">*</span> Tên vé
                                 </label>
                                 <input type="text" class="ticket_name" name="ticket_name"
                                        placeholder="Ví dụ: Vé thường">
                             </div>
                             <div>
-                                <label class="required-label-ticket">
+                                <label class="required-label">
                                     <span class="text-danger">*</span> Giá vé (VNĐ)
                                 </label>
                                 <input type="number" class="ticket_price" name="ticket_price" min="0"
                                        placeholder="100000">
                             </div>
                             <div>
-                                <label class="required-label-ticket">
+                                <label class="required-label">
                                     <span class="text-danger">*</span> Số lượng
                                 </label>
                                 <input type="number" class="ticket_quantity" name="ticket_quantity" min="1"
                                        placeholder="50">
-                            </div>
-                            <div class="form-group requires-seat-container"
-                                 style="display:none; align-self:center; padding-left:10px;">
-                                <label style="color: #000000 !important;">
-                                    <input type="checkbox" class="requires_seat" required>
-                                    Yêu cầu chọn ghế
-                                </label>
-                            </div>
-                            <div>
-                                <label class="required-label-ticket">
-                                    <span class="text-danger">*</span> Lợi ích
-                                </label>
-                                <input type="text" class="ticket_benefits"
-                                       placeholder="Hãy nhập với cấu trúc lợi ích 1 | lợi ích 2">
                             </div>
                         </div>
                         {% endif %}
