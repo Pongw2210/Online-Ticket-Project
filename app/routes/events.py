@@ -17,7 +17,9 @@ from app.data.models import (
 )
 from app import dao, db
 from app.utils import send_ticket_email
-
+from app.data.models import RefundRequest
+import uuid
+import datetime
 
 events_bp = Blueprint("events", __name__)
 
@@ -497,22 +499,31 @@ def get_seats(event_id):
 @events_bp.route('/my-ticket')
 @login_required
 def my_tickets():
-    # Lấy tất cả booking đã thanh toán của user
-    bookings = Booking.query.filter_by(user_id=current_user.id, status=StatusBookingEnum.DA_THANH_TOAN).all()
+    bookings = Booking.query.filter_by(user_id=current_user.id).all()
+
+    status_label_map = {
+        "CHO_XU_LY": "Đang chờ xử lý",
+        "DONG_Y": "Đã duyệt",
+        "TU_CHOI": "Đã bị từ chối",
+    }
 
     tickets_for_user = []
     for booking in bookings:
         for detail in booking.booking_details:
+            rr = RefundRequest.query.filter_by(booking_detail_id=detail.id).first()
+
+            # Nếu chưa thanh toán và chưa có refund thì bỏ qua
+            if booking.status != StatusBookingEnum.DA_THANH_TOAN and rr is None:
+                continue
+
             ticket_type = detail.ticket_type
             event = ticket_type.event
 
             seat_display = None
             event_address = "Chưa có địa điểm"
-
             if event.event_format == EventFormatEnum.OFFLINE:
                 event_offline = getattr(event, "event_offline", None)
                 event_address = getattr(event_offline, "location", "Chưa có địa điểm")
-
                 if getattr(event_offline, "has_seat", 0) == 1:
                     if ticket_type.requires_seat == 1:
                         seat_codes = [
@@ -527,19 +538,21 @@ def my_tickets():
             else:
                 event_online = getattr(event, "event_online", None)
                 event_address = getattr(event_online, "meeting_url", "Online")
-                seat_display = None
 
-            ticket_info = {
+            tickets_for_user.append({
+                "booking_detail_id": detail.id,
                 "ticket_id": detail.id,
+                "booking_id": booking.id,
                 "event": event.name,
                 "ticket_type": ticket_type.name,
                 "event_time": event.start_datetime,
                 "event_address": event_address,
                 "seat": seat_display,
                 "quantity": detail.quantity,
-                "user": current_user.fullname
-            }
-            tickets_for_user.append(ticket_info)
+                "user": current_user.fullname,
+                "refund_status": rr.status.name if rr else None,
+                "refund_label": status_label_map.get(rr.status.name) if rr else None
+            })
 
     return render_template("my_tickets.html", tickets=tickets_for_user)
 
@@ -590,3 +603,38 @@ def get_event_vouchers(event_id):
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
+@events_bp.route('/api/request-refund', methods=['POST'])
+@login_required
+def request_refund():
+    data = request.get_json()
+    booking_detail_id = data.get("booking_detail_id")
+    reason = data.get("reason")
+
+    detail = BookingDetail.query.get(booking_detail_id)
+    if not detail or detail.booking.user_id != current_user.id:
+        return jsonify({"success": False, "message": "Vé không hợp lệ"}), 400
+
+    # Chỉ cho phép khi đã thanh toán
+    if detail.booking.status != StatusBookingEnum.DA_THANH_TOAN:
+        return jsonify({"success": False, "message": "Đơn hàng chưa thanh toán"}), 400
+
+    # ====== GIỚI HẠN 24H SAU THANH TOÁN ======
+    # Dùng thời điểm tạo booking làm mốc thanh toán (hệ thống hiện chưa có paid_at)
+    paid_elapsed = datetime.datetime.utcnow() - (detail.booking.created_at or datetime.datetime.utcnow())
+    if paid_elapsed.total_seconds() > 24 * 3600:
+        return jsonify({
+            "success": False,
+            "message": "Yêu cầu không hợp lệ: chỉ hỗ trợ hoàn vé trong vòng 24h sau khi thanh toán."
+        }), 400
+    # =========================================
+
+    # Không tạo trùng yêu cầu
+    existing = RefundRequest.query.filter_by(booking_detail_id=detail.id).first()
+    if existing:
+        return jsonify({"success": False, "message": "Vé này đã gửi yêu cầu hoàn"}), 400
+
+    refund = RefundRequest(booking_detail_id=detail.id, reason=reason)
+    db.session.add(refund)
+    db.session.commit()
+
+    return jsonify({"success": True, "message": "Đã gửi yêu cầu hoàn vé"}), 201

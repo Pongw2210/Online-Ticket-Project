@@ -1,0 +1,192 @@
+{% extends "event_organizer/layout_event_organizer/base.html" %}
+{% block title %}Yêu cầu hoàn vé{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <h2 class="page-title">Yêu cầu hoàn vé</h2>
+</div>
+
+<div class="refund-container">
+    {% if refunds %}
+    <table class="refund-table">
+        <thead>
+            <tr>
+                <th>Sự kiện</th>
+                <th>Người mua</th>
+                <th>Loại vé</th>
+                <th>Số lượng</th>
+                <th>Lý do</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in refunds %}
+            <tr>
+                <td>{{ r.booking_detail.booking.event.name }}</td>
+                <td>{{ r.booking_detail.booking.user.customer.fullname }}</td>
+                <td>{{ r.booking_detail.ticket_type.name }}</td>
+                <td>{{ r.booking_detail.quantity }}</td>
+                <td>{{ r.reason }}</td>
+                <td>
+                    <span class="status-badge {{ 'approved' if r.status.name == 'DONG_Y' else 'rejected' if r.status.name == 'TU_CHOI' else 'pending' }}">
+                        {{ r.status.value }}
+                    </span>
+                </td>
+                <td>
+                    {% if r.status.name == 'CHO_XU_LY' %}
+                        <button class="btn-approve" onclick="handleRefundAction({{ r.id }}, 'approve')">Duyệt</button>
+                        <button class="btn-reject" onclick="handleRefundAction({{ r.id }}, 'reject')">Từ chối</button>
+                    {% else %}
+                        <em>Đã xử lý</em>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="empty-message">Không có yêu cầu hoàn vé nào.</p>
+    {% endif %}
+</div>
+
+<style>
+.page-title {
+    color: #d81b60;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.refund-container {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 20px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    overflow-x: auto;
+}
+
+.refund-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    color: #333;
+}
+
+.refund-table thead {
+    background: linear-gradient(135deg, #f8bbd0, #f48fb1);
+    color: #880e4f;
+    text-align: left;
+}
+
+.refund-table th, .refund-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+}
+
+.refund-table tr:hover {
+    background: #fdf1f6;
+    transition: background 0.3s;
+}
+
+.empty-message {
+    text-align: center;
+    color: #888;
+    font-size: 15px;
+    margin-top: 10px;
+}
+
+/* Badge trạng thái */
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-block;
+    transition: background 0.4s ease, color 0.4s ease;
+}
+.status-badge.pending {
+    background: #fff3cd;
+    color: #856404;
+}
+.status-badge.approved {
+    background: #c8e6c9;
+    color: #256029;
+}
+.status-badge.rejected {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* Nút hành động */
+.btn-approve, .btn-reject {
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+    margin-right: 6px;
+}
+.btn-approve {
+    background: #4caf50;
+    color: white;
+}
+.btn-approve:hover {
+    background: #43a047;
+    transform: scale(1.05);
+}
+.btn-reject {
+    background: #e91e63;
+    color: white;
+}
+.btn-reject:hover {
+    background: #d81b60;
+    transform: scale(1.05);
+}
+</style>
+
+<script>
+async function handleRefundAction(refundId, action) {
+    if (!confirm("Bạn có chắc muốn " + (action === 'approve' ? 'DUYỆT' : 'TỪ CHỐI') + " yêu cầu này?")) return;
+
+    try {
+        const response = await fetch(`/organizer/api/refund/${refundId}/${action}`, {
+            method: 'POST'
+        });
+        const result = await response.json();
+
+        if (result.success) {
+            const row = document.querySelector(`button[onclick*="${refundId}"]`)?.closest('tr');
+            if (!row) return;
+
+            // Lấy badge và cell hành động
+            const statusBadge = row.querySelector('.status-badge');
+            const actionCell = row.querySelector('td:last-child');
+
+            if (action === 'approve') {
+                statusBadge.textContent = 'Đồng ý hoàn';
+                statusBadge.classList.remove('pending', 'rejected');
+                statusBadge.classList.add('approved');
+            } else if (action === 'reject') {
+                statusBadge.textContent = 'Từ chối';
+                statusBadge.classList.remove('pending', 'approved');
+                statusBadge.classList.add('rejected');
+            }
+
+            // Thay 2 nút thành chữ Đã xử lý
+            actionCell.innerHTML = '<em>Đã xử lý</em>';
+        } else {
+            alert(result.message || 'Có lỗi xảy ra');
+        }
+    } catch (err) {
+        console.error(err);
+        alert('Có lỗi kết nối đến server.');
+    }
+}
+</script>
+
+{% endblock %}
