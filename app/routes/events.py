@@ -232,26 +232,35 @@ def payment_return():
     if not booking:
         return redirect(url_for("events.home", _anchor="payment-failed"))
 
-    if result_code == "0" and booking.status == StatusBookingEnum.CHO_THANH_TOAN:
+    if result_code == "0" :
         booking.status = StatusBookingEnum.DA_THANH_TOAN
 
+        # ===== Giảm số lượng vé =====
         for detail in booking.booking_details:
             ticket_type = detail.ticket_type
             if ticket_type:
                 ticket_type.quantity = max(ticket_type.quantity - detail.quantity, 0)
 
-        for seat_link in booking.booking_seats:
-            seat_obj = Seat.query.get(seat_link.seat_id)
-            if seat_obj:
-                seat_obj.status = StatusSeatEnum.DA_DAT
+        # ===== Cập nhật trạng thái ghế =====
+        for detail in booking.booking_details:
+            for seat_link in detail.booking_seats:  # seat liên kết với booking_detail
+                seat_obj = Seat.query.get(seat_link.seat_id)
+                if seat_obj:
+                    seat_obj.status = StatusSeatEnum.DA_DAT
+
+        # ===== Giảm số lượng voucher =====
+        if booking.booking_vouchers:
+            for bv in booking.booking_vouchers:
+                voucher_obj = Voucher.query.get(bv.voucher_id)
+                if voucher_obj and voucher_obj.quantity > 0:
+                    voucher_obj.quantity -= 1
 
         db.session.commit()
 
-        # ==== Lấy dữ liệu vé để gửi email ====
+        # ===== Lấy dữ liệu vé để gửi email =====
         tickets_for_email = []
-        booking_details = BookingDetail.query.filter_by(booking_id=booking.id).all()
 
-        for detail in booking_details:
+        for detail in booking.booking_details:
             ticket_type = detail.ticket_type
             event = ticket_type.event
 
@@ -259,17 +268,16 @@ def payment_return():
             event_address = "Chưa có địa điểm"
 
             if event.event_format == EventFormatEnum.OFFLINE:
-                # Lấy thông tin địa điểm offline
                 event_offline = getattr(event, "event_offline", None)
                 event_address = getattr(event_offline, "location", "Chưa có địa điểm")
 
                 if getattr(event_offline, "has_seat", 0) == 1:
                     if ticket_type.requires_seat == 1:
-                        # Lấy danh sách ghế của booking
+                        # Lấy danh sách ghế theo từng BookingDetail
                         seat_codes = [
                             s.seat_code for s in Seat.query
                             .join(BookingSeat, BookingSeat.seat_id == Seat.id)
-                            .filter(BookingSeat.booking_id == booking.id)
+                            .filter(BookingSeat.booking_detail_id == detail.id)
                             .all()
                         ]
                         seat_display = seat_codes
@@ -277,7 +285,6 @@ def payment_return():
                         seat_display = "Sẽ được sắp xếp ghế sau khi check-in"
                 else:
                     seat_display = None
-
             else:  # ONLINE
                 event_online = getattr(event, "event_online", None)
                 event_address = getattr(event_online, "meeting_url", "Online")
@@ -296,7 +303,7 @@ def payment_return():
 
             tickets_for_email.append(ticket_info)
 
-            # Gửi email
+        # ===== Gửi email =====
         with current_app.app_context():
             try:
                 send_ticket_email(booking.user.email, tickets_for_email)
@@ -305,6 +312,7 @@ def payment_return():
                 print(f"Lỗi gửi email: {e}")
 
         return redirect(url_for("events.home", _anchor="payment-success"))
+
     else:
         booking.status = StatusBookingEnum.DA_HUY
         db.session.commit()

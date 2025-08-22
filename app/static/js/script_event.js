@@ -265,6 +265,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let total = subtotal - discount;
     totalEl.textContent = total.toLocaleString() + ' đ';
+
+    sessionStorage.setItem('checkoutTotal', total);
 });
 
 let minutes = 14; let seconds = 30;
@@ -298,15 +300,19 @@ function payment_momo() {
     payBtn.disabled = true;
 
     let tickets = JSON.parse(sessionStorage.getItem('checkoutTickets')) || [];
-    console.log(sessionStorage.getItem('checkoutTickets'));
     if (tickets.length === 0) {
         alert("Không có vé để thanh toán");
         payBtn.disabled = false;
         return;
     }
 
-    let totalPrice = tickets.reduce((sum, ticket) => sum + (parseInt(ticket.price) * ticket.quantity), 0);
+    // Lấy tổng tiền sau khi đã áp dụng voucher
+    let totalPrice = Number(sessionStorage.getItem('checkoutTotal')) || 0;
 
+    let appliedVoucher = JSON.parse(sessionStorage.getItem('appliedVoucher')) || null;
+    let voucherId = appliedVoucher ? appliedVoucher.id : null;
+
+    // Tạo booking trước
     fetch("/booking/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -314,6 +320,7 @@ function payment_momo() {
             tickets: tickets,
             totalPrice: totalPrice,
             eventId: sessionStorage.getItem('checkoutEventId'),
+            voucherId: voucherId,
         }),
     })
     .then(res => res.json())
@@ -323,6 +330,7 @@ function payment_momo() {
             payBtn.disabled = false;
             throw new Error("Booking failed");
         }
+
         return fetch("/payment/momo", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -387,7 +395,6 @@ function payment_vnpay() {
             throw new Error("Booking failed");
         }
 
-        // Tạo yêu cầu thanh toán VNPAY với orderId theo bookingId
         return fetch("/payment/vnpay", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
