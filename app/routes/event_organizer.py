@@ -1,22 +1,20 @@
 import string
 import json
-import traceback
+from datetime import datetime
 
-from flask import Blueprint, render_template, redirect, url_for,request, jsonify, session
+from flask import Blueprint, render_template, redirect, url_for, request, jsonify, session
 from flask_login import login_required, current_user
 
-from app import dao,db
-from app.data.models import UserEnum, Event, EventOffline, EventOnline, TicketType, EventFormatEnum, EventTypeEnum, \
-    StatusEventEnum, EventRejectionLog, Seat, StatusSeatEnum, DiscountTypeEnum, Voucher, TicketVoucher
 import cloudinary.uploader
-from datetime import datetime
+
+from app import dao, db
 from app.data.models import (
-    Booking, BookingDetail, TicketType, Event,
+    UserEnum, EventOffline, EventOnline, EventFormatEnum, EventTypeEnum,
+    StatusEventEnum, EventRejectionLog, Seat, StatusSeatEnum, DiscountTypeEnum,
+    Voucher, TicketVoucher, Booking, BookingDetail, TicketType, Event,
     User, Customer, StatusBookingEnum
 )
 
-from app.data.models import Booking, BookingDetail, Customer
-from sqlalchemy import func
 
 event_organizer_bp = Blueprint("event_organizer", __name__, url_prefix="/organizer")
 
@@ -464,3 +462,9 @@ def ticket_history():
     )
     return render_template("event_organizer/ticket_history.html", history=history)
 
+@event_organizer_bp.route("/<int:event_id>")
+def event_detail(event_id):
+    event = Event.query.get_or_404(event_id)
+    vouchers = Voucher.query.filter_by(event_id=event.id).all()
+    return render_template('event_organizer/event_detail_organizer.html',
+                           event=event,vouchers=vouchers)

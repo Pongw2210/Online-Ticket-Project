@@ -1479,3 +1479,54 @@ form .form-group ::placeholder {
     background-color: #f7c6d0 !important; /* màu hồng pastel nhẹ */
     color: #333 !important;
 }
+.card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin: 20px 0;
+    overflow: hidden;
+}
+
+.card-header {
+    background: #ffb3c6;
+    padding: 12px 18px;
+    border-bottom: 1px solid #f5c2d9;
+}
+
+.card-header h3 {
+    margin: 0;
+    font-size: 20px;
+    color: #d6336c;
+}
+
+.card-body {
+    padding: 18px;
+}
+
+/* Table style */
+.ticket-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.ticket-table th,
+.ticket-table td {
+    border: 1px solid #eee;
+    padding: 10px;
+    text-align: center;
+}
+
+.ticket-table th {
+    background-color: #fdf0f5;
+    font-weight: bold;
+    color: #333;
+}
+
+.ticket-table tr:nth-child(even) {
+    background-color: #fdf9fb;
+}
+
+.ticket-table tr:hover {
+    background-color: #fde6ef;
+}

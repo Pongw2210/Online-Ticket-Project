@@ -175,7 +175,6 @@ function confirmSeatSelection() {
     closeSeatSelection();
 }
 
-
 function goToCheckout() {
     let continueBtn = document.getElementById('continue-btn');
     let eventId = continueBtn.getAttribute('data-event-id');
@@ -205,8 +204,6 @@ function goToCheckout() {
     sessionStorage.setItem('checkoutEventId', eventId);
     sessionStorage.setItem('checkoutTickets', JSON.stringify(tickets));
 
-    // Có thể thêm điều hướng trang thanh toán ở đây nếu cần
-    // window.location.href = '/checkout';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -365,7 +362,8 @@ function payment_vnpay() {
         return;
     }
 
-    let totalPrice = tickets.reduce((sum, ticket) => sum + (parseInt(ticket.price) * ticket.quantity), 0);
+    // Lấy tổng tiền sau khi đã áp dụng voucher
+    let totalPrice = Number(sessionStorage.getItem('checkoutTotal')) || 0;
 
     let appliedVoucher = JSON.parse(sessionStorage.getItem('appliedVoucher')) || null;
     let voucherId = appliedVoucher ? appliedVoucher.id : null;

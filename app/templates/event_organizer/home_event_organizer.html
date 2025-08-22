@@ -55,7 +55,7 @@
                     {{ event.event_offline.location if event.event_offline else 'Trực tuyến' }}
                 </div>
                 <div class="action-buttons">
-                    <a href="{{ url_for('events.event_detail', event_id=event.id) }}">
+                    <a href="{{ url_for('event_organizer.event_detail', event_id=event.id)}}">
                         <button class="btn-action btn-primary-card">Xem chi tiết</button>
                     </a>
                     <a>
@@ -109,7 +109,7 @@
                     {{ event.event_offline.location if event.event_offline else 'Trực tuyến' }}
                 </div>
                 <div class="action-buttons">
-                    <a href="{{ url_for('events.event_detail', event_id=event.id) }}">
+                    <a href="{{ url_for('event_organizer.event_detail', event_id=event.id)}}">
                         <button class="btn-action btn-primary-card">Xem chi tiết</button>
                     </a>
                     <a>
@@ -144,7 +144,7 @@
                     {{ event.event_offline.location if event.event_offline else 'Trực tuyến' }}
                 </div>
                 <div class="action-buttons">
-                    <a href="{{ url_for('events.event_detail', event_id=event.id) }}">
+                    <a href="{{ url_for('event_organizer.event_detail', event_id=event.id)}}">
                         <button class="btn-action btn-primary-card">Xem chi tiết</button>
                     </a>
                     <a href="{{ url_for('event_organizer.edit_event', event_id=event.id) }}">
@@ -187,7 +187,7 @@
                     {{ event.event_offline.location if event.event_offline else 'Trực tuyến' }}
                 </div>
                 <div class="action-buttons">
-                    <a href="{{ url_for('events.event_detail', event_id=event.id) }}">
+                    <a href="{{ url_for('event_organizer.event_detail', event_id=event.id)}}"">
                         <button class="btn-action btn-primary-card">Xem chi tiết</button>
                     </a>
                     <a>

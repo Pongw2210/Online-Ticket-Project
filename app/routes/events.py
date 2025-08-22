@@ -52,7 +52,6 @@ def home():
     events = events.order_by(Event.start_datetime.desc()).all()
     return render_template("home.html", events=events, search=search)
 
-
 @events_bp.route('/event/<int:event_id>')
 def event_detail(event_id):
     event = Event.query.get_or_404(event_id)
@@ -67,19 +66,16 @@ def event_detail(event_id):
 
     return render_template('event_detail.html', event=event, min_price=min_price)
 
-
 @events_bp.route("/buy-ticket/<int:event_id>")
 def buy_ticket(event_id):
     event = dao.get_event_by_id(event_id)
     ticket_types = dao.load_ticket_type(event_id)
     return render_template("buy_ticket/buy_ticket.html", event=event, ticket_types=ticket_types)
 
-
 @events_bp.route("/pay-ticket/<int:event_id>")
 def pay_ticket(event_id):
     event = dao.get_event_by_id(event_id)
     return render_template("buy_ticket/pay_ticket.html", event=event)
-
 
 @events_bp.route("/booking/create", methods=["POST"])
 def create_booking():
@@ -148,7 +144,6 @@ def create_booking():
     except Exception as e:
         db.session.rollback()
         return jsonify({"success": False, "message": "Lỗi server: " + str(e)}), 500
-
 
 @events_bp.route("/payment/momo", methods=["POST"])
 def payment_momo():
@@ -320,7 +315,6 @@ def payment_ipn():
     data = request.get_json()
     print("IPN từ MoMo:", data)
     return "OK", 200
-
 
 def hmac_sha512(key, data):
     return hmac.new(key.encode(), data.encode(), hashlib.sha512).hexdigest()

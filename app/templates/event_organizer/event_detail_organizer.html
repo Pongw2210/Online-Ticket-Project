@@ -1,267 +1,244 @@
 {% extends "event_organizer/layout_event_organizer/base.html" %}
 
-{% block title %}Chỉnh sửa sự kiện{% endblock %}
+{% block title %}Chi tiết sự kiện{% endblock %}
 
 {% block content %}
-<div class="topbar">
-    <h2>{% block header %} Chỉnh sửa sự kiện {% endblock %}</h2>
-    <div class="account-wrapper">
-        <div class="account" onclick="toggleDropdown()">
-            Tài khoản <i class="fa fa-caret-down"></i>
+
+<div class="ticket-card">
+    <div class="ticket-image">
+        {% if event.image_url %}
+        <img src="{{ event.image_url }}" alt="Hình sự kiện">
+        {% else %}
+        <img src="{{ url_for('static', filename='images/default.jpg') }}" alt="Hình mặc định">
+        {% endif %}
+    </div>
+
+    <div class="ticket-info">
+        <h1>{{ event.name }}</h1>
+
+        <div class="time">
+            Thời gian bắt đầu: {{ event.start_datetime.strftime('%d/%m/%Y %H:%M') }}
         </div>
-        <div class="dropdown" id="accountDropdown">
-            <a>Thông tin cá nhân</a>
-            <a href="{{ url_for('auth.login')}}">Đăng xuất</a>
+
+        <div class="location">
+            {% if event.event_format.name == 'OFFLINE' %}
+            Địa chỉ: {{ event.event_offline.location }}
+            {% else %}
+            Trực tuyến
+            {% endif %}
         </div>
     </div>
 </div>
-<div class="form-wrapper">
 
-    <!-- Thanh tiến trình -->
-    <div class="step-progress">
-        <div class="step active">
-            <div class="circle">1</div>
-            <div class="label">Thông tin sự kiện</div>
-        </div>
-        <div class="step">
-            <div class="circle">2</div>
-            <div class="label">Thời gian & Loại vé</div>
-        </div>
-        <div class="step-buttons">
-            <button class="btn btn-prev" onclick="goToPrevStepUpdate()">Quay lại</button>
-            <button class="btn btn-next" onclick="goToNextStepUpdate()">Tiếp tục</button>
-        </div>
+<div class="card">
+    <div class="card-header">
+        <h3>Thông tin sự kiện</h3>
     </div>
-
-    <!-- Nội dung chính có thể cuộn -->
-    <div class="main-content-scrollable content-center ">
-        <div class="content-center">
-            <div class="event-form-wrapper">
-                <div class="event-form-section step-section step-1 active ">
-                    <label class="required-label">
-                        <span class="text-danger">*</span> Hình ảnh sự kiện
-                    </label>
-
-                    <div class="upload-box" onclick="document.getElementById('imageUpload').click();">
-                        <input type="file" id="imageUpload" name="event_image" accept="image/*" style="display: none;"
-                               onchange="previewImage(event)">
-
-                        <div id="upload-preview">
-                            {% if event and event.image_url %}
-                            <img id="preview-img" src="{{ event.image_url }}"
-                                 style="max-width: 100%; max-height: 100%; border-radius: 10px;">
-                            {% else %}
-                            <div>
-                                <div class="icon">📷</div>
-                                <p>Thêm ảnh sự kiện</p>
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="required-label"><span class="text-danger">*</span> Tên sự kiện</label>
-                        <input type="text" name="name_event" id="name_event" maxlength="100" placeholder="Tên sự kiện"
-                               value="{{ event.name }}">
-                        <div class="text-counter">0 / 100</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="required-label">* Hình thức sự kiện</label>
-                        <div class="radio-group">
-                            <label>
-                                <input type="radio" name="event_format" value="OFFLINE"
-                                       {% if is_offline %}checked{% endif %}
-                                       onchange="handleEventFormatChange()"> Sự kiện Offline
-                            </label>
-                            <label>
-                                <input type="radio" name="event_format" value="ONLINE"
-                                       {% if not is_offline %}checked{% endif %}
-                                       onchange="handleEventFormatChange()"> Sự kiện Online
-                            </label>
-                        </div>
-                    </div>
-                    <div class="form-info-event-offline">
-                        <div class="form-group">
-                            <label>
-                                <input type="checkbox" name="has_seat" id="has_seat" value="true">
-                                Có chỗ ngồi (ghế) không?
-                            </label>
-                        </div>
-
-                        <div id="seat-setup-section" style="display:none; margin-top: 15px;">
-                            <h4>Thiết lập chỗ ngồi</h4>
-                            <div class="form-group">
-                                <label for="num_rows">Số hàng ghế:</label>
-                                <input type="number" id="num_rows" name="num_rows" min="1" max="26" value="10"/>
-                                <small>(Tối đa 26 hàng, tương ứng A-Z)</small>
-                            </div>
-                            <div class="form-group">
-                                <label for="seats_per_row">Số ghế mỗi hàng:</label>
-                                <input type="number" id="seats_per_row" name="seats_per_row" min="1" max="100"
-                                       value="15"/>
-                            </div>
-                        </div>
-
-                    </div>
-
-
-                    <div class="form-info-event-offline">
-                        <div class="form-group">
-                            <label class="required-label"><span class="text-danger">*</span> Tên địa điểm</label>
-                            <input type="text" name="venue_name" id="venue_name" maxlength="80"
-                                   placeholder="Tên địa điểm"
-                                   value="{{ event.event_offline.venue_name if event.event_offline else '' }}">
-                            <div class="text-counter">
-                                {{ event.event_offline.venue_name|length if event.event_offline and
-                                event.event_offline.venue_name else 0 }} / 80
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="required-label"><span class="text-danger">*</span> Địa chỉ cụ thể</label>
-                            <input type="text" name="address" id="address"
-                                   placeholder="Địa chỉ cụ thể"
-                                   value="{{ event.event_offline.location if event.event_offline else '' }}">
-                        </div>
-                    </div>
-
-                    <div class="form-info-event-online">
-                        <div class="form-group">
-                            <label class="required-label"><span class="text-danger">*</span> Link tham gia sự
-                                kiện</label>
-                            <input type="text" name="livestream_url" id="livestream_url" maxlength="80"
-                                   placeholder="Link tham gia sự kiện"
-                                   value="{{ event.event_online.livestream_url if event.event_online else '' }}">
-                            <div class="text-counter">
-                                {{ event.event_online.livestream_url|length if event.event_online and
-                                event.event_online.livestream_url else 0 }} / 80
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group form-row">
-                        <div>
-                            <label class="required-label"><span class="text-danger">*</span> Thể loại sự kiện</label>
-                            <select name="event_type" id="event_type">
-                                {% for key, label in event_type.items() %}
-                                <option value="{{ key }}">{{ label }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="required-label"><span class="text-danger">*</span> Thông tin sự kiện</label>
-                        <textarea name="description" id="description" rows="4"
-                                  placeholder="Nhập thông tin...">{{ event.description if event.description else '' }}</textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="required-label"><span class="text-danger">*</span> Luật lệ sự kiện</label>
-                        <textarea name="rules" id="rules" rows="4"
-                                  placeholder="Nhập thông tin...">{{ event.rules if event.rules else '' }}</textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="required-label"><span class="text-danger">*</span> Thông tin người biểu diễn sự
-                            kiện</label>
-                        <textarea name="performers" id="performers" rows="4"
-                                  placeholder="Nhập thông tin...">{{ event.authors if event.authors else '' }}</textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="required-label"><span class="text-danger">*</span> Thông tin người tổ chức</label>
-                        <textarea name="organizer" id="organizer" rows="4"
-                                  placeholder="Nhập thông tin...">{{ event.producers if event.producers else '' }}</textarea>
-                    </div>
-
-                </div>
-
-                <div class="event-form-section step-section step-2 ">
-                    <h3>Thời gian sự kiện</h3>
-                    <div class="form-group form-row">
-                        <div>
-                            <label class="required-label">
-                                <span class="text-danger">*</span> Ngày bắt đầu
-                            </label>
-                            <input type="datetime-local" id="start_time" name="start_time"
-                                   value="{{ event.start_datetime.strftime('%Y-%m-%dT%H:%M') if event.start_datetime else '' }}"
-                                   required>
-                        </div>
-                        <div>
-                            <label class="required-label">
-                                <span class="text-danger">*</span> Ngày kết thúc
-                            </label>
-                            <input type="datetime-local" id="end_time" name="end_time"
-                                   value="{{ event.end_datetime.strftime('%Y-%m-%dT%H:%M') if event.end_datetime else '' }}"
-                                   required>
-                        </div>
-                    </div>
-
-                    <h3>Thông tin các loại vé</h3>
-                    <div id="ticket-types">
-                        {% if ticket_types %}
-                        {% for ticket in ticket_types %}
-                        <div class="ticket-type form-group form-row">
-                            <div>
-                                <label class="required-label">
-                                    <span class="text-danger">*</span> Tên vé
-                                </label>
-                                <input type="text" class="ticket_name" name="ticket_name" value="{{ ticket.name }}"
-                                       placeholder="Ví dụ: Vé thường">
-                            </div>
-                            <div>
-                                <label class="required-label">
-                                    <span class="text-danger">*</span> Giá vé (VNĐ)
-                                </label>
-                                <input type="number" class="ticket_price" name="ticket_price" min="0"
-                                       value="{{ ticket.price }}" placeholder="100000">
-                            </div>
-                            <div>
-                                <label class="required-label">
-                                    <span class="text-danger">*</span> Số lượng
-                                </label>
-                                <input type="number" class="ticket_quantity" name="ticket_quantity" min="1"
-                                       value="{{ ticket.quantity }}" placeholder="50">
-                            </div>
-                        </div>
-                        {% endfor %}
-                        {% else %}
-                        <!-- Nếu chưa có vé nào, hiển thị 1 dòng trống để người dùng nhập -->
-                        <div class="ticket-type form-group form-row">
-                            <div>
-                                <label class="required-label">
-                                    <span class="text-danger">*</span> Tên vé
-                                </label>
-                                <input type="text" class="ticket_name" name="ticket_name"
-                                       placeholder="Ví dụ: Vé thường">
-                            </div>
-                            <div>
-                                <label class="required-label">
-                                    <span class="text-danger">*</span> Giá vé (VNĐ)
-                                </label>
-                                <input type="number" class="ticket_price" name="ticket_price" min="0"
-                                       placeholder="100000">
-                            </div>
-                            <div>
-                                <label class="required-label">
-                                    <span class="text-danger">*</span> Số lượng
-                                </label>
-                                <input type="number" class="ticket_quantity" name="ticket_quantity" min="1"
-                                       placeholder="50">
-                            </div>
-                        </div>
-                        {% endif %}
-                    </div>
-
-                    <button type="button" class="btn btn-save" onclick="addTicketType()">+ Thêm loại vé</button>
-                </div>
-
-            </div>
-
-        </div>
+    <div class="card-body">
+        <table class="ticket-table">
+            <tbody>
+            <tr>
+                <th>Mô tả</th>
+                <td>{{ event.description or "Không có mô tả" }}</td>
+            </tr>
+            <tr>
+                <th>Thời gian</th>
+                <td>{{ event.start_datetime.strftime("%d/%m/%Y %H:%M") }} -
+                    {{ event.end_datetime.strftime("%d/%m/%Y %H:%M") }}
+                </td>
+            </tr>
+            {% if event.event_offline %}
+            <tr>
+                <th>Địa điểm</th>
+                <td>{{ event.event_offline.location }}</td>
+            </tr>
+            <tr>
+                <th>Có chỗ ngồi</th>
+                <td>{{ 'Có' if event.event_offline.has_seat else 'Không' }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <th>Link tham gia</th>
+                <td>
+                    <a href="{{ event.event_online.livestream_url }}" target="_blank">
+                        {{ event.event_online.livestream_url }}
+                    </a>
+                </td>
+            </tr>
+            {% endif %}
+            <tr>
+                <th>Luật lệ</th>
+                <td>{{ event.rules or "Không có luật lệ" }}</td>
+            </tr>
+            <tr>
+                <th>Tác giả</th>
+                <td>{{ event.authors or "Không có" }}</td>
+            </tr>
+            <tr>
+                <th>Người sản xuất</th>
+                <td>{{ event.producers or "Không có" }}</td>
+            </tr>
+            <tr>
+                <th>Trạng thái</th>
+                <td>{{ event.status.value }}</td>
+            </tr>
+            <tr>
+                <th>Định dạng sự kiện</th>
+                <td>{{ event.event_format.value }}</td>
+            </tr>
+            <tr>
+                <th>Loại sự kiện</th>
+                <td>{{ event.event_type.value }}</td>
+            </tr>
+            <tr>
+                <th>Ngày tạo</th>
+                <td>{{ event.created_at.strftime("%d/%m/%Y %H:%M") }}</td>
+            </tr>
+            </tbody>
+        </table>
     </div>
 </div>
-<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+
+<!-- Card: Loại vé -->
+<div class="card">
+    <div class="card-header">
+        <h3>Loại vé</h3>
+    </div>
+    <div class="card-body">
+        {% if event.ticket_types %}
+        <table class="ticket-table">
+            <thead>
+            <tr>
+                <th>Tên vé</th>
+                <th>Giá</th>
+                <th>Số lượng</th>
+                <th>Chọn ghế</th>
+                <th>Lợi ích</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for ticket in event.ticket_types %}
+            <tr>
+                <td>{{ ticket.name }}</td>
+                <td>{{ "{:,.0f}".format(ticket.price) }} đ</td>
+                <td>{{ ticket.quantity }}</td>
+                <td>{{ "Có" if ticket.requires_seat else "Không" }}</td>
+                <td>{{ ticket.benefits }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>Chưa có loại vé nào</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3>Voucher</h3>
+    </div>
+    <div class="card-body">
+        {% if vouchers %}
+        <table class="ticket-table">
+            <thead>
+            <tr>
+                <th>Mã code</th>
+                <th>Loại giảm</th>
+                <th>Giá trị giảm</th>
+                <th>Số lượng</th>
+                <th>Ngày bắt đầu</th>
+                <th>Ngày kết thúc</th>
+                <th>Ngày tạo</th>
+                <th>Áp dụng cho loại vé</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for voucher in vouchers %}
+            <tr>
+                <td>{{ voucher.code }}</td>
+                <td>{{ voucher.discount_type.value }}</td>
+                <td>{{ voucher.discount_value }}</td>
+                <td>{{ voucher.quantity }}</td>
+                <td>{{ voucher.start_date }}</td>
+                <td>{{ voucher.end_date }}</td>
+                <td>{{ voucher.created_at }}</td>
+                <td> {% if voucher.apply_all %}
+                    Tất cả
+                    {% else %}
+                    {% for tv in voucher.ticket_vouchers %}
+                    {{ tv.ticket_type.name }}{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>Chưa có voucher nào</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3>Nhật ký từ chối</h3>
+    </div>
+    <div class="card-body">
+       {% if event.rejection_logs %}
+        <table class="ticket-table">
+            <thead>
+            <tr>
+                <th>Lý do</th>
+                <th>Thời gian từ chối</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for log in event.rejection_logs %}
+            <tr>
+                <td>{{ log.reason }}</td>
+                <td>{{ log.rejected_at }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>Không có nhật ký từ chối</p>
+        {% endif %}
+    </div>
+</div>
+
+
+
+<div class="card">
+    <div class="card-header">
+        <h3>Danh sách chỗ ngồi</h3>
+    </div>
+    <div class="card-body">
+        {% if event.seats %}
+        <table class="ticket-table">
+            <thead>
+            <tr>
+                <th>id</th>
+                <th>Mã ghế</th>
+                <th>Trạng thái</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for seat in event.seats %}
+            <tr>
+                <td>{{ seat.id }}</td>
+                <td>{{ seat.seat_code }}</td>
+                <td>{{ seat.status.value }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>Không có chỗ ngồi</p>
+        {% endif %}
+    </div>
+</div>
 
 {% endblock %}
-</div>
