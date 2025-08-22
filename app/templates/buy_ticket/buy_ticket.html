@@ -56,9 +56,9 @@
         <h4>Sự kiện {{event.name}}</h4>
         <ul id="summary-list"></ul>
         <p class="total" id="summary-total"><strong>🎟 x0</strong></p>
-        <a href="{{ url_for('events.pay_ticket',event_id=event.id)}}" class="continue-btn" id="continue-btn"
-           data-event-id="{{ event.id }}"
-           onclick="goToCheckout()">Tiếp tục >></a>
+       <button type="button" class="continue-btn" id="continue-btn"
+        data-event-id="{{ event.id }}"
+        onclick="goToCheckout()">Tiếp tục >></button>
     </div>
 </div>
 
@@ -69,7 +69,7 @@
         <h3>Chọn ghế</h3>
         <div id="seat-grid" class="seat-grid"></div>
         <div class="seat-actions">
-            <button onclick="confirmSeatSelection()" class="confirm-seat-btn">Xác nhận</button>
+            <button type="button" onclick="confirmSeatSelection()" class="confirm-seat-btn">Xác nhận</button>
         </div>
     </div>
 </div>

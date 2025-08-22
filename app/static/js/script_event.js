@@ -168,6 +168,11 @@ function confirmSeatSelection() {
         seat_code: seatEl.dataset.code
     }));
 
+    if (selectedSeats.length !== maxSeats) {
+        alert(`Bạn phải chọn đủ ${maxSeats} ghế cho vé này!`);
+        return; // không cho đóng modal nếu chưa đủ
+    }
+
     // Lưu ghế đã chọn cho vé hiện tại
     seatSelections[currentTicketId] = selectedSeats;
 
@@ -176,15 +181,24 @@ function confirmSeatSelection() {
 }
 
 function goToCheckout() {
+
     let continueBtn = document.getElementById('continue-btn');
     let eventId = continueBtn.getAttribute('data-event-id');
 
     let tickets = [];
+    let hasSeatError = false;
+
     document.querySelectorAll('.quantity-input').forEach(input => {
         let qty = parseInt(input.value) || 0;
         if (qty > 0) {
             let ticketId = input.getAttribute('data-ticket-id');
             let selectedSeats = seatSelections[ticketId] || [];
+
+            // ✅ Kiểm tra vé có nút chọn ghế
+            let hasSeatButton = document.querySelector(`.select-seat-btn[onclick*="${ticketId}"]`);
+            if (hasSeatButton && selectedSeats.length < qty) {
+                hasSeatError = true;
+            }
 
             tickets.push({
                 id: ticketId,
@@ -201,10 +215,17 @@ function goToCheckout() {
         return;
     }
 
+    if (hasSeatError) {
+        alert('Vui lòng chọn đủ số ghế cho các loại vé cần chọn ghế.');
+        return;
+    }
+
     sessionStorage.setItem('checkoutEventId', eventId);
     sessionStorage.setItem('checkoutTickets', JSON.stringify(tickets));
 
+    window.location.href = `/pay-ticket/${eventId}`;
 }
+
 
 document.addEventListener('DOMContentLoaded', () => {
     let tickets = JSON.parse(sessionStorage.getItem('checkoutTickets')) || [];
@@ -481,7 +502,6 @@ function applyVoucher(voucher) {
     closeVoucherModal();
     window.location.reload();
 }
-
 
 function updateSummary() {
     const summaryList = document.getElementById('summary-list');
