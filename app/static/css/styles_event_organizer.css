@@ -1530,3 +1530,94 @@ form .form-group ::placeholder {
 .ticket-table tr:hover {
     background-color: #fde6ef;
 }
+
+.language-btn {
+    margin-top: 5px;
+    background: #f48fb1;
+    border: none;
+    padding: 5px 10px;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+/* khi được chọn */
+.language-btn.active {
+    background: #d81b60;
+}
+
+/* --- Container Google Translate trong sidebar --- */
+.translate-container {
+    margin-top: 20px;
+    padding: 0 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: #555;
+}
+
+/* Thêm icon 🌐 nhỏ trước dropdown */
+.translate-container::before {
+    content: "\f0ac"; /* font-awesome: fa-globe */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    color: #d81b60;
+    font-size: 16px;
+}
+
+/* Dropdown select */
+.translate-container select {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    color: #333;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    min-width: 100px;
+}
+
+/* Hover & focus effect */
+.translate-container select:hover,
+.translate-container select:focus {
+    border-color: #d81b60;
+    box-shadow: 0 0 6px rgba(216, 27, 96, 0.4);
+}
+
+/* Ẩn mũi tên mặc định IE/Edge */
+.translate-container select::-ms-expand {
+    display: none;
+}
+
+/* --- Ẩn banner Google Translate mặc định --- */
+.goog-te-banner-frame.skiptranslate {
+    display: none !important;
+}
+.goog-te-gadget span,
+.goog-logo-link {
+    display: none !important;
+}
+
+/* Fix margin mà Google Translate tự thêm */
+body {
+    top: 0px !important;
+}
+/* Ẩn hẳn banner Google Translate */
+.goog-te-banner-frame,
+.goog-te-banner-frame.skiptranslate,
+body > table[width="100%"] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+}
+
+/* Reset lại phần body bị đẩy xuống */
+body {
+    top: 0px !important;
+    position: relative !important;
+}

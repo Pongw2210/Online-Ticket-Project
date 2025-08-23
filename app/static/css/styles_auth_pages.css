@@ -151,3 +151,20 @@ body {
     font-size: 15px;
     font-weight: 500;
 }
+
+/* Flash message đồng bộ với form */
+.flash-messages {
+    margin-bottom: 15px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 17px;
+}
+
+.flash {
+    color: #d9534f;
+    font-weight: 500;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    padding: 8px 12px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}

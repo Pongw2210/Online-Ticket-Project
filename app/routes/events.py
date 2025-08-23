@@ -13,7 +13,7 @@ from flask_login import current_user, login_required
 from app.data.models import (
     Event, EventTypeEnum, Seat, BookingSeat, Booking,
     StatusBookingEnum, BookingDetail, TicketType,
-    StatusSeatEnum, StatusEventEnum, EventFormatEnum, Customer, BookingVoucher, Voucher, TicketVoucher
+    StatusSeatEnum, StatusEventEnum, EventFormatEnum, Customer, BookingVoucher, Voucher, TicketVoucher, EventOffline
 )
 from app import dao, db
 from app.utils import send_ticket_email
@@ -21,12 +21,20 @@ from app.utils import send_ticket_email
 
 events_bp = Blueprint("events", __name__)
 
-
+from datetime import datetime
 @events_bp.route("/")
 def home():
     search = request.args.get("q", "")
+    event_type = request.args.get("type")        # lọc theo loại sự kiện
+    event_format = request.args.get("format")   # lọc theo hình thức (online/offline)
+    date_filter = request.args.get("date")      # lọc theo ngày: upcoming, today, past
+    page = request.args.get("page", 1, type=int)
+    per_page = 10  # số sự kiện hiển thị mỗi trang
+
+    # Chỉ lấy sự kiện đã duyệt
     events = Event.query.filter(Event.status == StatusEventEnum.DA_DUYET)
 
+    # ====== Search cơ bản ======
     if search:
         search_lower = search.lower()
         if search_lower in ["online", "trực tuyến"]:
@@ -49,8 +57,119 @@ def home():
                 except ValueError:
                     events = events.filter(Event.name.ilike(f"%{search}%"))
 
-    events = events.order_by(Event.start_datetime.desc()).all()
-    return render_template("home.html", events=events, search=search)
+    # ====== Lọc nâng cao ======
+    if event_type:
+        try:
+            events = events.filter(Event.event_type == EventTypeEnum(event_type))
+        except ValueError:
+            pass
+
+    if event_format:
+        try:
+            events = events.filter(Event.event_format == EventFormatEnum(event_format))
+        except ValueError:
+            pass
+
+    if date_filter:
+        from datetime import datetime, date
+        now = datetime.now()
+        today = date.today()
+
+        if date_filter == "upcoming":  # sự kiện sắp diễn ra
+            events = events.filter(Event.start_datetime > now)
+        elif date_filter == "today":  # sự kiện trong ngày hôm nay
+            events = events.filter(
+                db.func.date(Event.start_datetime) == today
+            )
+        elif date_filter == "past":  # sự kiện đã diễn ra
+            events = events.filter(Event.end_datetime < now)
+
+    # ====== Sắp xếp & Phân trang ======
+    pagination = events.order_by(Event.start_datetime.desc()).paginate(page=page, per_page=per_page)
+    events_paginated = pagination.items
+
+    return render_template(
+        "home.html",
+        events=events_paginated,
+        search=search,
+        pagination=pagination,
+        event_type=event_type,
+        event_format=event_format,
+        date_filter=date_filter
+    )
+
+
+@events_bp.route("/filter")
+def filter_events():
+    page = request.args.get("page", 1, type=int)
+    per_page = 10
+
+    # Lấy tham số từ form
+    name = request.args.get("name", "").strip()
+    location = request.args.get("location", "").strip()
+    performer = request.args.get("performer", "").strip()
+    price_min = request.args.get("price_min", type=float)
+    price_max = request.args.get("price_max", type=float)
+    start_date = request.args.get("start_date")
+    end_date = request.args.get("end_date")
+
+    # Base query
+    query = Event.query
+    filters = [Event.status == StatusEventEnum.DA_DUYET]
+
+    # Lọc theo tên sự kiện
+    if name:
+        filters.append(Event.name.ilike(f"%{name}%"))
+
+    if performer:
+        filters.append(
+            (Event.authors.ilike(f"%{performer}%")) |
+            (Event.producers.ilike(f"%{performer}%"))
+        )
+
+    # Lọc theo địa điểm (offline)
+    if location:
+        query = query.join(EventOffline, Event.event_offline)
+        filters.append(EventOffline.location.ilike(f"%{location}%"))
+
+    # Lọc theo giá vé
+    if price_min is not None or price_max is not None:
+        query = query.join(TicketType, Event.ticket_types)
+        if price_min is not None:
+            filters.append(TicketType.price >= price_min)
+        if price_max is not None:
+            filters.append(TicketType.price <= price_max)
+
+    # Lọc theo ngày bắt đầu
+    if start_date:
+        try:
+            start = datetime.strptime(start_date, "%Y-%m-%d")
+            filters.append(Event.start_datetime >= start)
+        except ValueError:
+            pass
+
+    # Lọc theo ngày kết thúc
+    if end_date:
+        try:
+            end = datetime.strptime(end_date, "%Y-%m-%d")
+            filters.append(Event.start_datetime <= end)
+        except ValueError:
+            pass
+
+    # Apply tất cả filters
+    query = query.filter(*filters).distinct()
+
+    # Sắp xếp và phân trang
+    pagination = query.order_by(Event.start_datetime.desc()).paginate(page=page, per_page=per_page)
+    events_paginated = pagination.items
+
+    return render_template(
+        "home.html",
+        events=events_paginated,
+        pagination=pagination,
+        filters=request.args
+    )
+
 
 @events_bp.route('/event/<int:event_id>')
 def event_detail(event_id):

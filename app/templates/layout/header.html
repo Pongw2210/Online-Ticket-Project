@@ -1,39 +1,59 @@
 <header>
     <div class="logo">
-        <a href="/"><img src="{{ url_for('static', filename='images/icons8-ticket-100.png') }}" alt="Ticketbox Logo" class="logo-img"></a>
+        <a href="/">
+            <img src="{{ url_for('static', filename='images/icons8-ticket-100.png') }}"
+                 alt="Ticketbox Logo" class="logo-img">
+        </a>
     </div>
 
-    <form class="search-bar" method="get" action="/">
-        <input type="text" name="q" value="{{ search }}" placeholder="Bạn tìm gì hôm nay?">
-        <button type="submit">Tìm kiếm</button>
-    </form>
+    <div class="search-container">
+        <form class="search-bar" method="get" action="/">
+            <input type="text" name="q" value="{{ search }}" placeholder="Bạn tìm gì hôm nay?">
+            <button class="btn-search" type="submit">Tìm kiếm</button>
+            <button class="btn-filter" type="button">Lọc</button>
+        </form>
+    </div>
 
     {% if current_user.is_authenticated %}
-        <div class="header-actions">
-            <a href="/my-ticket" class="my-ticket">
-                <img src="{{ url_for('static', filename='images/icons8-ticket-30.png') }}" alt="ticket icon" class="ticket-icon">
-                <span>Vé của tôi</span>
-            </a>
+    <div class="header-actions">
+        <a href="/my-ticket" class="my-ticket">
+            <img src="{{ url_for('static', filename='images/icons8-ticket-30.png') }}"
+                 alt="ticket icon" class="ticket-icon">
+            <span>Vé của tôi</span>
+        </a>
 
-            {% if current_user.role.value == "Khách hàng" %}
-            <a href="{{ url_for('auth.user_info') }}" class="profile-link">
-                Thông tin cá nhân
-            </a>
-            {% endif %}
-        </div>
+        {% if current_user.role.value == "Khách hàng" %}
+        <a href="{{ url_for('auth.user_info') }}" class="profile-link">
+            Thông tin cá nhân
+        </a>
+        {% endif %}
+    </div>
 
-        <div class="auth-links">
-            <a href="/user_info">
-                👋 Xin chào, <strong>{{ current_user.fullname or current_user.username }}</strong> |
-            </a>
-            <a href="/logout">Đăng xuất</a>
-
-
-        </div>
+    <div class="auth-links">
+        <a href="/user_info">
+            👋 Xin chào, <strong>{{ current_user.fullname or current_user.username }}</strong> |
+        </a>
+        <a href="/logout">Đăng xuất</a>
+    </div>
     {% else %}
-        <div class="auth-links">
-            <a href="{{ url_for('auth.login') }}">Đăng nhập</a> |
-            <a href="{{ url_for('auth.register') }}">Đăng ký</a>
-        </div>
+    <div class="auth-links">
+        <a href="{{ url_for('auth.login') }}">Đăng nhập</a> |
+        <a href="{{ url_for('auth.register') }}">Đăng ký</a>
+    </div>
     {% endif %}
+    <!-- Ngôn ngữ -->
+    <div class="translate-container">
+        <div id="google_translate_element"></div>
+    </div>
+
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+          new google.translate.TranslateElement({
+            pageLanguage: 'vi',
+            includedLanguages: 'vi,en',
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+          }, 'google_translate_element');
+        }
+    </script>
+    <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </header>

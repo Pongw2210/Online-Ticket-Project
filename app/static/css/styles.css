@@ -2,7 +2,8 @@
 body {
     margin: 0;
     font-family: 'Poppins', 'Segoe UI', sans-serif;
-    background-color: #fff0f5; /* nền trắng */
+    /* ====  background-color: #fff0f5; ==== */
+    /* nền trắng */
     color: #333333; /* chữ đen */
 }
 
@@ -153,7 +154,7 @@ header {
     color: #ce93d8;
     text-decoration: none;
     font-weight: bold;
-    font-size: 16px;
+    font-size: 18px;
     transition: color 0.2s ease;
 }
 
@@ -175,7 +176,8 @@ header {
     flex-wrap: wrap;
     gap: 20px;
     justify-content: center;
-    background-color: #fde8ef;
+    /* ==== background-color: #fde8ef; ==== */
+
 }
 
 .event-card {
@@ -1549,3 +1551,246 @@ a:hover {
     background-color: rgba(43,109,240,0.5);
     border-radius: 3px;
 }
+
+
+/* Container phân trang */
+.pagination {
+    text-align: center;
+    margin: 30px 0;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Link phân trang */
+.pagination a, .pagination span {
+    display: inline-block;
+    margin: 0 5px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+    color:black; /* chữ trắng */
+    font-weight: 700; /* in đậm */
+    box-shadow: 0 2px 6px rgba(255, 107, 107, 0.3);
+    transition: all 0.25s ease;
+}
+
+/* Trang hiện tại */
+.pagination .current {
+    background: linear-gradient(135deg, #FFB6C1, #FF69B4); /* gradient hồng pastel */
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 3px 8px rgba(255, 105, 180, 0.4);
+}
+
+/* Hover */
+.pagination a:hover {
+   background: linear-gradient(135deg, #FFB6C1, #FF69B4);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(255, 69, 0, 0.5);
+}
+
+/* Dấu ... */
+.pagination span.ellipsis {
+    background: none;
+    color: #999;
+    font-weight: 500;
+    box-shadow: none;
+    transform: none;
+}
+
+
+
+/* Form tìm kiếm + lọc */
+.search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap; /* responsive */
+}
+
+/* Input tìm kiếm */
+.search-bar input[type="text"] {
+    flex: 1; /* tự động giãn theo chiều rộng container */
+    padding: 12px 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+    color: #333;
+    background-color: #fff;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.search-bar input[type="text"]::placeholder {
+    color: #aaa;
+}
+
+.search-bar input[type="text"]:focus {
+    border-color: #FF6B6B;
+    box-shadow: 0 0 8px rgba(255, 107, 107, 0.5);
+    outline: none;
+}
+
+/* Nút tìm kiếm & lọc */
+.search-bar button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    color: #fff;
+    transition: all 0.25s ease;
+}
+
+/* Nút tìm kiếm */
+.search-bar .btn-search {
+     background: linear-gradient(135deg, #FFB6C1, #FF69B4); /* hồng pastel */
+    box-shadow: 0 2px 6px rgba(255, 107, 107, 0.3);
+}
+
+.search-bar .btn-search:hover {
+    background: linear-gradient(135deg, #FF69B4, #FF1493);
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(255, 69, 0, 0.4);
+}
+
+/* Nút lọc */
+.search-bar .btn-filter {
+    background: linear-gradient(135deg, #FFB6C1, #FF69B4); /* hồng pastel */
+    box-shadow: 0 2px 6px rgba(255, 105, 180, 0.3);
+}
+
+.search-bar .btn-filter:hover {
+    background: linear-gradient(135deg, #FF69B4, #FF1493);
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(255, 105, 180, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .search-bar {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .search-bar input[type="text"],
+    .search-bar button {
+        width: 100%;
+    }
+}
+
+.filter-panel {
+    display: none; /* ẩn mặc định */
+    flex-direction: row;   /* nằm ngang */
+    align-items: center;   /* căn giữa dọc */
+    justify-content: flex-start; /* căn trái */
+    background: linear-gradient(135deg, #fff 60%, #ffe6f0);
+    margin-top: 10px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    gap: 12px;  /* khoảng cách giữa input và nút */
+    flex-wrap: nowrap; /* không xuống dòng */
+    overflow-x: auto; /* nếu dài quá thì kéo ngang */
+}
+
+/* Khi active thì mới hiện */
+.filter-panel.active {
+    display: flex;
+}
+
+/* Input trong filter */
+.filter-panel input {
+    flex: 1;
+    min-width: 180px; /* input không quá nhỏ */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+/* Nút áp dụng filter */
+.filter-panel .apply-filter {
+    background: linear-gradient(135deg, #ff99cc, #ff6699); /* hồng nhạt -> hồng đậm */
+    color: #fff;
+    font-weight: 700;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.filter-panel .apply-filter:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(255, 105, 180, 0.5); /* ánh hồng khi hover */
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+}
+
+.filter-group label {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #444;
+}
+/* --- Container Google Translate trong header/sidebar --- */
+.translate-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Nhãn (icon ngôn ngữ) */
+.translate-container .translate-label {
+    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Select Google Translate */
+.goog-te-combo {
+    padding: 8px 14px;
+    border-radius: 999px; /* giống header actions */
+    border: 1px solid white;
+    background: transparent;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+/* Hover + focus giống header-actions */
+.goog-te-combo:hover,
+.goog-te-combo:focus {
+    background-color: white;
+    color: #f48fb1;
+    border-color: white;
+    outline: none;
+}
+
+/* Ẩn logo & chữ thừa Google */
+.goog-logo-link,
+.goog-te-gadget span {
+    display: none !important;
+}
+
+/* Ẩn banner tự động */
+.goog-te-banner-frame,
+.goog-te-banner-frame.skiptranslate,
+body > table[width="100%"] {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+}
+body {
+    top: 0px !important;
+    position: relative !important;
+}
+

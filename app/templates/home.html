@@ -2,17 +2,58 @@
 {% block title %}Trang chủ{% endblock %}
 
 {% block content %}
+
 <div class="nav">
-    <!-- Lọc theo loại sự kiện -->
     <a href="{{ url_for('events.home', q='Nhạc sống') }}">Nhạc sống</a>
     <a href="{{ url_for('events.home', q='Sân khấu & Nghệ thuật') }}">Sân khấu & Nghệ thuật</a>
-    <a href="{{ url_for('events.home', q='Thể thao') }}">Thể thao</a>
+    <a href="{{ url_for('events.home', q='Thể thaohttps://res.cloudinary.com/dgqx9xde1/image/upload/v1755939798/c1b6f6ad-dd71-4006-86e3-51d3a9f52b0e.png') }}">Thể
+        thao</a>
     <a href="{{ url_for('events.home', q='Khác') }}">Khác</a>
-
-    <!-- Lọc theo hình thức tổ chức -->
     <a href="{{ url_for('events.home', q='Trực tuyến') }}">Trực tuyến</a>
     <a href="{{ url_for('events.home', q='Trực tiếp') }}">Trực tiếp</a>
 </div>
+
+
+<!-- Thanh lọc ẩn -->
+<form method="get" action="{{ url_for('events.filter_events') }}" class="filter-panel">
+    <div class="filter-group">
+        <label for="event_name">Tên sự kiện</label>
+        <input type="text" id="event_name" name="name" value="{{ request.args.get('name', '') }}">
+    </div>
+
+    <div class="filter-group">
+        <label for="location">Địa điểm</label>
+        <input type="text" id="location" name="location" value="{{ request.args.get('location', '') }}">
+    </div>
+
+    <div class="filter-group">
+        <label for="performer">Tên người biểu diễn</label>
+        <input type="text" id="performer" name="performer" value="{{ request.args.get('performer', '') }}">
+    </div>
+
+    <div class="filter-group">
+        <label for="performer">Giá thấp nhất</label>
+        <input type="text" id="price_min" name="price_min" value="{{ request.args.get('price_min', '') }}">
+    </div>
+
+    <div class="filter-group">
+        <label for="performer">Giá cao nhất</label>
+        <input type="text" id="price_max" name="price_max" value="{{ request.args.get('price_max', '') }}">
+    </div>
+
+    <div class="filter-group">
+        <label for="start_date">Ngày bắt đầu</label>
+        <input type="date" id="start_date" name="start_date" value="{{ request.args.get('start_date', '') }}">
+    </div>
+
+    <div class="filter-group">
+        <label for="end_date">Ngày kết thúc</label>
+        <input type="date" id="end_date" name="end_date" value="{{ request.args.get('end_date', '') }}">
+    </div>
+
+    <button type="submit" class="apply-filter">Áp dụng</button>
+</form>
+
 
 <div class="container">
     {% for event in events %}
@@ -25,13 +66,36 @@
             </div>
             <div class="location">
                 {% if event.event_format.name == 'OFFLINE' %}
-                    {{ event.event_offline.location }}
+                {{ event.event_offline.location }}
                 {% else %}
-                    Trực tuyến
+                Trực tuyến
                 {% endif %}
             </div>
         </div>
     </a>
     {% endfor %}
 </div>
+<!-- Phân trang -->
+<div class="pagination">
+    {% if pagination.has_prev %}
+    <a href="{{ url_for('events.home', page=pagination.prev_num, q=search) }}">&laquo; Trước</a>
+    {% endif %}
+
+    {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+    {% if page_num %}
+    {% if page_num == pagination.page %}
+    <span class="current">{{ page_num }}</span>
+    {% else %}
+    <a href="{{ url_for('events.home', page=page_num, q=search) }}">{{ page_num }}</a>
+    {% endif %}
+    {% else %}
+    <span>…</span>
+    {% endif %}
+    {% endfor %}
+
+    {% if pagination.has_next %}
+    <a href="{{ url_for('events.home', page=pagination.next_num, q=search) }}">Sau &raquo;</a>
+    {% endif %}
+</div>
+
 {% endblock %}
