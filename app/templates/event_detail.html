@@ -34,9 +34,9 @@
             <div class="price">Hiện chưa có vé</div>
         {% endif %}
 
-        {% if current_user.role.value == "Khách hàng" %}
-            <a href="{{ url_for('events.buy_ticket', event_id=event.id) }}" class="buy-btn">Mua vé ngay</a>
-        {% endif %}
+        {% if current_user.is_authenticated and current_user.role.value == "Khách hàng" %}
+    <a href="{{ url_for('events.buy_ticket', event_id=event.id) }}" class="buy-btn">Mua vé ngay</a>
+{% endif %}
 
     </div>
 </div>
@@ -45,6 +45,11 @@
 <div class="event-extra-info">
     <h2>Giới thiệu chương trình</h2>
     <p>{{ event.description }}</p>
+
+    {% if event.event_format.name == 'OFFLINE' %}
+    <h2>Nơi tổ chức</h2>
+    <p> {{ event.event_offline.venue_name }}</p>
+    {% endif %}
 
     <h2>Địa điểm</h2>
     <p>

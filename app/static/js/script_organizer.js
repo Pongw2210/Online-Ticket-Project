@@ -828,7 +828,6 @@ function hideTicketForm() {
     document.getElementById("ticketForm").style.display = "none"; // ẩn modal
 }
 
-
 function saveTicketForm() {
     const eventId = document.getElementById("ticketEventId").value;
     const name = document.getElementById("nameTicket").value;
@@ -863,6 +862,5 @@ function saveTicketForm() {
     })
     .catch(err => console.error(err));
 }
-
 
 

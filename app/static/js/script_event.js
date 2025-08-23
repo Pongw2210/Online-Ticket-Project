@@ -568,5 +568,10 @@ function formatPrice(value) {
     return value.toLocaleString('vi-VN') + ' đ';
 }
 
+const filterBtn = document.querySelector('.btn-filter');
+const filterPanel = document.querySelector('.filter-panel');
 
+document.querySelector(".btn-filter").addEventListener("click", function() {
+    document.querySelector(".filter-panel").classList.toggle("active");
+});
 

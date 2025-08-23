@@ -11,7 +11,8 @@
 <div class="container">
     <div class="sidebar">
         <div class="logo">
-            <img src="https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612717/icons8-ticket-50_yn9dlx.png" alt="logo">
+            <img src="https://res.cloudinary.com/dgqx9xde1/image/upload/v1753612717/icons8-ticket-50_yn9dlx.png"
+                 alt="logo">
             <a href="{{ url_for('event_organizer.home') }}" style="text-decoration:none; color:#d81b60;">
                 <h2 style="margin:0; font-size:19px;">Organizer Center</h2>
             </a>
@@ -21,31 +22,35 @@
                 <a href="{{ url_for('event_organizer.home') }}"><i class="fa fa-calendar"></i> Sự kiện của tôi</a>
             </li>
             <li><a href="{{ url_for('report.dashboard') }}"><i class="fa fa-file-alt"></i> Thống kê/báo cáo</a></li>
-            <li><a href="{{ url_for('event_organizer.ticket_history') }}"><i class="fa fa-receipt"></i> Lịch sử bán vé</a></li>
+            <li><a href="{{ url_for('event_organizer.ticket_history') }}"><i class="fa fa-receipt"></i> Lịch sử bán
+                vé</a></li>
             <li><a href="#"><i class="fa fa-file-contract"></i> Điều khoản cho Ban tổ chức</a></li>
         </ul>
 
         <!-- Ngôn ngữ -->
-        <div style="margin-top: 20px; padding: 0 15px;">
-            <small>Ngôn ngữ</small><br>
-            <button style="
-                margin-top: 5px;
-                background: #f48fb1;
-                border: none;
-                padding: 5px 10px;
-                color: white;
-                border-radius: 6px;
-                cursor: pointer;
-            ">
-                Vie vn
-            </button>
+        <div class="translate-container">
+            <div id="google_translate_element"></div>
         </div>
+
     </div>
+
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+          new google.translate.TranslateElement({
+            pageLanguage: 'vi',
+            includedLanguages: 'vi,en',
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+          }, 'google_translate_element');
+        }
+    </script>
+    <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
 
     <div class="main">
         {% block content %}{% endblock %}
     </div>
 </div>
+
 <script src="{{ url_for('static', filename='js/script_organizer.js') }}"></script>
 </body>
 </html>
