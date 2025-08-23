@@ -5,6 +5,7 @@ from enum import Enum as RoleEnum
 from flask_login import UserMixin
 import hashlib
 from app.extensions import db  # Dùng db từ extensions
+from sqlalchemy.orm import relationship, backref
 
 class UserEnum(RoleEnum):
     KHACH_HANG = "Khách hàng"
@@ -22,7 +23,7 @@ class StatusBookingEnum(RoleEnum):
     CHO_THANH_TOAN = "Chờ thanh toán"
     DA_THANH_TOAN = "Đã thanh toán"
     DA_HUY = "Đã hủy"
-
+    DA_HOAN = "Đã hoàn"
 class StatusSeatEnum(RoleEnum):
     TRONG = "Trống"
     DA_DAT = "Đã đặt"
@@ -253,3 +254,19 @@ class BookingVoucher(Base):
     voucher_id = Column(Integer, ForeignKey('voucher.id'), nullable=False)
 
     voucher = relationship("Voucher")
+
+class RefundStatusEnum(RoleEnum):
+    CHO_XU_LY = "Chờ xử lý"
+    DONG_Y = "Đồng ý hoàn"
+    TU_CHOI = "Từ chối"
+
+class RefundRequest(Base):
+    __tablename__ = 'refund_request'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    booking_detail_id = Column(Integer, ForeignKey('booking_detail.id'), nullable=False)  # 👈 sửa chỗ này
+    reason = Column(Text, nullable=False)
+    status = Column(Enum(RefundStatusEnum), default=RefundStatusEnum.CHO_XU_LY, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    booking_detail = relationship("BookingDetail", backref=backref("refund_request", uselist=False))

@@ -1,52 +1,120 @@
-{% extends "home.html" %}
-
 {% block content %}
-
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <style>
+     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Quicksand:wght@400;600;700&display=swap');
+
     body {
-        background-color: #0f1b17;
-        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(180deg, #fff0f5, #fce4ec);
+        font-family: 'Inter', 'Quicksand', sans-serif;
+        color: #333;
         margin: 0;
+    }
+
+    /* Header */
+    .page-header {
+        background: linear-gradient(135deg, #ff4b8c, #ff7eb3, #ffb6c1);
         color: white;
-    }
-
-    .container-grid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 32px;
-        padding: 60px 80px;
-        justify-content: center;
-    }
-
-    .event-card {
-        background-color: #1e2b27;
         border-radius: 20px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        padding: 40px 20px;
+        text-align: center;
+        margin: 25px auto 35px;
+        max-width: 1250px;
+        box-shadow: 0 10px 30px rgba(255, 75, 140, 0.45);
+        position: relative;
+        animation: fadeInDown 0.6s ease;
+    }
+
+    .page-header h2 {
+        font-size: 36px;
+        font-weight: 800;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 6px rgba(0,0,0,0.25);
+    }
+
+    .page-header h2::before {
+        content: "🎟️ ";
+    }
+
+    .page-header p {
+        font-size: 15px;
+        opacity: 0.95;
+        font-weight: 500;
+    }
+
+    /* Btn Thoát */
+    .btn-exit {
+        position: absolute;
+        top: 18px;
+        right: 25px;
+        padding: 10px 20px;
+        border-radius: 10px;
+        border: none;
+        font-weight: 700;
+        font-size: 14px;
+        background: linear-gradient(135deg, #ff5252, #d32f2f);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+    }
+
+    .btn-exit:hover {
+        background: linear-gradient(135deg, #e53935, #b71c1c);
+        transform: scale(1.05);
+    }
+
+    /* Khung chứa */
+    .event-wrapper {
+        max-width: 1250px;
+        margin: auto;
+        padding: 25px;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+        border: 2px solid #f8bbd0;
+    }
+
+    .event-wrapper h3 {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 25px;
+        color: #d81b60;
+        text-align: center;
+    }
+
+    /* Grid layout */
+    .container-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 25px;
+    }
+
+    /* Card sự kiện */
+    .event-card {
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid #f5c6d6;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.06);
         overflow: hidden;
         display: flex;
         flex-direction: column;
-        transition: all 0.3s ease;
-        border: 1px solid #1e1e1e;
-        width: 300px;
+        transition: all 0.25s ease;
     }
 
     .event-card:hover {
         transform: translateY(-6px);
-        box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+        box-shadow: 0 14px 28px rgba(0,0,0,0.15);
     }
 
     .event-image {
         width: 100%;
-        height: 180px;
+        height: 150px;
         object-fit: cover;
-        background-color: #2c3a36;
     }
 
     .event-body {
-        padding: 20px;
+        padding: 14px;
         flex-grow: 1;
         display: flex;
         flex-direction: column;
@@ -54,144 +122,192 @@
     }
 
     .event-title {
-        font-weight: 600;
-        font-size: 20px;
+        font-size: 16px;
+        font-weight: 700;
         margin-bottom: 6px;
-        color: #ffffff;
+        color: #e91e63;
+        line-height: 1.3;
     }
 
     .event-subtitle {
-        font-size: 15px;
-        color: #cfcfcf;
-        margin-bottom: 16px;
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 14px;
+        max-height: 40px;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
+    /* Buttons đều nhau */
     .btn-group {
         display: flex;
-        justify-content: center;
-        gap: 12px;
-        margin-top: 10px;
+        gap: 8px;
+        margin-top: auto;
     }
 
-    .btn-approve,
-    .btn-reject {
+    .btn-action {
         flex: 1;
-        padding: 10px 0;
+        width: 100%;
+        padding: 10px;
         border: none;
-        border-radius: 12px;
+        border-radius: 10px;
         font-weight: 600;
-        font-size: 14px;
+        font-size: 13px;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: all 0.25s ease;
+        text-align: center;
     }
+
+    .btn-detail {
+        background: linear-gradient(135deg, #f48fb1, #ec407a);
+        color: #fff;
+    }
+    .btn-detail:hover { background: linear-gradient(135deg, #ec407a, #d81b60); }
 
     .btn-approve {
-        background-color: #00c896;
-        color: white;
+        background: linear-gradient(135deg, #81c784, #4caf50);
+        color: #fff;
     }
-
-    .btn-approve:hover {
-        background-color: #00b386;
-    }
+    .btn-approve:hover { background: linear-gradient(135deg, #66bb6a, #388e3c); }
 
     .btn-reject {
-        background-color: #e63946;
-        color: white;
+        background: linear-gradient(135deg, #e57373, #ef5350);
+        color: #fff;
     }
+    .btn-reject:hover { background: linear-gradient(135deg, #ef5350, #c62828); }
 
-    .btn-reject:hover {
-        background-color: #c62828;
-    }
-
+    /* Modal */
     .modal-content {
-        background-color: #22332f;
-        color: white;
+        background-color: #fff;
+        color: #333;
         border-radius: 16px;
-        border: 2px solid #00c896;
+        border: 2px solid #f8bbd0;
         padding: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .modal-content h4,
+    .modal-content h5 {
+        color: #e91e63;
+        font-weight: 700;
+    }
+
+    .modal-content p strong {
+        color: #d81b60;
     }
 
     .form-control {
-        width: 100%;
-        max-width: 340px;
-        margin: 16px auto;
-        padding: 10px;
-        border: 2px solid #555;
-        border-radius: 10px;
-        font-size: 14px;
-        display: block;
-        background-color: #1b2a26;
-        color: white;
-        box-sizing: border-box;
+        background-color: #fff0f5;
+        color: #333;
+        border: 1px solid #f5a6c8;
     }
 
     .form-control:focus {
-        border-color: #00c896;
+        border-color: #e91e63;
         outline: none;
+        box-shadow: 0 0 6px rgba(233,30,99,0.4);
     }
 
-    .d-flex button {
-        font-weight: 600;
-        border-radius: 10px;
-        padding: 8px 16px;
-        border: none;
-    }
-
-    .btn-danger {
-        background-color: #e74c3c;
-        color: white;
-    }
-
-    .btn-danger:hover {
-        background-color: #c0392b;
-    }
-
-    .btn-secondary {
-        background-color: #7f8c8d;
-        color: white;
-    }
-
-    .btn-secondary:hover {
-        background-color: #707b7c;
+    /* Animation */
+    @keyframes fadeInDown {
+        from { transform: translateY(-20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
     }
 </style>
 
-<div class="container-grid">
-    {% for event in events %}
-    <div class="event-card">
-        <img src="{{ event.image_url or url_for('static', filename='placeholder.jpg') }}" alt="Event Image" class="event-image">
-        <div class="event-body">
-            <div>
-                <div class="event-title">{{ event.name }}</div>
-                <div class="event-subtitle">{{ event.description }}</div>
-            </div>
-            <div class="btn-group">
-                <form method="post" action="{{ url_for('admin_view.approve', event_id=event.id) }}">
-                    <button type="submit" class="btn-approve">✔ Duyệt</button>
-                </form>
-                <!-- Nút mở modal từ chối -->
-                <button type="button" class="btn-reject" data-bs-toggle="modal" data-bs-target="#rejectModal{{ event.id }}">
-                    ✖ Từ chối
-                </button>
+<div class="page-header">
+    <h2>Duyệt sự kiện</h2>
+    <p>Hãy xem chi tiết sự kiện trước khi quyết định phê duyệt hoặc từ chối</p>
+    <a href="{{ url_for('admin.index') }}" class="btn-exit">⏏ Thoát</a>
+</div>
+
+<!-- Flash messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="container mb-3" style="max-width: 1200px;">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<div class="event-wrapper">
+    <h3>Danh sách sự kiện đang chờ duyệt</h3>
+    <div class="container-grid">
+        {% for event in events %}
+        <div class="event-card">
+            <img src="{{ event.image_url or url_for('static', filename='placeholder.jpg') }}" alt="Event Image" class="event-image">
+            <div class="event-body">
+                <div>
+                    <div class="event-title">{{ event.name }}</div>
+                    <div class="event-subtitle">{{ event.description }}</div>
+                </div>
+                <div class="btn-group mb-2">
+                    <button type="button" class="btn-action btn-detail" data-bs-toggle="modal" data-bs-target="#detailModal{{ event.id }}">
+                        👁 Xem
+                    </button>
+                </div>
+                <div class="btn-group">
+                    <form method="post" action="{{ url_for('admin_view.approve', event_id=event.id) }}" style="flex:1;">
+                        <button type="submit" class="btn-action btn-approve">Duyệt</button>
+                    </form>
+                    <form method="post" action="{{ url_for('admin_view.reject', event_id=event.id) }}" style="flex:1;">
+                        <button type="button" class="btn-action btn-reject" data-bs-toggle="modal" data-bs-target="#rejectModal{{ event.id }}">
+                            Từ chối
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Modal từ chối -->
-    <div class="modal fade" id="rejectModal{{ event.id }}" tabindex="-1" aria-labelledby="rejectModalLabel{{ event.id }}" aria-hidden="true">
-        <div class="modal-dialog">
-            <form method="post" action="{{ url_for('admin_view.reject', event_id=event.id) }}">
+        <!-- Modal chi tiết -->
+        <div class="modal fade" id="detailModal{{ event.id }}" tabindex="-1">
+            <div class="modal-dialog modal-lg">
                 <div class="modal-content">
-                    <h5 id="rejectModalLabel{{ event.id }}">Lý do từ chối</h5>
-                    <textarea name="reason" class="form-control" rows="4" placeholder="Nhập lý do..." required></textarea>
-                    <div class="d-flex justify-content-end mt-3">
-                        <button type="submit" class="btn btn-danger me-2">Từ chối</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
+                    <h4 class="mb-3">{{ event.name }}</h4>
+                    <img src="{{ event.image_url or url_for('static', filename='placeholder.jpg') }}" class="img-fluid rounded mb-3">
+
+                    <p><strong>Mô tả:</strong> {{ event.description }}</p>
+                    <p><strong>Thời gian:</strong>
+                        {{ event.start_datetime.strftime("%d/%m/%Y %H:%M") if event.start_datetime else "Chưa có" }}
+                        {% if event.end_datetime %} – {{ event.end_datetime.strftime("%d/%m/%Y %H:%M") }}{% endif %}
+                    </p>
+                    <p><strong>Người tổ chức:</strong> {{ event.producers or "Chưa cập nhật" }}</p>
+                    <p><strong>Người biểu diễn:</strong> {{ event.authors or "Chưa cập nhật" }}</p>
+
+                    {% if event.event_format.name == "OFFLINE" %}
+                      <p><strong>Địa điểm:</strong> {{ event.event_offline.venue_name }} - {{ event.event_offline.location }}</p>
+                    {% else %}
+                      <p><strong>Link trực tuyến:</strong> {{ event.event_online.livestream_url }}</p>
+                    {% endif %}
+
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
                     </div>
                 </div>
-            </form>
+            </div>
         </div>
+
+        <!-- Modal từ chối -->
+        <div class="modal fade" id="rejectModal{{ event.id }}" tabindex="-1">
+            <div class="modal-dialog">
+                <form method="post" action="{{ url_for('admin_view.reject', event_id=event.id) }}">
+                    <div class="modal-content">
+                        <h5 class="mb-3">Lý do từ chối</h5>
+                        <textarea name="reason" class="form-control" rows="3" placeholder="Nhập lý do..." required></textarea>
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-danger me-2">Từ chối</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Huỷ</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
     </div>
-    {% endfor %}
 </div>
 {% endblock %}

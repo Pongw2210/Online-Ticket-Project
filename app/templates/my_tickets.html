@@ -1,32 +1,271 @@
 {% extends 'layout/base.html' %}
 {% block title %}Vé của tôi{% endblock %}
-{% block content %}
-<h2>Vé của tôi</h2>
 
-<div style="display:flex; flex-wrap:wrap; gap:20px;">
+{% block content %}
+<h2 style="margin-bottom:20px; text-align:center; font-weight:700; color:#d81b60;">Vé của tôi</h2>
+
+<!-- LƯU Ý HOÀN VÉ -->
+<div class="notice-refund">
+  ⚠️ <strong>Lưu ý:</strong> Yêu cầu hoàn vé trong vòng
+  <strong>24h sau khi thanh toán</strong>. Sau 24h hệ thống sẽ trả về
+  <em>“Yêu cầu không hợp lệ”</em>.
+</div>
+
+<div class="ticket-list">
     {% for t in tickets %}
-    <div style="
-        background: linear-gradient(145deg, #ffffff, #ffe6f0);
-        padding:20px;
-        border-radius:15px;
-        box-shadow:0 6px 18px rgba(0,0,0,0.12);
-        width:280px;
-        flex-shrink:0;
-    ">
-        <h3 style="margin:0 0 10px 0; color:#d81b60;">{{ t.event }}</h3>
-        <p style="margin:4px 0; font-size:14px; color:#555;"><strong>Loại vé:</strong> {{ t.ticket_type }}</p>
-        <p style="margin:4px 0; font-size:14px;"><strong>Thời gian:</strong> {{ t.event_time.strftime('%d/%m/%Y %H:%M') if t.event_time else 'Chưa có' }}</p>
-        <p style="margin:4px 0; font-size:14px;"><strong>Địa điểm:</strong> 
+    <div class="ticket-card">
+        <h3>{{ t.event }}</h3>
+        <p><strong>Loại vé:</strong> {{ t.ticket_type }}</p>
+        <p><strong>Thời gian:</strong> {{ t.event_time.strftime('%d/%m/%Y %H:%M') if t.event_time else 'Chưa có' }}</p>
+        <p><strong>Địa điểm:</strong>
             {% if t.event_address.startswith('http') %}
                 <a href="{{ t.event_address }}" target="_blank" style="color:#d81b60;">{{ t.event_address }}</a>
             {% else %}
                 {{ t.event_address }}
             {% endif %}
         </p>
-        <p style="margin:4px 0; font-size:14px;"><strong>Vé ID:</strong> {{ t.ticket_id }}</p>
-        <p style="margin:4px 0; font-size:14px;"><strong>Ghế:</strong> {{ t.seat if t.seat else '—' }}</p>
-        <p style="margin:4px 0; font-size:14px;"><strong>Số lượng:</strong> {{ t.quantity }}</p>
+        <p><strong>Booking Detail ID:</strong> {{ t.booking_detail_id }}</p>
+        <p><strong>Ghế:</strong> {{ t.seat if t.seat else '—' }}</p>
+        <p><strong>Số lượng:</strong> {{ t.quantity }}</p>
+
+        <!-- Trạng thái vé -->
+        {% if t.booking_status %}
+        <p><strong>Trạng thái vé:</strong>
+            {% if t.booking_status == "Đã hoàn" %}
+                <span style="color:#d81b60; font-weight:600;">Đã hoàn</span>
+            {% elif t.booking_status == "Đã thanh toán" %}
+                <span style="color:green; font-weight:600;">Đã thanh toán</span>
+            {% elif t.booking_status == "Đang chờ xử lý" %}
+                <span style="color:orange; font-weight:600;">Đang chờ xử lý</span>
+            {% elif t.booking_status == "Đã bị từ chối" %}
+                <span style="color:red; font-weight:600;">Đã bị từ chối</span>
+            {% endif %}
+        </p>
+        {% endif %}
+
+        <!-- Nút yêu cầu hoàn vé -->
+        {% if not t.booking_status %}
+            <button class="refund-btn" data-booking-detail-id="{{ t.booking_detail_id }}">
+                Yêu cầu hoàn vé
+            </button>
+        {% elif t.booking_status == "Đang chờ xử lý" %}
+            <button class="refund-btn" disabled>Đang chờ xử lý</button>
+        {% elif t.booking_status == "Đã hoàn" %}
+            <button class="refund-btn" disabled>Đã hoàn</button>
+        {% elif t.booking_status == "Đã bị từ chối" %}
+            <button class="refund-btn" disabled>Đã bị từ chối</button>
+        {% elif t.booking_status == "Đã thanh toán" %}
+            <button class="refund-btn" disabled>Đã thanh toán</button>
+        {% endif %}
     </div>
     {% endfor %}
 </div>
+
+<!-- Modal nhập lý do -->
+<div id="refund-modal" class="modal-overlay">
+    <div class="modal-card">
+        <h3>Nhập lý do hoàn vé</h3>
+        <textarea id="refund-reason" class="reason-input" placeholder="Nhập lý do của bạn..."></textarea>
+        <div class="actions">
+            <button id="cancel-refund" class="btn-cancel">Hủy</button>
+            <button id="submit-refund" class="btn-submit">Gửi yêu cầu</button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ===== Container vé ===== */
+.ticket-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+  justify-content: center;
+}
+
+/* ===== Card vé ===== */
+.ticket-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  width: 280px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+.ticket-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+.ticket-card::before {
+  content: "";
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 100px; height: 100px;
+  background: rgba(216,27,96,0.08);
+  border-radius: 50%;
+}
+
+/* ===== Tiêu đề sự kiện ===== */
+.ticket-card h3 {
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #d81b60;
+}
+
+/* ===== Thông tin vé ===== */
+.ticket-card p {
+  margin: 5px 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #444;
+}
+.ticket-card p strong {
+  color: #111;
+}
+
+/* ===== Nút hoàn vé ===== */
+.refund-btn {
+  background: #d81b60;
+  color: #fff;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 12px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+.refund-btn:hover:not([disabled]) {
+  background: #b0174e;
+  transform: translateY(-2px);
+}
+.refund-btn[disabled] {
+  background: #bdbdbd !important;
+  cursor: not-allowed;
+}
+
+/* ===== Thông báo lưu ý ===== */
+.notice-refund {
+  background: #ffe6ef;
+  border-left: 5px solid #d81b60;
+  padding: 14px 18px;
+  border-radius: 10px;
+  margin: 0 0 20px 0;
+  font-size: 15px;
+  color: #a00040;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.notice-refund strong { color: #d81b60; }
+
+/* ===== Modal ===== */
+#refund-modal.modal-overlay {
+  display: none !important;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,.5);
+  z-index: 9999;
+}
+#refund-modal.modal-overlay.show {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+.modal-card{
+  background: #fff;
+  padding: 24px 28px;
+  border-radius: 12px;
+  width: 420px;
+  max-width: 90%;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  animation: fadeIn 0.2s ease-out;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.modal-card h3 {
+  margin: 0;
+  font-size: 20px;
+  color: #d81b60;
+  text-align: center;
+}
+.reason-input{
+  width: 100%;
+  height: 120px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1.5px solid #ccc;
+  font-size: 14px;
+  resize: none;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  box-sizing: border-box;
+}
+.reason-input:focus{ border-color:#d81b60; box-shadow:0 0 8px rgba(216,27,96,.25); }
+.actions { display:flex; justify-content:flex-end; gap:12px; margin-top:8px; }
+.btn-cancel{ background:#f5f5f5; color:#333; border:none; padding:10px 18px; border-radius:8px; font-weight:600; cursor:pointer; }
+.btn-cancel:hover{ background:#e0e0e0; }
+.btn-submit{ background:#d81b60; color:#fff; border:none; padding:10px 20px; border-radius:8px; font-weight:600; cursor:pointer; }
+.btn-submit:hover{ background:#b0174e; }
+.refund-btn:hover:not([disabled]){ background:#b0174e; }
+.refund-btn[disabled]{ background:#bdbdbd !important; cursor:not-allowed; }
+@keyframes fadeIn{ from{ transform:translateY(-6px); opacity:0; } to{ transform:translateY(0); opacity:1; } }
+</style>
+
+<script>
+let currentBookingDetailId = null;
+const overlay = document.getElementById('refund-modal');
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.refund-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.disabled) return;
+      currentBookingDetailId = btn.dataset.bookingDetailId;
+      overlay.classList.add('show');
+      document.getElementById('refund-reason').focus();
+    });
+  });
+  document.getElementById('cancel-refund').addEventListener('click', () => {
+    overlay.classList.remove('show');
+  });
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.classList.remove('show');
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') overlay.classList.remove('show');
+  });
+  document.getElementById('submit-refund').addEventListener('click', () => {
+    const reason = document.getElementById('refund-reason').value.trim();
+    if (!reason) { alert('Vui lòng nhập lý do'); return; }
+    fetch('/api/request-refund', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ booking_detail_id: currentBookingDetailId, reason })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        alert(data.message);
+        overlay.classList.remove('show');
+        document.getElementById('refund-reason').value = '';
+        const btn = document.querySelector(`.refund-btn[data-booking-detail-id="${currentBookingDetailId}"]`);
+        if (btn) {
+          btn.textContent = 'Đang chờ xử lý';
+          btn.disabled = true;
+          btn.style.background = '#bdbdbd';
+        }
+      } else {
+        alert(data.message);
+      }
+    })
+    .catch(err => { console.error(err); alert('Có lỗi xảy ra'); });
+  });
+});
+</script>
 {% endblock %}
