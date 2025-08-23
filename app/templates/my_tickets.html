@@ -28,15 +28,35 @@
         <p><strong>Ghế:</strong> {{ t.seat if t.seat else '—' }}</p>
         <p><strong>Số lượng:</strong> {{ t.quantity }}</p>
 
-        <!-- Nút yêu cầu hoàn vé -->
-        <button class="refund-btn" data-booking-detail-id="{{ t.booking_detail_id }}"
-            {% if t.refund_status %}disabled{% endif %}>
-            {% if t.refund_status %}
-                {{ t.refund_label }}
-            {% else %}
-                Yêu cầu hoàn vé
+        <!-- Trạng thái vé -->
+        {% if t.booking_status %}
+        <p><strong>Trạng thái vé:</strong>
+            {% if t.booking_status == "Đã hoàn" %}
+                <span style="color:#d81b60; font-weight:600;">Đã hoàn</span>
+            {% elif t.booking_status == "Đã thanh toán" %}
+                <span style="color:green; font-weight:600;">Đã thanh toán</span>
+            {% elif t.booking_status == "Đang chờ xử lý" %}
+                <span style="color:orange; font-weight:600;">Đang chờ xử lý</span>
+            {% elif t.booking_status == "Đã bị từ chối" %}
+                <span style="color:red; font-weight:600;">Đã bị từ chối</span>
             {% endif %}
-        </button>
+        </p>
+        {% endif %}
+
+        <!-- Nút yêu cầu hoàn vé -->
+        {% if not t.booking_status %}
+            <button class="refund-btn" data-booking-detail-id="{{ t.booking_detail_id }}">
+                Yêu cầu hoàn vé
+            </button>
+        {% elif t.booking_status == "Đang chờ xử lý" %}
+            <button class="refund-btn" disabled>Đang chờ xử lý</button>
+        {% elif t.booking_status == "Đã hoàn" %}
+            <button class="refund-btn" disabled>Đã hoàn</button>
+        {% elif t.booking_status == "Đã bị từ chối" %}
+            <button class="refund-btn" disabled>Đã bị từ chối</button>
+        {% elif t.booking_status == "Đã thanh toán" %}
+            <button class="refund-btn" disabled>Đã thanh toán</button>
+        {% endif %}
     </div>
     {% endfor %}
 </div>

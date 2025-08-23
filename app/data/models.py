@@ -23,7 +23,7 @@ class StatusBookingEnum(RoleEnum):
     CHO_THANH_TOAN = "Chờ thanh toán"
     DA_THANH_TOAN = "Đã thanh toán"
     DA_HUY = "Đã hủy"
-
+    DA_HOAN = "Đã hoàn"
 class StatusSeatEnum(RoleEnum):
     TRONG = "Trống"
     DA_DAT = "Đã đặt"

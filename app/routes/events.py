@@ -495,30 +495,36 @@ def get_seats(event_id):
             "occupied": seat.status != StatusSeatEnum.TRONG
         })
     return jsonify(seat_list)
-
 @events_bp.route('/my-ticket')
 @login_required
 def my_tickets():
     bookings = Booking.query.filter_by(user_id=current_user.id).all()
-
-    status_label_map = {
-        "CHO_XU_LY": "Đang chờ xử lý",
-        "DONG_Y": "Đã duyệt",
-        "TU_CHOI": "Đã bị từ chối",
-    }
 
     tickets_for_user = []
     for booking in bookings:
         for detail in booking.booking_details:
             rr = RefundRequest.query.filter_by(booking_detail_id=detail.id).first()
 
-            # Nếu chưa thanh toán và chưa có refund thì bỏ qua
-            if booking.status != StatusBookingEnum.DA_THANH_TOAN and rr is None:
+            # Nếu đơn chưa thanh toán và cũng không có refund thì bỏ qua
+            if booking.status not in [StatusBookingEnum.DA_THANH_TOAN, StatusBookingEnum.DA_HOAN] and rr is None:
                 continue
 
             ticket_type = detail.ticket_type
             event = ticket_type.event
 
+            #  Logic hiển thị trạng thái
+            status_display = None
+            if rr:
+                if rr.status.name == "DONG_Y":  # tổ chức duyệt
+                    status_display = "Đã hoàn"
+                    booking.status = StatusBookingEnum.DA_HOAN
+                    db.session.commit()
+                elif rr.status.name == "CHO_XU_LY":  # đang chờ tổ chức duyệt
+                    status_display = "Đang chờ xử lý"
+                elif rr.status.name == "TU_CHOI":  # tổ chức từ chối
+                    status_display = "Đã bị từ chối"
+
+            # Ghế và địa điểm
             seat_display = None
             event_address = "Chưa có địa điểm"
             if event.event_format == EventFormatEnum.OFFLINE:
@@ -550,12 +556,10 @@ def my_tickets():
                 "seat": seat_display,
                 "quantity": detail.quantity,
                 "user": current_user.fullname,
-                "refund_status": rr.status.name if rr else None,
-                "refund_label": status_label_map.get(rr.status.name) if rr else None
+                "booking_status": status_display
             })
 
     return render_template("my_tickets.html", tickets=tickets_for_user)
-
 @events_bp.route("/api/vouchers/<int:event_id>", methods=["POST"])
 def get_event_vouchers(event_id):
     try:

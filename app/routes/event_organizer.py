@@ -450,7 +450,6 @@ def refund_requests():
     )
     return render_template("event_organizer/refund_requests.html", refunds=refunds)
 
-
 @event_organizer_bp.route("/api/refund/<int:refund_id>/<string:action>", methods=['POST'])
 @login_required
 def handle_refund(refund_id, action):
@@ -462,42 +461,66 @@ def handle_refund(refund_id, action):
         return jsonify({"success": False, "message": "Không tìm thấy yêu cầu"}), 404
 
     try:
+        detail = refund.booking_detail
+        booking = detail.booking
+
         if action == "approve":
+            # 1) Đánh dấu yêu cầu hoàn
             refund.status = RefundStatusEnum.DONG_Y
 
-            detail = refund.booking_detail
-
-            # Debug in ra giá trị để kiểm tra
-            print("=== APPROVE REFUND DEBUG ===")
-            print("BookingDetail ID:", detail.id)
-            print("Quantity (trước khi hoàn):", detail.quantity)
-            print("Unit price:", detail.unit_price)
-            print("Booking total_price (trước):", detail.booking.total_price)
-
-            # Lưu số lượng cũ trước khi gán về 0
+            # 2) Tính số lượng hoàn
             refunded_qty = detail.quantity or 0
 
-            # Giảm total_price trước
-            if refunded_qty > 0:
-                detail.booking.total_price -= detail.unit_price * refunded_qty
+            # 3) Hoàn lại tồn vé cho TicketType
+            try:
+                if detail.ticket_type and refunded_qty > 0:
+                    detail.ticket_type.quantity = (detail.ticket_type.quantity or 0) + refunded_qty
+            except Exception:
+                pass  # phòng trường hợp model khác tên thuộc tính
 
-            # Cập nhật lại quantity
+            # 4) Mở ghế (nếu có ghế) & xoá liên kết đặt ghế (nếu dùng bảng trung gian)
+            # Lưu ý: tuỳ mô hình của bạn. Nếu BookingDetail có quan hệ booking_seats -> seat
+            # thì dùng vòng lặp dưới. Nếu bạn dùng bảng BookingSeat rời, hãy query theo booking_id.
+            try:
+                if hasattr(detail, "booking_seats"):
+                    for bs in list(detail.booking_seats):
+                        if bs.seat:
+                            bs.seat.status = StatusSeatEnum.TRONG
+                        db.session.delete(bs)  # huỷ liên kết giữ ghế
+            except Exception:
+                pass
+
+            # 5) Trả lại voucher (nếu có gán voucher cho booking)
+            # Nếu có bảng liên kết BookingVoucher / booking.booking_vouchers
+            try:
+                if hasattr(booking, "booking_vouchers"):
+                    for bv in list(booking.booking_vouchers):
+                        if bv.voucher:
+                            # trả lại số lượng cho voucher
+                            bv.voucher.quantity = (bv.voucher.quantity or 0) + 1
+                        db.session.delete(bv)  # huỷ liên kết voucher với booking
+            except Exception:
+                pass
+
+            # 6) Giảm tổng tiền booking trước rồi set quantity của detail = 0
+            if refunded_qty > 0:
+                booking.total_price = (booking.total_price or 0) - (detail.unit_price or 0) * refunded_qty
+                if booking.total_price < 0:
+                    booking.total_price = 0
             detail.quantity = 0
 
-            # Debug sau khi cập nhật
-            print("Booking total_price (sau):", detail.booking.total_price)
-
-            # Nếu tất cả vé trong booking đều đã hoàn hết -> hủy booking
-            if all(
-                d.quantity == 0 or (d.refund_request and d.refund_request.status == RefundStatusEnum.DONG_Y)
-                for d in detail.booking.booking_details
-            ):
-                detail.booking.status = StatusBookingEnum.DA_HUY
-                print("Booking đã hủy vì tất cả vé đã được hoàn")
+            # 7) Nếu tất cả chi tiết đều đã hoàn (quantity == 0) → set booking = ĐÃ HOÀN
+            all_refunded = True
+            for d in booking.booking_details:
+                # còn quantity > 0 là chưa hoàn hết
+                if (d.quantity or 0) > 0:
+                    all_refunded = False
+                    break
+            if all_refunded:
+                booking.status = StatusBookingEnum.DA_HOAN
 
         elif action == "reject":
             refund.status = RefundStatusEnum.TU_CHOI
-            print("Refund bị từ chối")
 
         db.session.commit()
         return jsonify({"success": True, "message": "Cập nhật thành công"})
