@@ -23,7 +23,7 @@ import datetime
 
 events_bp = Blueprint("events", __name__)
 
-from datetime import datetime
+
 @events_bp.route("/")
 def home():
     search = request.args.get("q", "")
@@ -99,7 +99,6 @@ def home():
         event_format=event_format,
         date_filter=date_filter
     )
-
 
 @events_bp.route("/filter")
 def filter_events():
@@ -596,6 +595,7 @@ def get_seats(event_id):
             "occupied": seat.status != StatusSeatEnum.TRONG
         })
     return jsonify(seat_list)
+
 @events_bp.route('/my-ticket')
 @login_required
 def my_tickets():
@@ -661,6 +661,7 @@ def my_tickets():
             })
 
     return render_template("my_tickets.html", tickets=tickets_for_user)
+
 @events_bp.route("/api/vouchers/<int:event_id>", methods=["POST"])
 def get_event_vouchers(event_id):
     try:

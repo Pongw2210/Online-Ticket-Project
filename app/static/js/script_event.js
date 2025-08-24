@@ -423,7 +423,7 @@ function payment_vnpay() {
             throw new Error("Booking failed");
         }
 
-       return fetch("/payment/momo", {
+        return fetch("/payment/vnpay", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
