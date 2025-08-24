@@ -327,9 +327,7 @@ function payment_momo() {
         return;
     }
 
-    // Lấy tổng tiền sau khi đã áp dụng voucher
-    let totalPrice = Number(sessionStorage.getItem('checkoutTotal')) || 0;
-
+    let totalPrice = Math.round(Number(sessionStorage.getItem('checkoutTotal')) || 0);
     let appliedVoucher = JSON.parse(sessionStorage.getItem('appliedVoucher')) || null;
     let voucherId = appliedVoucher ? appliedVoucher.id : null;
 
@@ -357,12 +355,23 @@ function payment_momo() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 amount: totalPrice,
+                bookingId: bookingData.bookingId,
                 orderId: "order_" + bookingData.bookingId,
                 orderInfo: `Thanh toán vé sự kiện ${sessionStorage.getItem('checkoutEventId')}`,
             }),
         });
     })
-    .then(res => res.json())
+    .then(async res => {
+        console.log("Response status:", res.status);
+        const text = await res.text();
+        console.log("Raw response:", text);
+
+        try {
+            return JSON.parse(text);
+        } catch (e) {
+            throw new Error("Response không phải JSON hợp lệ: " + text);
+        }
+    })
     .then(paymentData => {
         if (paymentData.payUrl) {
             window.location.href = paymentData.payUrl;
@@ -373,10 +382,8 @@ function payment_momo() {
     })
     .catch(err => {
         console.error(err);
-        if (err.message !== "Booking failed") {
-            alert("Đã xảy ra lỗi, vui lòng thử lại.");
-            payBtn.disabled = false;
-        }
+        alert("Đã xảy ra lỗi, vui lòng thử lại.");
+        payBtn.disabled = false;
     });
 }
 
@@ -416,7 +423,7 @@ function payment_vnpay() {
             throw new Error("Booking failed");
         }
 
-        return fetch("/payment/vnpay", {
+       return fetch("/payment/momo", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

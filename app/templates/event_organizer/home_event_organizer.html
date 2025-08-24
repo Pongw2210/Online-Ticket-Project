@@ -63,6 +63,7 @@
                             kiện
                         </button>
                     </a>
+
                     <a>
                         <button class="btn-action btn-danger-card" onclick="showConfirmDeleteForm({{ event.id }})">Xóa
                         </button>
@@ -148,7 +149,7 @@
                         <button class="btn-action btn-primary-card">Xem chi tiết</button>
                     </a>
                     <a href="{{ url_for('event_organizer.edit_event', event_id=event.id) }}">
-                        <button class="btn-confirm">Chỉnh sửa sự kiện</button>
+                        <button class="btn-confirm">Chỉnh sửa</button>
                     </a>
                     <a>
                         <button class="btn-action btn-secondary-card" onclick="viewRejectionReason({{ event.id }})">

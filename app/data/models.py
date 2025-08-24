@@ -1,17 +1,15 @@
 from datetime import datetime
-from sqlalchemy.orm import relationship
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, Text, Time, Float, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, Text, Float, Boolean
 from enum import Enum as RoleEnum
 from flask_login import UserMixin
 import hashlib
-from app.extensions import db  # Dùng db từ extensions
+from app.extensions import db
 from sqlalchemy.orm import relationship, backref
 
 class UserEnum(RoleEnum):
     KHACH_HANG = "Khách hàng"
     NGUOI_TO_CHUC = "Người tổ chức"
     ADMIN = "Người quản trị"
-
 
 class StatusEventEnum(RoleEnum):
     DA_DUYET = "Đã duyệt"
@@ -24,6 +22,7 @@ class StatusBookingEnum(RoleEnum):
     DA_THANH_TOAN = "Đã thanh toán"
     DA_HUY = "Đã hủy"
     DA_HOAN = "Đã hoàn"
+
 class StatusSeatEnum(RoleEnum):
     TRONG = "Trống"
     DA_DAT = "Đã đặt"
@@ -42,6 +41,11 @@ class DiscountTypeEnum(RoleEnum):
     PHAN_TRAM = "Phần trăm"
     SO_TIEN = "Số tiền"
 
+class RefundStatusEnum(RoleEnum):
+    CHO_XU_LY = "Chờ xử lý"
+    DONG_Y = "Đồng ý hoàn"
+    TU_CHOI = "Từ chối"
+
 class Base(db.Model):
     __abstract__ = True
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -57,7 +61,6 @@ class Customer(Base):
     number_phone = Column(String(10), nullable=False)
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
 
-
 class EventOrganizer(Base):
     __tablename__ = 'event_organizer'
 
@@ -65,7 +68,6 @@ class EventOrganizer(Base):
     email = Column(String(100), nullable=True)
     gender = Column(String(10), nullable=False)
     user_id = Column(Integer, ForeignKey('user.id'), nullable=True)
-
 
 class Admin(Base):
     __tablename__ = 'admin'
@@ -113,7 +115,6 @@ class TicketVoucher(Base):
     voucher_id = Column(Integer, ForeignKey("voucher.id"))
     ticket_type_id = Column(Integer, ForeignKey("ticket_type.id"))
 
-
 class TicketType(Base):
     __tablename__ = 'ticket_type'
 
@@ -146,6 +147,7 @@ class EventOnline(Base):
 
 class Event(Base):
     __tablename__ = 'event'
+
     name = Column(String(255), nullable=False)
     description = Column(Text)
     start_datetime = Column(DateTime, nullable=False)
@@ -167,6 +169,7 @@ class Event(Base):
     event_online = relationship(EventOnline, uselist=False, backref="event", cascade="all, delete")
     rejection_logs = relationship("EventRejectionLog", backref="event", cascade="all, delete")
     seats = relationship("Seat", backref="event", cascade="all, delete")
+    vouchers = relationship("Voucher", backref="event", cascade="all, delete")
 
     @property
     def ticket_count(self):
@@ -192,6 +195,7 @@ class EventRejectionLog(Base):
 
 class Booking(Base):
     __tablename__ = 'booking'
+
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     event_id = Column(Integer, ForeignKey('event.id'), nullable=False)
     total_price = Column(Float, nullable=False)
@@ -255,16 +259,11 @@ class BookingVoucher(Base):
 
     voucher = relationship("Voucher")
 
-class RefundStatusEnum(RoleEnum):
-    CHO_XU_LY = "Chờ xử lý"
-    DONG_Y = "Đồng ý hoàn"
-    TU_CHOI = "Từ chối"
-
 class RefundRequest(Base):
     __tablename__ = 'refund_request'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    booking_detail_id = Column(Integer, ForeignKey('booking_detail.id'), nullable=False)  # 👈 sửa chỗ này
+    booking_detail_id = Column(Integer, ForeignKey('booking_detail.id'), nullable=False)
     reason = Column(Text, nullable=False)
     status = Column(Enum(RefundStatusEnum), default=RefundStatusEnum.CHO_XU_LY, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)

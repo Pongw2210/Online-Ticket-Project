@@ -1,5 +1,5 @@
 import uuid
-import datetime
+from datetime import datetime
 import random
 import string
 import requests
@@ -172,7 +172,6 @@ def filter_events():
         filters=request.args
     )
 
-
 @events_bp.route('/event/<int:event_id>')
 def event_detail(event_id):
     event = Event.query.get_or_404(event_id)
@@ -267,35 +266,20 @@ def create_booking():
         return jsonify({"success": False, "message": "Lỗi server: " + str(e)}), 500
 
 @events_bp.route("/payment/momo", methods=["POST"])
-def payment_momo():
+def momo_payment():
     data = request.get_json()
-
-    booking_id = data.get("bookingId")
-    amount = str(data.get("amount", 50000))
-    orderInfo = data.get("orderInfo", "Thanh toán vé sự kiện")
-
-    if not booking_id:
-        return jsonify({"success": False, "message": "Thiếu bookingId"}), 400
-
-    orderId = f"BOOKING_{booking_id}"
-    requestId = str(uuid.uuid4())
 
     endpoint = "https://test-payment.momo.vn/v2/gateway/api/create"
     accessKey = "F8BBA842ECF85"
     secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz"
     partnerCode = "MOMO"
-
     redirectUrl = "http://localhost:5000/payment/return"  # URL trả về sau khi thanh toán
-    ipnUrl = "http://localhost:5000/payment/ipn"          # URL callback thông báo kết quả
+    ipnUrl = "http://localhost:5000/payment/ipn"  # URL callback thông báo kết quả
 
     orderId = data.get("orderId", str(uuid.uuid4()))
     amount = str(data.get("amount", 50000))
-    orderInfo = data.get("orderInfo", "Thanh toán tests")
+    orderInfo = data.get("orderInfo", "Thanh toán test")
     requestId = str(uuid.uuid4())
-
-    redirectUrl = "http://localhost:5000/payment/return"
-    ipnUrl = "http://localhost:5000/payment/ipn"
-
     requestType = "payWithMethod"
 
     raw_signature = (
@@ -326,10 +310,6 @@ def payment_momo():
 
     res = requests.post(endpoint, json=payload)
     result = res.json()
-    print("MoMo RESPONSE:", result)
-
-    if "payUrl" not in result:
-        return jsonify({"success": False, "message": result}), 400
 
     return jsonify({"payUrl": result.get("payUrl")})
 

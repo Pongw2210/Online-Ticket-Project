@@ -93,7 +93,7 @@ def login():
 @auth_bp.route("/logout")
 def logout_my_user():
     logout_user()
-    return redirect(url_for("events.home"))
+    return redirect(url_for("auth.login"))
 
 @auth_bp.route("/user_info")
 @login_required
