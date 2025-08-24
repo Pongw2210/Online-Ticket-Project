@@ -1,6 +1,5 @@
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-
 from flask_admin.menu import MenuLink
 from flask_admin import AdminIndexView, expose
 from sqlalchemy import func
@@ -10,19 +9,21 @@ from app.extensions import db
 from app.admin_stats import StatsView
 
 
-
 flask_admin = Admin(name="Ticket Admin", template_mode="bootstrap4")
 
 
-# AdminIndexView có inject CSS
 class MyAdminIndexView(AdminIndexView):
 
     @expose('/')
     def index(self):
         from app.data.models import (
             User, Event, Customer, EventOrganizer, EventOnline, EventOffline,
-            Booking, EventTypeEnum, UserEnum
+            Booking, EventTypeEnum, UserEnum, StatusEventEnum
         )
+
+        # Đếm số sự kiện đang chờ duyệt
+        pending_count = db.session.query(func.count(Event.id)) \
+            .filter(Event.status == StatusEventEnum.DANG_DUYET).scalar() or 0
 
         # Thống kê tổng số bản ghi từng bảng
         counts_summary = {
@@ -52,16 +53,25 @@ class MyAdminIndexView(AdminIndexView):
             event_labels=event_labels,
             event_data=event_data,
             user_labels=user_labels,
-            user_data=user_data
+            user_data=user_data,
+            pending_count=pending_count,
+            extra_js=[url_for('static', filename='js/admin_badge.js')]
         )
-
-
-# ModelView cũng inject CSS
+# ModelView cũng inject CSS + JS
 class MyModelView(ModelView):
     def render(self, template, **kwargs):
+        # inject CSS
         extras = self._template_args.get('extra_css', [])
         extras.append(url_for('static', filename='css/custom.css'))
         self._template_args['extra_css'] = extras
+
+        # inject JS
+        extra_js = self._template_args.get('extra_js', [])
+        js_url = url_for('static', filename='js/admin_badge.js')
+        if js_url not in extra_js:
+            extra_js.append(js_url)
+        self._template_args['extra_js'] = extra_js
+
         return super().render(template, **kwargs)
 
 
@@ -70,7 +80,6 @@ flask_admin = Admin(
     template_mode="bootstrap4",
     index_view=MyAdminIndexView()
 )
-
 
 
 def init_admin(app):

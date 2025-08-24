@@ -46,12 +46,13 @@ def api_summary():
     end = _parse_date(request.args.get("end"))
     event_id = request.args.get("event_id", type=int)
 
-    q = db.session.query(
-        func.coalesce(func.sum(BookingDetail.unit_price * BookingDetail.quantity), 0)
-    ).join(Booking, BookingDetail.booking_id == Booking.id) \
-     .join(Event, Booking.event_id == Event.id) \
+    # Tổng doanh thu = sum Booking.total_price (đã trừ voucher)
+    q_revenue = db.session.query(
+        func.coalesce(func.sum(Booking.total_price), 0)
+    ).join(Event, Booking.event_id == Event.id) \
      .filter(_organizer_filter(), _paid())
 
+    # Tổng số vé
     q_tickets = db.session.query(
         func.coalesce(func.sum(BookingDetail.quantity), 0)
     ).join(Booking, BookingDetail.booking_id == Booking.id) \
@@ -59,17 +60,17 @@ def api_summary():
      .filter(_organizer_filter(), _paid())
 
     if event_id:
-        q = q.filter(Event.id == event_id)
+        q_revenue = q_revenue.filter(Event.id == event_id)
         q_tickets = q_tickets.filter(Event.id == event_id)
     if start:
-        q = q.filter(Booking.booking_date >= start)
+        q_revenue = q_revenue.filter(Booking.booking_date >= start)
         q_tickets = q_tickets.filter(Booking.booking_date >= start)
     if end:
-        q = q.filter(Booking.booking_date <= end + timedelta(days=1))
+        q_revenue = q_revenue.filter(Booking.booking_date <= end + timedelta(days=1))
         q_tickets = q_tickets.filter(Booking.booking_date <= end + timedelta(days=1))
 
     return jsonify({
-        "total_revenue": float(q.scalar() or 0),
+        "total_revenue": float(q_revenue.scalar() or 0),
         "total_tickets": int(q_tickets.scalar() or 0)
     })
 
@@ -91,9 +92,8 @@ def api_revenue_by_date():
 
     q = db.session.query(
         date_expr.label("label"),
-        func.sum(BookingDetail.unit_price * BookingDetail.quantity).label("revenue")
-    ).join(Booking, BookingDetail.booking_id == Booking.id) \
-     .join(Event, Booking.event_id == Event.id) \
+        func.sum(Booking.total_price).label("revenue")
+    ).join(Event, Booking.event_id == Event.id) \
      .filter(_organizer_filter(), _paid())
 
     if event_id:
@@ -118,6 +118,7 @@ def api_revenue_by_ticket():
     end = _parse_date(request.args.get("end"))
     event_id = request.args.get("event_id", type=int)
 
+    # Vẫn tính theo BookingDetail (doanh thu gốc theo loại vé)
     q = db.session.query(
         TicketType.name.label("label"),
         func.sum(BookingDetail.unit_price * BookingDetail.quantity).label("revenue")
@@ -146,7 +147,7 @@ def api_revenue_by_ticket():
 def api_tickets_by_event():
     start = _parse_date(request.args.get("start"))
     end = _parse_date(request.args.get("end"))
-    event_id = request.args.get("event_id", type=int)  # Thêm lấy event_id
+    event_id = request.args.get("event_id", type=int)
 
     q = db.session.query(
         Event.id, Event.name,
@@ -155,7 +156,6 @@ def api_tickets_by_event():
      .join(Event, Booking.event_id == Event.id) \
      .filter(_organizer_filter(), _paid())
 
-    # Lọc theo event_id nếu có
     if event_id:
         q = q.filter(Event.id == event_id)
     if start:
@@ -168,6 +168,7 @@ def api_tickets_by_event():
         "labels": [r.name for r in data],
         "values": [int(r.tickets or 0) for r in data]
     })
+
 
 # -------- API: Vé đã bán vs còn lại --------
 @report_bp.route("/api/ticket_stock", methods=["GET"])
@@ -223,7 +224,7 @@ def api_top_customers():
     q = db.session.query(
         Customer.fullname.label("name"),
         func.sum(BookingDetail.quantity).label("tickets"),
-        func.sum(BookingDetail.unit_price * BookingDetail.quantity).label("spent")
+        func.sum(Booking.total_price).label("spent")
     ).join(Booking, BookingDetail.booking_id == Booking.id) \
      .join(User, Booking.user_id == User.id) \
      .join(Customer, Customer.user_id == User.id) \
