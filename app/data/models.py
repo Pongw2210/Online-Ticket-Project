@@ -216,6 +216,9 @@ class BookingDetail(Base):
     ticket_type_id = Column(Integer, ForeignKey('ticket_type.id'))
     quantity = Column(Integer, nullable=False)
     unit_price = Column(Float, nullable=False)
+    qr_code_data = Column(Text, nullable=True)
+    check_in = Column(Boolean,default=False)
+    check_in_at = Column(DateTime)
 
     ticket_type = relationship("TicketType")
     booking_seats = relationship("BookingSeat", back_populates="booking_detail")

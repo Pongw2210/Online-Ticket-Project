@@ -1,0 +1,42 @@
+{% extends "event_organizer/layout_event_organizer/base.html" %}
+
+{% block title %}Quét mã sự kiện{% endblock %}
+
+{% block content %}
+<div class="qr-container">
+    <h2 class="qr-title">📷 Quét mã sự kiện</h2>
+    <div id="reader"></div>
+    <div id="result" class="qr-result"></div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode/html5-qrcode.min.js"></script>
+<script>
+    function onScanSuccess(decodedText, decodedResult) {
+        document.getElementById("result").innerHTML = "Mã vé: " + decodedText;
+
+        fetch("/organizer/api/booking/check-in", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ qr_code: decodedText })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById("result").innerHTML = "Check-in thành công!";
+            } else {
+                document.getElementById("result").innerHTML = data.message;
+            }
+        })
+        .catch(() => {
+            document.getElementById("result").innerHTML = "Lỗi kết nối server!";
+        });
+    }
+
+    function onScanFailure(error) {}
+
+    let html5QrcodeScanner = new Html5QrcodeScanner(
+        "reader", { fps: 10, qrbox: 300 }
+    );
+    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+</script>
+{% endblock %}

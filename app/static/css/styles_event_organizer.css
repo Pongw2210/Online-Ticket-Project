@@ -1621,3 +1621,36 @@ body {
     top: 0px !important;
     position: relative !important;
 }
+
+ body {
+        background: #ffe4ec; /* nền hồng nhạt */
+    }
+
+.qr-container {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.qr-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #e91e63;
+    margin-bottom: 20px;
+}
+
+#reader {
+    width: 100% !important;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.qr-result {
+    margin-top: 20px;
+    font-size: 1.2rem;
+    font-weight: 500;
+}

@@ -1,25 +1,29 @@
+import json
 import uuid
-from datetime import datetime
+import hmac
+import hashlib
 import random
 import string
 import requests
-import hmac
-import hashlib
+import datetime
 from urllib.parse import urlencode
 
-from flask import Blueprint, render_template, request, redirect, jsonify, url_for, current_app
+from flask import (
+    Blueprint, render_template, request, redirect,
+    jsonify, url_for, current_app
+)
 from flask_login import current_user, login_required
 
-from app.data.models import (
-    Event, EventTypeEnum, Seat, BookingSeat, Booking,
-    StatusBookingEnum, BookingDetail, TicketType,
-    StatusSeatEnum, StatusEventEnum, EventFormatEnum, Customer, BookingVoucher, Voucher, TicketVoucher, EventOffline
-)
 from app import dao, db
 from app.utils import send_ticket_email
-from app.data.models import RefundRequest
-import uuid
-import datetime
+from app.data.models import (
+    Event, EventOffline, EventTypeEnum, EventFormatEnum, StatusEventEnum,
+    Seat, StatusSeatEnum, BookingSeat,
+    Booking, BookingDetail, StatusBookingEnum,
+    TicketType, Voucher, TicketVoucher, BookingVoucher,
+    Customer, RefundRequest
+)
+
 
 events_bp = Blueprint("events", __name__)
 
@@ -495,20 +499,17 @@ def payment_return_vnpay():
     if result_code == "00":
         booking.status = StatusBookingEnum.DA_THANH_TOAN
 
-        # ===== Giảm số lượng vé =====
         for detail in booking.booking_details:
             ticket_type = detail.ticket_type
             if ticket_type:
                 ticket_type.quantity = max(ticket_type.quantity - detail.quantity, 0)
 
-        # ===== Cập nhật trạng thái ghế =====
         for detail in booking.booking_details:
-            for seat_link in detail.booking_seats:  # seat liên kết với booking_detail
+            for seat_link in detail.booking_seats:
                 seat_obj = Seat.query.get(seat_link.seat_id)
                 if seat_obj:
                     seat_obj.status = StatusSeatEnum.DA_DAT
 
-        # ===== Giảm số lượng voucher =====
         if booking.booking_vouchers:
             for bv in booking.booking_vouchers:
                 voucher_obj = Voucher.query.get(bv.voucher_id)
@@ -517,7 +518,6 @@ def payment_return_vnpay():
 
         db.session.commit()
 
-        # ===== Lấy dữ liệu vé để gửi email =====
         tickets_for_email = []
 
         for detail in booking.booking_details:
@@ -561,9 +561,12 @@ def payment_return_vnpay():
                 "user": booking.user.fullname
             }
 
+            detail.qr_code_data = json.dumps(ticket_info, ensure_ascii=False,default=str)
+            db.session.add(detail)
+            db.session.commit()
+
             tickets_for_email.append(ticket_info)
 
-        # ===== Gửi email =====
         with current_app.app_context():
             try:
                 send_ticket_email(booking.user.email, tickets_for_email)

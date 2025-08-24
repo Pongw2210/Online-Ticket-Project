@@ -1,21 +1,22 @@
 import string
 import json
+from datetime import datetime
 
-from flask import Blueprint, render_template, redirect, url_for,request, jsonify, session
+from flask import Blueprint, render_template, redirect, url_for, request, jsonify, session
 from flask_login import login_required, current_user
 
-from app import dao,db
-from app.data.models import UserEnum, Event, EventOffline, EventOnline, TicketType, EventFormatEnum, EventTypeEnum, \
-    StatusEventEnum, EventRejectionLog, Seat, StatusSeatEnum, DiscountTypeEnum, Voucher, TicketVoucher, \
-    RefundStatusEnum, RefundRequest
 import cloudinary.uploader
-from datetime import datetime
+
+from app import dao, db
 from app.data.models import (
-    Booking, BookingDetail, TicketType, Event,
-    User, Customer, StatusBookingEnum
+    UserEnum, User, Customer,
+    Event, EventOffline, EventOnline, EventFormatEnum, EventTypeEnum, StatusEventEnum, EventRejectionLog,
+    TicketType, DiscountTypeEnum, Voucher, TicketVoucher,
+    Booking, BookingDetail, StatusBookingEnum,
+    Seat, StatusSeatEnum,
+    RefundRequest, RefundStatusEnum
 )
 
-from app.data.models import Booking, BookingDetail, Customer
 
 
 event_organizer_bp = Blueprint("event_organizer", __name__, url_prefix="/organizer")
@@ -537,3 +538,55 @@ def handle_refund(refund_id, action):
         import traceback; traceback.print_exc()
         return jsonify({"success": False, "message": "Lỗi server: " + str(e)}), 500
 
+@event_organizer_bp.route("/scan-qr")
+@login_required
+def scan_qr():
+    return render_template("event_organizer/scan_qr.html")
+
+@event_organizer_bp.route("/api/booking/check-in", methods=["POST"])
+@login_required
+def scan_qr_checkin():
+    try:
+        data = request.get_json()
+        qr_raw = data.get("qr_code")
+
+        if not qr_raw:
+            return jsonify({"success": False, "message": "Thiếu dữ liệu QR"}), 400
+
+        print("QR raw:", qr_raw, "| type:", type(qr_raw))
+
+        # Nếu qr_raw đã là dict (trường hợp gửi trực tiếp JSON)
+        if isinstance(qr_raw, dict):
+            qr_data = qr_raw
+        else:
+            # Trường hợp qr_raw là string JSON
+            try:
+                qr_data = json.loads(qr_raw)
+            except Exception:
+                return jsonify({"success": False, "message": "QR không hợp lệ"}), 400
+
+        ticket_id = qr_data.get("ticket_id")
+        if not ticket_id:
+            return jsonify({"success": False, "message": "QR thiếu ticket_id"}), 400
+
+        detail = BookingDetail.query.get(ticket_id)
+        if not detail:
+            return jsonify({"success": False, "message": "Vé không tồn tại"}), 404
+
+        if detail.booking.status != StatusBookingEnum.DA_THANH_TOAN:
+            return jsonify({"success": False, "message": "Vé chưa được thanh toán"}), 400
+
+        if detail.check_in == 1:
+            return jsonify({"success": False, "message": "Vé đã được check-in trước đó"}), 400
+
+        detail.check_in = 1
+        detail.check_in_at = datetime.utcnow()
+        db.session.commit()
+
+        return jsonify({
+            "success": True,
+            "message": "Check-in thành công",
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
