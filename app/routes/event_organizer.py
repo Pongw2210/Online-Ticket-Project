@@ -512,9 +512,18 @@ def handle_refund(refund_id, action):
 
             # 6) Giảm tổng tiền booking trước rồi set quantity của detail = 0
             if refunded_qty > 0:
-                booking.total_price = (booking.total_price or 0) - (detail.unit_price or 0) * refunded_qty
+                # Tổng gốc trước khi giảm giá
+                original_total = sum(d.unit_price * d.quantity for d in booking.booking_details)
+
+                refund_amount = 0
+                if original_total > 0:
+                    discount_ratio = booking.total_price / original_total
+                    refund_amount = (detail.unit_price or 0) * refunded_qty * discount_ratio
+
+                booking.total_price = (booking.total_price or 0) - refund_amount
                 if booking.total_price < 0:
                     booking.total_price = 0
+
             detail.quantity = 0
 
             # 7) Nếu tất cả chi tiết đều đã hoàn (quantity == 0) → set booking = ĐÃ HOÀN

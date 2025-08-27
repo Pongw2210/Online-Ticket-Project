@@ -166,6 +166,12 @@ canvas {
 
 <div class="container-fluid">
   <h2 class="mb-3">Dashboard</h2>
+  {% if pending_count > 0 %}
+<div class="alert alert-warning shadow-sm" role="alert">
+  🔔 Có <strong>{{ pending_count }}</strong> sự kiện đang chờ duyệt!
+  <a href="{{ url_for('admin_view.approve_events') }}" class="alert-link">Xem ngay</a>
+</div>
+{% endif %}
 
   <!-- Cards thống kê tổng -->
   <div class="row">
