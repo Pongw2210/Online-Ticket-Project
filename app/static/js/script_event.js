@@ -194,7 +194,6 @@ function goToCheckout() {
             let ticketId = input.getAttribute('data-ticket-id');
             let selectedSeats = seatSelections[ticketId] || [];
 
-            // ✅ Kiểm tra vé có nút chọn ghế
             let hasSeatButton = document.querySelector(`.select-seat-btn[onclick*="${ticketId}"]`);
             if (hasSeatButton && selectedSeats.length < qty) {
                 hasSeatError = true;
@@ -225,7 +224,6 @@ function goToCheckout() {
 
     window.location.href = `/pay-ticket/${eventId}`;
 }
-
 
 document.addEventListener('DOMContentLoaded', () => {
     let tickets = JSON.parse(sessionStorage.getItem('checkoutTickets')) || [];

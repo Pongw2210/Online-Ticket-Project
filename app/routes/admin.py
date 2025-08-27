@@ -6,7 +6,7 @@ from app.data.models import StatusEventEnum
 from sqlalchemy import func
 from flask_admin import BaseView, expose
 from app import admin_view
-
+from flask import jsonify
 
 admin_bp = Blueprint('admin_view', __name__, url_prefix='/admin')
 
@@ -46,3 +46,4 @@ def reject(event_id):
 
     flash(" Sự kiện đã bị từ chối!", "danger")
     return redirect(url_for("admin_view.approve_events"))
+
