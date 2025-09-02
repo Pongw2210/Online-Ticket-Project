@@ -199,6 +199,7 @@ class Booking(Base):
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     event_id = Column(Integer, ForeignKey('event.id'), nullable=False)
     total_price = Column(Float, nullable=False)
+    final_price = Column(Float, nullable=False)  # số tiền thực khách phải trả
     booking_date = Column(DateTime, default=datetime.utcnow)
     status = Column(Enum(StatusBookingEnum), default=StatusBookingEnum.CHO_THANH_TOAN)
     created_at = Column(DateTime, default=datetime.utcnow)

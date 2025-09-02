@@ -24,9 +24,7 @@ from app.data.models import (
     Customer, RefundRequest
 )
 
-
 events_bp = Blueprint("events", __name__)
-
 
 @events_bp.route("/")
 def home():
@@ -207,7 +205,6 @@ def create_booking():
     tickets = data.get("tickets", [])
     total_price = data.get("totalPrice")
     event_id = data.get("eventId")
-    voucher_id = data.get("voucherId")
 
     if not tickets or not total_price or not event_id:
         return jsonify({"success": False, "message": "Dữ liệu không hợp lệ"}), 400
@@ -220,17 +217,11 @@ def create_booking():
             user_id=current_user.id,
             event_id=event_id,
             total_price=total_price,
+            final_price=total_price,
             status=StatusBookingEnum.CHO_THANH_TOAN
         )
         db.session.add(booking)
         db.session.flush()  # để có booking.id
-
-        if voucher_id:
-            booking_voucher = BookingVoucher(
-                booking_id =booking.id,
-                voucher_id =voucher_id
-            )
-            db.session.add(booking_voucher)
 
         for t in tickets:
             # Tạo booking detail cho từng loại vé
@@ -268,33 +259,77 @@ def create_booking():
         db.session.rollback()
         return jsonify({"success": False, "message": "Lỗi server: " + str(e)}), 500
 
+@events_bp.route("/booking/apply-voucher", methods=["POST"])
+def apply_voucher():
+    data = request.json
+    booking_id = data.get("bookingId")
+    voucher_id = data.get("voucherId")
+
+    booking = Booking.query.get(booking_id)
+    if not booking:
+        return {"success": False, "message": "Booking không tồn tại"}, 404
+
+    voucher = Voucher.query.get(voucher_id)
+    if not voucher:
+        return {"success": False, "message": "Voucher không tồn tại"}, 404
+
+    booking_voucher = BookingVoucher(booking_id=booking.id, voucher_id=voucher.id)
+    db.session.add(booking_voucher)
+
+    db.session.commit()
+
+    return {"success": True, "message": "Voucher đã lưu vào booking"}
+
+
+@events_bp.route("/booking/delete", methods=["POST"])
+def delete_booking():
+    data = request.get_json()
+    booking_id = data.get("bookingId")
+
+    if not booking_id:
+        return jsonify({"success": False, "message": "Booking ID không được để trống"}), 400
+
+    booking = Booking.query.get(booking_id)
+    if not booking:
+        return jsonify({"success": False, "message": "Booking không tồn tại"}), 404
+
+    try:
+        db.session.delete(booking)
+        db.session.commit()
+        return jsonify({"success": True, "message": "Booking đã bị xóa"}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "message": f"Lỗi khi xóa booking: {str(e)}"}), 500
+
 @events_bp.route("/payment/momo", methods=["POST"])
 def momo_payment():
     data = request.get_json()
 
+    # ===== Thông tin MoMo sandbox =====
     endpoint = "https://test-payment.momo.vn/v2/gateway/api/create"
     accessKey = "F8BBA842ECF85"
     secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz"
     partnerCode = "MOMO"
-    redirectUrl = "http://localhost:5000/payment/return"  # URL trả về sau khi thanh toán
-    ipnUrl = "http://localhost:5000/payment/ipn"  # URL callback thông báo kết quả
+    redirectUrl = "http://localhost:5000/payment/return"
+    ipnUrl = "http://localhost:5000/payment/ipn"
 
-    orderId = data.get("orderId", str(uuid.uuid4()))
+    # ===== Thông tin đơn hàng từ client =====
+    orderId = data.get("orderId") or f"order_{data.get('bookingId', str(uuid.uuid4()))}"
     amount = str(data.get("amount", 50000))
-    orderInfo = data.get("orderInfo", "Thanh toán test")
+    orderInfo = data.get("orderInfo", "Thanh toán vé sự kiện")
     requestId = str(uuid.uuid4())
     requestType = "payWithMethod"
 
+    # ===== Tạo chữ ký HMAC =====
     raw_signature = (
         f"accessKey={accessKey}&amount={amount}&extraData="
         f"&ipnUrl={ipnUrl}&orderId={orderId}&orderInfo={orderInfo}"
         f"&partnerCode={partnerCode}&redirectUrl={redirectUrl}"
         f"&requestId={requestId}&requestType={requestType}"
     )
+    signature = hmac.new(secretKey.encode('utf-8'), raw_signature.encode('utf-8'), hashlib.sha256).hexdigest()
 
-    h = hmac.new(secretKey.encode('utf-8'), raw_signature.encode('utf-8'), hashlib.sha256)
-    signature = h.hexdigest()
-
+    # ===== Payload gửi MoMo =====
     payload = {
         "partnerCode": partnerCode,
         "partnerName": "Test",
@@ -311,10 +346,21 @@ def momo_payment():
         "signature": signature
     }
 
-    res = requests.post(endpoint, json=payload)
-    result = res.json()
+    # ===== Gửi request tới MoMo =====
+    try:
+        res = requests.post(endpoint, json=payload)
+        result = res.json()
+        print("MoMo API response:", result)  # in ra debug
 
-    return jsonify({"payUrl": result.get("payUrl")})
+        pay_url = result.get("payUrl")
+        if not pay_url:
+            return jsonify({"error": "Không lấy được link thanh toán", "raw": result}), 400
+
+        return jsonify({"payUrl": pay_url})
+
+    except Exception as e:
+        print("Lỗi gửi request MoMo:", e)
+        return jsonify({"error": "Có lỗi khi kết nối MoMo"}), 500
 
 @events_bp.route("/payment/return")
 def payment_return():
@@ -328,7 +374,7 @@ def payment_return():
         return redirect(url_for("events.home", _anchor="payment-failed"))
 
     try:
-        booking_id = int(order_id.split('_')[-1])
+        booking_id = int(order_id.split('_')[1])
     except (ValueError, IndexError):
         return redirect(url_for("events.home", _anchor="payment-failed"))
 
@@ -338,14 +384,13 @@ def payment_return():
 
     if result_code == "0" :
         booking.status = StatusBookingEnum.DA_THANH_TOAN
+        booking.final_price = request.args.get("amount") or booking.final_price
 
-        # ===== Giảm số lượng vé =====
         for detail in booking.booking_details:
             ticket_type = detail.ticket_type
             if ticket_type:
                 ticket_type.quantity = max(ticket_type.quantity - detail.quantity, 0)
 
-        # ===== Cập nhật trạng thái ghế =====
         for detail in booking.booking_details:
             for seat_link in detail.booking_seats:  # seat liên kết với booking_detail
                 seat_obj = Seat.query.get(seat_link.seat_id)
@@ -404,6 +449,10 @@ def payment_return():
                 "quantity": detail.quantity,
                 "user": booking.user.fullname
             }
+
+            detail.qr_code_data = json.dumps(ticket_info, ensure_ascii=False, default=str)
+            db.session.add(detail)
+            db.session.commit()
 
             tickets_for_email.append(ticket_info)
 
