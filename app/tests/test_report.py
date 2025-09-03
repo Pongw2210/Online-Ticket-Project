@@ -1,11 +1,10 @@
 import pytest
-from datetime import datetime
-from flask_login import LoginManager
+from datetime import datetime, date
 from app.data.models import (
     User, Customer, EventOrganizer, Event, TicketType, Booking, BookingDetail,
     StatusBookingEnum, EventFormatEnum, EventTypeEnum
 )
-from datetime import date
+
 # ----------------- Fixture cho dữ liệu -----------------
 @pytest.fixture
 def organizer_setup(db_session, app):
@@ -91,6 +90,7 @@ def organizer_setup(db_session, app):
 
 # ----------------- Helper login -----------------
 def login_client(client, user):
+    """Login bằng cách set session trực tiếp, không dùng login_user()"""
     with client.session_transaction() as sess:
         sess["_user_id"] = str(user.id)
         sess["_fresh"] = True
