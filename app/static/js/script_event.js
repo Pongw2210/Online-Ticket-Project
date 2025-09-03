@@ -181,7 +181,6 @@ function confirmSeatSelection() {
 }
 
 function goToCheckout() {
-
     let continueBtn = document.getElementById('continue-btn');
     let eventId = continueBtn.getAttribute('data-event-id');
 
@@ -222,7 +221,33 @@ function goToCheckout() {
     sessionStorage.setItem('checkoutEventId', eventId);
     sessionStorage.setItem('checkoutTickets', JSON.stringify(tickets));
 
-    window.location.href = `/pay-ticket/${eventId}`;
+    let subtotal = tickets.reduce((sum, t) => sum + (t.price * t.quantity), 0);
+
+    fetch("/booking/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            tickets: tickets,
+            totalPrice: subtotal,
+            eventId: eventId,
+        }),
+    })
+    .then(res => res.json())
+    .then(bookingData => {
+        if (!bookingData.success) {
+            alert("Tạo booking thất bại: " + bookingData.message);
+            throw new Error("Booking failed");
+        }
+
+        // Lưu bookingId để thanh toán sau
+        sessionStorage.setItem('bookingId', bookingData.bookingId);
+
+        window.location.href = `/pay-ticket/${eventId}`;
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Có lỗi khi tạo booking, vui lòng thử lại.");
+    });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -288,18 +313,60 @@ document.addEventListener('DOMContentLoaded', () => {
     sessionStorage.setItem('checkoutTotal', total);
 });
 
-let minutes = 14; let seconds = 30;
-const minEl = document.getElementById('cd-min');
-const secEl = document.getElementById('cd-sec');
-function tick(){
-  if(seconds===0){
-    if(minutes===0){ clearInterval(timer); return; }
-    minutes--; seconds=59;
-  } else seconds--;
-  minEl.textContent = String(minutes).padStart(2,'0');
-  secEl.textContent = String(seconds).padStart(2,'0');
+let minutes = 1;
+let seconds = 0;
+
+const minEl = document.getElementById("cd-min");
+const secEl = document.getElementById("cd-sec");
+
+function updateDisplay() {
+  minEl.textContent = String(minutes).padStart(2, "0");
+  secEl.textContent = String(seconds).padStart(2, "0");
 }
-const timer = setInterval(tick,1000);
+
+function deleteBooking() {
+    const bookingId = sessionStorage.getItem("bookingId");
+    if (!bookingId) {
+        alert("Không tìm thấy booking để xóa!");
+        window.location.href = "/";
+        return;
+    }
+
+    fetch("/booking/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId: bookingId })
+    })
+    .then((res) => res.json())
+    .then((data) => {
+          console.log("Booking deleted:", data);
+          alert("Hết thời gian giữ vé. Booking đã bị hủy.");
+          window.location.href = "/";
+    })
+    .catch((err) => {
+          console.error("Error deleting booking:", err);
+          alert("Có lỗi xảy ra khi xóa booking!");
+          window.location.href = "/";
+    });
+}
+
+function tick() {
+  if (seconds === 0) {
+    if (minutes === 0) {
+      clearInterval(timer);
+      deleteBooking();
+      return;
+    }
+    minutes--;
+    seconds = 59;
+  } else {
+    seconds--;
+  }
+  updateDisplay();
+}
+
+updateDisplay();
+const timer = setInterval(tick, 1000);
 
 function handlePayment() {
     // Lấy phương thức thanh toán đang được chọn
@@ -326,63 +393,80 @@ function payment_momo() {
     }
 
     let totalPrice = Math.round(Number(sessionStorage.getItem('checkoutTotal')) || 0);
+    let bookingId = sessionStorage.getItem('bookingId');
+    let orderId = `order_${bookingId}_${Date.now()}`;
+    let orderInfo = `Thanh toán vé sự kiện ${sessionStorage.getItem('checkoutEventId')}`;
+
+    // Voucher áp dụng
     let appliedVoucher = JSON.parse(sessionStorage.getItem('appliedVoucher')) || null;
     let voucherId = appliedVoucher ? appliedVoucher.id : null;
+//
+//    console.log("Total price:", totalPrice);
+//    console.log("Booking ID:", bookingId);
+//    console.log("Order ID:", orderId);
+//    console.log("Order info:", orderInfo);
+//    console.log("Voucher applied:", appliedVoucher);
 
-    // Tạo booking trước
-    fetch("/booking/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            tickets: tickets,
-            totalPrice: totalPrice,
-            eventId: sessionStorage.getItem('checkoutEventId'),
-            voucherId: voucherId,
-        }),
-    })
-    .then(res => res.json())
-    .then(bookingData => {
-        if (!bookingData.success) {
-            alert("Tạo booking thất bại: " + bookingData.message);
+    if (voucherId) {
+        fetch("/booking/apply-voucher", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ bookingId, voucherId })
+        })
+        .then(res => res.json())
+        .then(dataVoucher => {
+            console.log("Voucher save response:", dataVoucher);
+            return fetch("/payment/momo", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    amount: totalPrice,
+                    bookingId,
+                    orderId,
+                    orderInfo
+                })
+            });
+        })
+        .then(res => res.json())
+        .then(paymentData => {
+            if (paymentData.payUrl) {
+                window.location.href = paymentData.payUrl;
+            } else {
+                alert("Không tạo được link thanh toán!");
+                payBtn.disabled = false;
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Đã xảy ra lỗi, vui lòng thử lại.");
             payBtn.disabled = false;
-            throw new Error("Booking failed");
-        }
-
-        return fetch("/payment/momo", {
+        });
+    } else {
+        fetch("/payment/momo", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 amount: totalPrice,
-                bookingId: bookingData.bookingId,
-                orderId: "order_" + bookingData.bookingId,
-                orderInfo: `Thanh toán vé sự kiện ${sessionStorage.getItem('checkoutEventId')}`,
-            }),
-        });
-    })
-    .then(async res => {
-        console.log("Response status:", res.status);
-        const text = await res.text();
-        console.log("Raw response:", text);
-
-        try {
-            return JSON.parse(text);
-        } catch (e) {
-            throw new Error("Response không phải JSON hợp lệ: " + text);
-        }
-    })
-    .then(paymentData => {
-        if (paymentData.payUrl) {
-            window.location.href = paymentData.payUrl;
-        } else {
-            alert("Không tạo được link thanh toán!");
+                bookingId,
+                orderId,
+                orderInfo
+            })
+        })
+        .then(res => res.json())
+        .then(paymentData => {
+            if (paymentData.payUrl) {
+                window.location.href = paymentData.payUrl;
+            } else {
+                alert("Không tạo được link thanh toán!");
+                payBtn.disabled = false;
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Đã xảy ra lỗi, vui lòng thử lại.");
             payBtn.disabled = false;
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        alert("Đã xảy ra lỗi, vui lòng thử lại.");
-        payBtn.disabled = false;
-    });
+        });
+    }
 }
 
 function payment_vnpay() {
@@ -396,57 +480,75 @@ function payment_vnpay() {
         return;
     }
 
-    // Lấy tổng tiền sau khi đã áp dụng voucher
-    let totalPrice = Number(sessionStorage.getItem('checkoutTotal')) || 0;
+    let totalPrice = Math.round(Number(sessionStorage.getItem('checkoutTotal')) || 0);
+    let bookingId = sessionStorage.getItem('bookingId');
+    let orderId = `order_${bookingId}_${Date.now()}`;
+    let orderInfo = `Thanh toán vé sự kiện ${sessionStorage.getItem('checkoutEventId')}`;
 
+    // Voucher áp dụng
     let appliedVoucher = JSON.parse(sessionStorage.getItem('appliedVoucher')) || null;
     let voucherId = appliedVoucher ? appliedVoucher.id : null;
 
-    // Tạo booking trước
-    fetch("/booking/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            tickets: tickets,
-            totalPrice: totalPrice,
-            eventId: sessionStorage.getItem('checkoutEventId'),
-            voucherId: voucherId,
-        }),
-    })
-    .then(res => res.json())
-    .then(bookingData => {
-        if (!bookingData.success) {
-            alert("Tạo booking thất bại: " + bookingData.message);
+    if (voucherId) {
+        fetch("/booking/apply-voucher", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ bookingId, voucherId })
+        })
+        .then(res => res.json())
+        .then(dataVoucher => {
+            console.log("Voucher save response:", dataVoucher);
+            return fetch("/payment/vnpay", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    amount: totalPrice,
+                    bookingId,
+                    orderId,
+                    orderInfo
+                })
+            });
+        })
+        .then(res => res.json())
+        .then(paymentData => {
+            if (paymentData.payUrl) {
+                window.location.href = paymentData.payUrl;
+            } else {
+                alert("Không tạo được link thanh toán!");
+                payBtn.disabled = false;
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Đã xảy ra lỗi, vui lòng thử lại.");
             payBtn.disabled = false;
-            throw new Error("Booking failed");
-        }
-
-        return fetch("/payment/vnpay", {
+        });
+    } else {
+        fetch("/payment/vnpay", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 amount: totalPrice,
-                orderId: "order_" + bookingData.bookingId,
-                orderInfo: `Thanh toán vé sự kiện ${sessionStorage.getItem('checkoutEventId')}`,
-            }),
-        });
-    })
-    .then(res => res.json())
-    .then(paymentData => {
-        if (paymentData.payUrl) {
-            window.location.href = paymentData.payUrl;
-        } else {
-            alert("Không tạo được link thanh toán!");
-            payBtn.disabled = false;
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        if (err.message !== "Booking failed") {
+                bookingId,
+                orderId,
+                orderInfo
+            })
+        })
+        .then(res => res.json())
+        .then(paymentData => {
+            if (paymentData.payUrl) {
+                window.location.href = paymentData.payUrl;
+            } else {
+                alert("Không tạo được link thanh toán!");
+                payBtn.disabled = false;
+            }
+        })
+        .catch(err => {
+            console.error(err);
             alert("Đã xảy ra lỗi, vui lòng thử lại.");
             payBtn.disabled = false;
-        }
-    });
+        });
+    }
 }
 
 function closeVoucherModal(){
@@ -489,8 +591,6 @@ function showVoucherModal(eventId) {
     })
     .catch(err => console.error("Lỗi fetch voucher:", err));
 }
-
-let appliedVoucher = null; // voucher đã chọn
 
 function applyVoucher(voucher) {
     appliedVoucher = voucher;
@@ -539,33 +639,16 @@ function updateSummary() {
             totalPrice += price * qty;
         }
     });
-   // Áp voucher nếu có
-    let discount = 0;
-    let discountText = '';
-    if (appliedVoucher && totalPrice > 0) {
-        if (appliedVoucher.discount_type === "PHAN_TRAM") {
-            discount = totalPrice * (appliedVoucher.discount_value / 100);
-        } else {
-            discount = appliedVoucher.discount_value;
-        }
-
-        // Không vượt quá tổng tiền
-        discount = Math.min(discount, totalPrice);
-        totalPrice -= discount;
-        discountText = ` - Giảm: ${formatPrice(discount)} (Voucher: ${appliedVoucher.code})`;
-
-        console.log("Voucher đang áp dụng:", appliedVoucher);
-        console.log("Discount tính được:", discount, "Tổng tiền sau giảm:", totalPrice);
-    }
 
     if (totalEl) {
-        totalEl.innerHTML = `<strong>🎟 x${totalTickets}</strong> — Tổng: ${formatPrice(totalPrice)}${discountText}`;
+        totalEl.innerHTML = `<strong>🎟 x${totalTickets}</strong> — Tổng: ${formatPrice(totalPrice)}`;
     }
 
     if (continueBtn) {
         continueBtn.textContent = `Tiếp tục - Tổng: ${formatPrice(totalPrice)}`;
     }
 }
+
 
 //document.addEventListener('DOMContentLoaded', updateSummary);
 // Format giá
@@ -576,7 +659,8 @@ function formatPrice(value) {
 const filterBtn = document.querySelector('.btn-filter');
 const filterPanel = document.querySelector('.filter-panel');
 
-document.querySelector(".btn-filter").addEventListener("click", function() {
-    document.querySelector(".filter-panel").classList.toggle("active");
-});
-
+if (filterBtn && filterPanel) {
+    filterBtn.addEventListener("click", () => {
+        filterPanel.classList.toggle("active");
+    });
+}
