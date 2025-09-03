@@ -62,6 +62,7 @@ def organizer_setup(db_session, app):
             user_id=customer_user.id,
             event_id=event.id,
             total_price=100,
+            final_price=100,
             status=StatusBookingEnum.DA_THANH_TOAN
         )
         db_session.add(booking)

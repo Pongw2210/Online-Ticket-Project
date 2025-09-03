@@ -53,6 +53,7 @@ def paid_booking(db_session):
         user_id=user.id,
         event_id=event.id,
         total_price=100,
+        final_price=100,
         status=StatusBookingEnum.DA_THANH_TOAN
     )
     db_session.add(booking)

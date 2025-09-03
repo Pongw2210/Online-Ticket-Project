@@ -49,13 +49,12 @@ def create_app(config_class=None):
         admin_view.init_admin(app)
 
 
-    from app.routes import auth, events, event_organizer, admin
+    from app.routes import auth, events, event_organizer, admin, payment,report
     app.register_blueprint(auth.auth_bp)
     app.register_blueprint(events.events_bp)
     app.register_blueprint(event_organizer.event_organizer_bp)
     app.register_blueprint(admin.admin_bp)
-
-    from app.routes.report import report_bp
-    app.register_blueprint(report_bp)
+    app.register_blueprint(payment.payment_bp)
+    app.register_blueprint(report.report_bp)
 
     return app

@@ -202,7 +202,7 @@ class Booking(Base):
     final_price = Column(Float, nullable=False)  # số tiền thực khách phải trả
     booking_date = Column(DateTime, default=datetime.utcnow)
     status = Column(Enum(StatusBookingEnum), default=StatusBookingEnum.CHO_THANH_TOAN)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    # created_at = Column(DateTime, default=datetime.utcnow)
 
     # Quan hệ
     user = relationship("User", backref="bookings")
@@ -222,7 +222,7 @@ class BookingDetail(Base):
     check_in_at = Column(DateTime)
 
     ticket_type = relationship("TicketType")
-    booking_seats = relationship("BookingSeat", back_populates="booking_detail")
+    booking_seats = relationship("BookingSeat", back_populates="booking_detail",cascade="all, delete")
 
 class Seat(Base):
     __tablename__ = 'seat'

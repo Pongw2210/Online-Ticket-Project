@@ -56,6 +56,7 @@ def sample_data(app):
             user_id=user1.id,
             event_id=event1.id,
             total_price=200,
+            final_price=100,
             booking_date=datetime.utcnow(),
         )
         db.session.add(booking1)
