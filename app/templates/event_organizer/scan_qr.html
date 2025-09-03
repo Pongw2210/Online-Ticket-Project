@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="qr-container">
-    <h2 class="qr-title">📷 Quét mã sự kiện</h2>
+    <h2 class="qr-title">Quét mã sự kiện</h2>
     <div id="reader"></div>
     <div id="result" class="qr-result"></div>
 </div>
@@ -12,7 +12,13 @@
 <script src="https://unpkg.com/html5-qrcode/html5-qrcode.min.js"></script>
 <script>
     function onScanSuccess(decodedText, decodedResult) {
-        document.getElementById("result").innerHTML = "Mã vé: " + decodedText;
+        const resultEl = document.getElementById("result");
+
+        // Tạm dừng scanner để tránh quét liên tục
+        html5QrcodeScanner.pause();
+
+        // Hiển thị trạng thái đang xử lý
+        resultEl.innerHTML = "Đang kiểm tra vé...";
 
         fetch("/organizer/api/booking/check-in", {
             method: "POST",
@@ -21,14 +27,28 @@
         })
         .then(res => res.json())
         .then(data => {
-            if (data.success) {
-                document.getElementById("result").innerHTML = "Check-in thành công!";
-            } else {
-                document.getElementById("result").innerHTML = data.message;
-            }
+            setTimeout(() => {
+                if (data.success) {
+                    resultEl.innerHTML = "Check-in thành công!";
+                } else {
+                    resultEl.innerHTML =data.message;
+                }
+
+                // Delay 2 giây nữa mới resume scanner
+                setTimeout(() => {
+                    resultEl.innerHTML = ""; // xóa thông báo
+                    html5QrcodeScanner.resume();
+                }, 2000);
+            }, 1500); // 1.5 giây delay trước khi hiển thị kết quả
         })
         .catch(() => {
-            document.getElementById("result").innerHTML = "Lỗi kết nối server!";
+            setTimeout(() => {
+                resultEl.innerHTML = "Lỗi kết nối server!";
+                setTimeout(() => {
+                    resultEl.innerHTML = "";
+                    html5QrcodeScanner.resume();
+                }, 2000);
+            }, 1500);
         });
     }
 

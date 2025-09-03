@@ -17,8 +17,6 @@ from app.data.models import (
     RefundRequest, RefundStatusEnum
 )
 
-
-
 event_organizer_bp = Blueprint("event_organizer", __name__, url_prefix="/organizer")
 
 @event_organizer_bp.route("/home")
