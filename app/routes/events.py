@@ -325,8 +325,6 @@ def my_tickets():
             if rr:
                 if rr.status.name == "DONG_Y":  # tổ chức duyệt
                     status_display = "Đã hoàn"
-                    booking.status = StatusBookingEnum.DA_HOAN
-                    db.session.commit()
                 elif rr.status.name == "CHO_XU_LY":  # đang chờ tổ chức duyệt
                     status_display = "Đang chờ xử lý"
                 elif rr.status.name == "TU_CHOI":  # tổ chức từ chối
@@ -432,9 +430,12 @@ def request_refund():
     if detail.booking.status != StatusBookingEnum.DA_THANH_TOAN:
         return jsonify({"success": False, "message": "Đơn hàng chưa thanh toán"}), 400
 
+    if detail.check_in==1:
+        return jsonify({"success": False, "message": "Vé đã được checkin, không được hoàn vé"}), 400
+
     # ====== GIỚI HẠN 24H SAU THANH TOÁN ======
     # Dùng thời điểm tạo booking làm mốc thanh toán (hệ thống hiện chưa có paid_at)
-    paid_elapsed = datetime.datetime.utcnow() - (detail.booking.created_at or datetime.datetime.utcnow())
+    paid_elapsed = datetime.datetime.utcnow() - (detail.booking.booking_date or datetime.datetime.utcnow())
     if paid_elapsed.total_seconds() > 24 * 3600:
         return jsonify({
             "success": False,
