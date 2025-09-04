@@ -415,7 +415,7 @@ def ticket_history():
             User.username,
             Customer.fullname,
             Customer.email,
-            Booking.created_at,
+            Booking.booking_date,
             TicketType.name.label("ticket_type"),
             BookingDetail.quantity,
             (BookingDetail.unit_price * BookingDetail.quantity).label("price"),

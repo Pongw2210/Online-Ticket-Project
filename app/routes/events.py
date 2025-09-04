@@ -357,6 +357,7 @@ def my_tickets():
                 "booking_detail_id": detail.id,
                 "ticket_id": detail.id,
                 "booking_id": booking.id,
+                "booking_date":booking.booking_date,
                 "event": event.name,
                 "ticket_type": ticket_type.name,
                 "event_time": event.start_datetime,

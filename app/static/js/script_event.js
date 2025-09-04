@@ -259,6 +259,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let totalEl = document.getElementById('total-price');
     let voucherNameEl = document.getElementById('voucher-name'); // element hiển thị voucher
 
+    if (!summaryDiv || !subtotalEl || !totalEl) return;
+
     if (tickets.length === 0) {
         summaryDiv.innerHTML = '<div class="muted">Chưa có vé nào được chọn</div>';
         subtotalEl.textContent = '0 đ';
@@ -320,33 +322,31 @@ const minEl = document.getElementById("cd-min");
 const secEl = document.getElementById("cd-sec");
 
 function updateDisplay() {
-  minEl.textContent = String(minutes).padStart(2, "0");
-  secEl.textContent = String(seconds).padStart(2, "0");
+  if (minEl && secEl) {
+    minEl.textContent = String(minutes).padStart(2, "0");
+    secEl.textContent = String(seconds).padStart(2, "0");
+  }
 }
 
 function deleteBooking() {
-    const bookingId = sessionStorage.getItem("bookingId");
-    if (!bookingId) {
-        alert("Không tìm thấy booking để xóa!");
-        window.location.href = "/";
-        return;
-    }
+  const bookingId = sessionStorage.getItem("bookingId");
+  if (!bookingId) return; // nếu không có booking thì thôi
 
-    fetch("/booking/delete", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookingId: bookingId })
-    })
+  fetch("/booking/delete", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ bookingId: bookingId })
+  })
     .then((res) => res.json())
     .then((data) => {
-          console.log("Booking deleted:", data);
-          alert("Hết thời gian giữ vé. Booking đã bị hủy.");
-          window.location.href = "/";
+      console.log("Booking deleted:", data);
+      alert("Hết thời gian giữ vé. Booking đã bị hủy.");
+      window.location.href = "/";
     })
     .catch((err) => {
-          console.error("Error deleting booking:", err);
-          alert("Có lỗi xảy ra khi xóa booking!");
-          window.location.href = "/";
+      console.error("Error deleting booking:", err);
+      alert("Có lỗi xảy ra khi xóa booking!");
+      window.location.href = "/";
     });
 }
 
@@ -365,8 +365,11 @@ function tick() {
   updateDisplay();
 }
 
-updateDisplay();
-const timer = setInterval(tick, 1000);
+if (minEl && secEl && sessionStorage.getItem("bookingId")) {
+  updateDisplay();
+  var timer = setInterval(tick, 1000);
+}
+
 
 function handlePayment() {
     // Lấy phương thức thanh toán đang được chọn
@@ -656,11 +659,14 @@ function formatPrice(value) {
     return value.toLocaleString('vi-VN') + ' đ';
 }
 
-const filterBtn = document.querySelector('.btn-filter');
-const filterPanel = document.querySelector('.filter-panel');
+document.addEventListener("DOMContentLoaded", () => {
+    const filterBtn = document.querySelector(".btn-filter");
+    const filterPanel = document.querySelector(".filter-panel");
 
-if (filterBtn && filterPanel) {
-    filterBtn.addEventListener("click", () => {
-        filterPanel.classList.toggle("active");
-    });
-}
+    if (filterBtn && filterPanel) {
+        filterBtn.addEventListener("click", () => {
+            filterPanel.classList.toggle("active");
+        });
+    }
+});
+
