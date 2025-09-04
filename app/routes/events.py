@@ -401,6 +401,7 @@ def get_event_vouchers(event_id):
                 "discount_value": v.discount_value,
                 "discount_type": v.discount_type.name if v.discount_type else None,
                 "apply_all": v.apply_all,
+                "quantity":v.quantity,
                 "ticket_types": [],
             }
 
