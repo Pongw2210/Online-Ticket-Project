@@ -13,7 +13,6 @@ flask_admin = Admin(name="Ticket Admin", template_mode="bootstrap4")
 
 
 class MyAdminIndexView(AdminIndexView):
-
     @expose('/')
     def index(self):
         from app.data.models import (

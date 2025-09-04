@@ -1,4 +1,4 @@
-# app/blueprints/report.py
+
 from datetime import datetime, timedelta
 from flask import Blueprint, render_template, request, jsonify, Response
 from flask_login import login_required, current_user
@@ -10,7 +10,6 @@ from app.data.models import (
 )
 
 report_bp = Blueprint("report", __name__, url_prefix="/organizer/report")
-
 
 # -------- Helpers --------
 def _parse_date(s, fallback=None):
@@ -46,9 +45,9 @@ def api_summary():
     end = _parse_date(request.args.get("end"))
     event_id = request.args.get("event_id", type=int)
 
-    # Tổng doanh thu = sum Booking.total_price (đã trừ voucher)
+    # Tổng doanh thu = sum Booking.final_price (đã trừ voucher / refund)
     q_revenue = db.session.query(
-        func.coalesce(func.sum(Booking.total_price), 0)
+        func.coalesce(func.sum(Booking.final_price), 0)
     ).join(Event, Booking.event_id == Event.id) \
      .filter(_organizer_filter(), _paid())
 
@@ -92,7 +91,7 @@ def api_revenue_by_date():
 
     q = db.session.query(
         date_expr.label("label"),
-        func.sum(Booking.total_price).label("revenue")
+        func.sum(Booking.final_price).label("revenue")  # Sửa ở đây
     ).join(Event, Booking.event_id == Event.id) \
      .filter(_organizer_filter(), _paid())
 
@@ -109,7 +108,6 @@ def api_revenue_by_date():
         "values": [float(r.revenue or 0) for r in data]
     })
 
-
 # -------- API: Doanh thu theo loại vé --------
 @report_bp.route("/api/revenue_by_ticket", methods=["GET"])
 @login_required
@@ -118,26 +116,32 @@ def api_revenue_by_ticket():
     end = _parse_date(request.args.get("end"))
     event_id = request.args.get("event_id", type=int)
 
-    # Vẫn tính theo BookingDetail (doanh thu gốc theo loại vé)
-    q = db.session.query(
-        TicketType.name.label("label"),
-        func.sum(BookingDetail.unit_price * BookingDetail.quantity).label("revenue")
-    ).join(TicketType, BookingDetail.ticket_type_id == TicketType.id) \
-     .join(Booking, BookingDetail.booking_id == Booking.id) \
-     .join(Event, Booking.event_id == Event.id) \
-     .filter(_organizer_filter(), _paid())
+    tickets = db.session.query(BookingDetail).join(Booking).join(Event) \
+        .filter(_organizer_filter(), _paid())
 
     if event_id:
-        q = q.filter(Event.id == event_id)
+        tickets = tickets.filter(Event.id == event_id)
     if start:
-        q = q.filter(Booking.booking_date >= start)
+        tickets = tickets.filter(Booking.booking_date >= start)
     if end:
-        q = q.filter(Booking.booking_date <= end + timedelta(days=1))
+        tickets = tickets.filter(Booking.booking_date <= end + timedelta(days=1))
 
-    data = q.group_by(TicketType.name).order_by(TicketType.name).all()
+    revenue_by_ticket = {}
+    for detail in tickets.all():
+        # Tổng giá gốc của booking
+        total_original = sum(d.unit_price * d.quantity for d in detail.booking.booking_details)
+        if total_original > 0:
+            # Tỷ lệ detail trong tổng booking
+            ratio = (detail.unit_price * detail.quantity) / total_original
+            actual_revenue = (detail.booking.final_price or 0) * ratio
+        else:
+            actual_revenue = 0
+
+        revenue_by_ticket[detail.ticket_type.name] = revenue_by_ticket.get(detail.ticket_type.name, 0) + actual_revenue
+
     return jsonify({
-        "labels": [r.label for r in data],
-        "values": [float(r.revenue or 0) for r in data]
+        "labels": list(revenue_by_ticket.keys()),
+        "values": [float(v) for v in revenue_by_ticket.values()]
     })
 
 
@@ -208,9 +212,8 @@ def api_ticket_stock():
     return jsonify({
         "labels": [r.name for r in rows],
         "sold": [int(r.sold or 0) for r in rows],
-        "remaining": [max(int(r.total or 0) - int(r.sold or 0), 0) for r in rows]
+        "remaining": [int(r.total or 0) for r in rows]
     })
-
 
 # -------- API: Top khách hàng --------
 @report_bp.route("/api/top_customers", methods=["GET"])
@@ -221,32 +224,46 @@ def api_top_customers():
     limit = request.args.get("limit", default=10, type=int)
     event_id = request.args.get("event_id", type=int)
 
-    q = db.session.query(
-        Customer.fullname.label("name"),
-        func.sum(BookingDetail.quantity).label("tickets"),
-        func.sum(Booking.total_price).label("spent")
-    ).join(Booking, BookingDetail.booking_id == Booking.id) \
-     .join(User, Booking.user_id == User.id) \
-     .join(Customer, Customer.user_id == User.id) \
-     .join(Event, Booking.event_id == Event.id) \
-     .filter(_organizer_filter(), _paid())
+    # Lấy tất cả BookingDetail của các booking đã thanh toán
+    tickets = db.session.query(BookingDetail).join(Booking).join(Event) \
+        .filter(_organizer_filter(), _paid())
 
     if event_id:
-        q = q.filter(Event.id == event_id)
+        tickets = tickets.filter(Event.id == event_id)
     if start:
-        q = q.filter(Booking.booking_date >= start)
+        tickets = tickets.filter(Booking.booking_date >= start)
     if end:
-        q = q.filter(Booking.booking_date <= end + timedelta(days=1))
+        tickets = tickets.filter(Booking.booking_date <= end + timedelta(days=1))
 
-    rows = q.group_by(Customer.fullname).order_by(func.sum(BookingDetail.quantity).desc()).limit(limit).all()
+    revenue_by_customer = {}
+    tickets_by_customer = {}
 
-    return jsonify({
-        "rows": [
-            {"name": r.name, "tickets": int(r.tickets or 0), "spent": float(r.spent or 0)}
-            for r in rows
-        ]
-    })
+    for detail in tickets.all():
+        customer_name = detail.booking.user.customer.fullname  # hoặc detail.booking.user.customer.fullname
+        # Tổng giá gốc của booking
+        total_original = sum(d.unit_price * d.quantity for d in detail.booking.booking_details)
+        if total_original > 0:
+            ratio = (detail.unit_price * detail.quantity) / total_original
+            actual_revenue = (detail.booking.final_price or 0) * ratio
+        else:
+            actual_revenue = 0
 
+        revenue_by_customer[customer_name] = revenue_by_customer.get(customer_name, 0) + actual_revenue
+        tickets_by_customer[customer_name] = tickets_by_customer.get(customer_name, 0) + (detail.quantity or 0)
+
+    # Sắp xếp theo số vé bán ra giảm dần
+    sorted_customers = sorted(tickets_by_customer.keys(), key=lambda k: tickets_by_customer[k], reverse=True)[:limit]
+
+    rows = [
+        {
+            "name": name,
+            "tickets": int(tickets_by_customer[name]),
+            "spent": round(float(revenue_by_customer[name]), 2)
+        }
+        for name in sorted_customers
+    ]
+
+    return jsonify({"rows": rows})
 
 # -------- Export CSV --------
 @report_bp.route("/export/top_customers.csv", methods=["GET"])
