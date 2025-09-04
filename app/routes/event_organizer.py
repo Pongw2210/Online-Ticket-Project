@@ -474,65 +474,58 @@ def handle_refund(refund_id, action):
             # 1) Đánh dấu yêu cầu hoàn
             refund.status = RefundStatusEnum.DONG_Y
 
-            # 2) Tính số lượng hoàn
-            refunded_qty = detail.quantity or 0
+            # 2) Xác định số lượng refund thực tế (partial hoặc full)
+            refunded_qty = min(detail.quantity, getattr(refund, "requested_qty", detail.quantity) or 0)
+            if refunded_qty <= 0:
+                return jsonify({"success": False, "message": "Số lượng hoàn không hợp lệ"}), 400
 
             # 3) Hoàn lại tồn vé cho TicketType
             try:
-                if detail.ticket_type and refunded_qty > 0:
+                if detail.ticket_type:
                     detail.ticket_type.quantity = (detail.ticket_type.quantity or 0) + refunded_qty
             except Exception:
-                pass  # phòng trường hợp model khác tên thuộc tính
+                pass
 
-            # 4) Mở ghế (nếu có ghế) & xoá liên kết đặt ghế (nếu dùng bảng trung gian)
-            # Lưu ý: tuỳ mô hình của bạn. Nếu BookingDetail có quan hệ booking_seats -> seat
-            # thì dùng vòng lặp dưới. Nếu bạn dùng bảng BookingSeat rời, hãy query theo booking_id.
+            # 4) Mở ghế và xoá liên kết giữ ghế
             try:
                 if hasattr(detail, "booking_seats"):
                     for bs in list(detail.booking_seats):
                         if bs.seat:
                             bs.seat.status = StatusSeatEnum.TRONG
-                        db.session.delete(bs)  # huỷ liên kết giữ ghế
+                        db.session.delete(bs)
             except Exception:
                 pass
 
-            # 5) Trả lại voucher (nếu có gán voucher cho booking)
-            # Nếu có bảng liên kết BookingVoucher / booking.booking_vouchers
-            try:
-                if hasattr(booking, "booking_vouchers"):
-                    for bv in list(booking.booking_vouchers):
-                        if bv.voucher:
-                            # trả lại số lượng cho voucher
-                            bv.voucher.quantity = (bv.voucher.quantity or 0) + 1
-                        db.session.delete(bv)  # huỷ liên kết voucher với booking
-            except Exception:
-                pass
+            # 5) Tính refund_amount dựa trên tỷ lệ
+            total_original = sum(d.unit_price * d.quantity for d in booking.booking_details)
+            if total_original > 0:
+                detail_total = detail.unit_price * detail.quantity
+                ratio = detail_total / total_original
+                refund_amount = booking.final_price * ratio * (refunded_qty / detail.quantity)
+                booking.final_price -= refund_amount
+                if booking.final_price < 0:
+                    booking.final_price = 0
 
-            # 6) Giảm tổng tiền booking trước rồi set quantity của detail = 0
-            if refunded_qty > 0:
-                # Tổng gốc trước khi giảm giá
-                original_total = sum(d.unit_price * d.quantity for d in booking.booking_details)
+            # 6) Cập nhật quantity của detail
+            detail.quantity -= refunded_qty
+            if detail.quantity < 0:
+                detail.quantity = 0
 
-                refund_amount = 0
-                if original_total > 0:
-                    discount_ratio = booking.total_price / original_total
-                    refund_amount = (detail.unit_price or 0) * refunded_qty * discount_ratio
-
-                booking.total_price = (booking.total_price or 0) - refund_amount
-                if booking.total_price < 0:
-                    booking.total_price = 0
-
-            detail.quantity = 0
-
-            # 7) Nếu tất cả chi tiết đều đã hoàn (quantity == 0) → set booking = ĐÃ HOÀN
-            all_refunded = True
-            for d in booking.booking_details:
-                # còn quantity > 0 là chưa hoàn hết
-                if (d.quantity or 0) > 0:
-                    all_refunded = False
-                    break
-            if all_refunded:
+            # 7) Cập nhật trạng thái booking và trả lại voucher nếu full refund
+            if all(d.quantity == 0 for d in booking.booking_details):
                 booking.status = StatusBookingEnum.DA_HOAN
+
+                # Trả lại voucher
+                try:
+                    if hasattr(booking, "booking_vouchers"):
+                        for bv in list(booking.booking_vouchers):
+                            if bv.voucher:
+                                bv.voucher.quantity = (bv.voucher.quantity or 0) + 1
+                            db.session.delete(bv)
+                except Exception:
+                    pass
+            else:
+                booking.status = StatusBookingEnum.DA_THANH_TOAN
 
         elif action == "reject":
             refund.status = RefundStatusEnum.TU_CHOI
@@ -585,6 +578,12 @@ def scan_qr_checkin():
 
         if detail.check_in == 1:
             return jsonify({"success": False, "message": "Vé đã được check-in trước đó"}), 400
+
+        rr = RefundRequest.query.filter_by(booking_detail_id=detail.id).first()
+        if rr and rr.status == RefundStatusEnum.DONG_Y:
+            return jsonify({"success": False, "message": "Vé đã được hoàn trước đó"}), 400
+        if rr and rr.status == RefundStatusEnum.CHO_XU_LY:
+            return jsonify({"success": False, "message": "Vé đang chờ xử lý hoàn vé"}), 400
 
         detail.check_in = 1
         detail.check_in_at = datetime.utcnow()

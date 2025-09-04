@@ -585,7 +585,8 @@ function showVoucherModal(eventId) {
             return;
         }
 
-        data.forEach(v => {
+        const availableVouchers = data.filter(v => v.quantity > 0);
+        availableVouchers.forEach(v => {
             const li = document.createElement("li");
             li.textContent = `${v.code} - ${v.discount_value}${v.discount_type === "PHAN_TRAM" ? "%" : "đ"}`;
             li.onclick = () => applyVoucher(v);
@@ -598,8 +599,8 @@ function showVoucherModal(eventId) {
 function applyVoucher(voucher) {
     appliedVoucher = voucher;
 
-    // Lưu voucher vào sessionStorage để các trang / lần reload còn nhớ
-    sessionStorage.setItem('appliedVoucher', JSON.stringify(voucher));
+        // Lưu voucher vào sessionStorage để các trang / lần reload còn nhớ
+        sessionStorage.setItem('appliedVoucher', JSON.stringify(voucher));
 
     // Hiển thị voucher trên nút
     const voucherBtn = document.querySelector('.voucher .btn');
@@ -651,7 +652,6 @@ function updateSummary() {
         continueBtn.textContent = `Tiếp tục - Tổng: ${formatPrice(totalPrice)}`;
     }
 }
-
 
 //document.addEventListener('DOMContentLoaded', updateSummary);
 // Format giá

@@ -73,8 +73,12 @@ class StatsView(BaseView):
         total_bookings = db.session.query(func.count(Booking.id)).filter(
             Booking.booking_date >= start_date, Booking.booking_date < end_date
         ).scalar() or 0
-        total_revenue = db.session.query(func.coalesce(func.sum(Booking.total_price), 0)).filter(
-            Booking.booking_date >= start_date, Booking.booking_date < end_date
+
+        total_revenue = db.session.query(
+            func.coalesce(func.sum(Booking.final_price), 0)
+        ).filter(
+            Booking.booking_date >= start_date,
+            Booking.booking_date < end_date
         ).scalar() or 0.0
 
         prev_bookings = db.session.query(func.count(Booking.id)).filter(
