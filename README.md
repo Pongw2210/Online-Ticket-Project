@@ -1,6 +1,6 @@
-# 🎫 TicketBox Clone – Hệ thống đặt vé sự kiện trực tuyến
+# 🎫 **TicketBox Clone – Hệ thống đặt vé sự kiện trực tuyến**
 
-## 📖 Giới thiệu
+## 📖 **Giới thiệu**
 **TicketBox Clone** là một hệ thống đặt vé sự kiện trực tuyến được xây dựng bằng **Flask**.  
 Ứng dụng cho phép:
 
@@ -12,9 +12,9 @@ Dự án được thiết kế theo mô hình **MVC (Model–View–Controller)*
 
 ---
 
-## 🚀 Hướng dẫn chạy ứng dụng
+## 🚀 **Hướng dẫn chạy ứng dụng**
 
-### 1️⃣ Cài đặt môi trường & dependencies
+### 1️⃣ **Cài đặt môi trường & dependencies**
 ```bash
 pip install flask flask-sqlalchemy pymysql qrcode[pil] cloudinary
 2️⃣ Cấu hình Database
@@ -127,22 +127,22 @@ API Key: 455275651816759
 API Secret: 4ouN8Z8Hjj1ahlD7lH8sU21MWwA
 
 ⚠️ Khuyến nghị: Không commit thông tin API/Secret trực tiếp lên repo public.
-Hãy sử dụng file .env để bảo mật.
+👉 Hãy sử dụng file .env để bảo mật.
 
 🎯 Tính năng đã hoàn thiện
- Authentication (session-based, email validation, password hashing)
+Authentication (session-based, email validation, password hashing)
 
- Event management (CRUD, Cloudinary, status)
+Event management (CRUD, Cloudinary, status)
 
- Ticket booking (seat selection, price calculation, DB persistence)
+Ticket booking (seat selection, price calculation, DB persistence)
 
- Payment system (QR code, nhiều phương thức thanh toán)
+Payment system (QR code, nhiều phương thức thanh toán)
 
- UI/UX (responsive, QR integration, JS interactive)
+UI/UX (responsive, QR integration, JS interactive)
 
 🐞 Troubleshooting
 ❌ Lỗi ModuleNotFoundError: No module named 'app'
-👉 Giải pháp: Sử dụng:
+👉 Giải pháp:
 
 bash
 Sao chép mã
@@ -191,6 +191,3 @@ UI/UX Design
 📄 License
 © 2024 TicketBox Clone. All rights reserved.
 Phần mềm phát triển nhằm mục đích học tập & nghiên cứu, không sử dụng cho mục đích thương mại.
-
-yaml
-Sao chép mã
