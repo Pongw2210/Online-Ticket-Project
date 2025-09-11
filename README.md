@@ -14,22 +14,21 @@ Dự án được thiết kế theo mô hình **MVC (Model–View–Controller)*
 
 ## 🚀 **Hướng dẫn chạy ứng dụng**
 
-### 1️⃣ **Cài đặt môi trường & dependencies**
-```bash
+### 1 **Cài đặt môi trường & dependencies**
 pip install flask flask-sqlalchemy pymysql qrcode[pil] cloudinary
-2️⃣ Cấu hình Database
+2. Cấu hình Database
 Đảm bảo MySQL server đang chạy.
 Tạo database ticket_db với charset utf8mb4.
 Nếu cần, cập nhật thông tin kết nối tại app/__init__.py.
-3️⃣ Khởi tạo Database
+3. Khởi tạo Database
 python -m app.data.create_db
-4️⃣ Chạy ứng dụng
+4. Chạy ứng dụng
 Có 2 cách chạy:
 Cách 1: File run.py tại thư mục gốc
 python run.py
 Cách 2: Module app
 python -m app.run
-5️⃣ Truy cập ứng dụng
+5. Truy cập ứng dụng
 Mở trình duyệt: 👉 http://localhost:5000
 
 🔐 Tính năng nổi bật
