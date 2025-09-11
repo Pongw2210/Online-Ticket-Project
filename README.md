@@ -1,150 +1,196 @@
-# 🎫 TicketBox Clone - Hệ thống đặt vé sự kiện trực tuyến
+🎫 TicketBox Clone – Hệ thống đặt vé sự kiện trực tuyến
+📖 Giới thiệu
 
-## 📋 Mô tả
-Hệ thống đặt vé sự kiện trực tuyến được xây dựng bằng Flask, cho phép người dùng đăng ký, đăng nhập, xem sự kiện, mua vé và chọn ghế ngồi.
+TicketBox Clone là một hệ thống đặt vé sự kiện trực tuyến được xây dựng bằng Flask.
+Ứng dụng cho phép:
 
-## 🚀 Cách chạy ứng dụng
+Người dùng đăng ký/đăng nhập, tìm kiếm, mua vé và chọn ghế ngồi.
 
-### 1. Cài đặt dependencies
-```bash
+Người tổ chức sự kiện có thể đăng tải và quản lý sự kiện.
+
+Thanh toán nhanh chóng bằng QR code với nhiều phương thức.
+
+Dự án được thiết kế theo mô hình MVC (Model–View–Controller), dễ bảo trì và mở rộng.
+
+🚀 Hướng dẫn chạy ứng dụng
+1️⃣ Cài đặt môi trường & dependencies
 pip install flask flask-sqlalchemy pymysql qrcode[pil] cloudinary
-```
 
-### 2. Cấu hình database
-- Đảm bảo MySQL server đang chạy
-- Tạo database `ticket_db` với charset `utf8mb4`
-- Cập nhật thông tin kết nối trong `app/__init__.py` nếu cần
+2️⃣ Cấu hình Database
 
-### 3. Khởi tạo database
-```bash
+Đảm bảo MySQL server đang chạy.
+
+Tạo database ticket_db với charset utf8mb4.
+
+Nếu cần, cập nhật thông tin kết nối tại app/__init__.py.
+
+3️⃣ Khởi tạo Database
 python -m app.data.create_db
-```
 
-### 4. Chạy ứng dụng
-Có 2 cách:
+4️⃣ Chạy ứng dụng
 
-**Cách 1: Sử dụng file run.py ở thư mục gốc**
-```bash
+Có 2 cách chạy:
+
+Cách 1: File run.py tại thư mục gốc
+
 python run.py
-```
 
-**Cách 2: Sử dụng module app**
-```bash
+
+Cách 2: Module app
+
 python -m app.run
-```
 
-### 5. Truy cập ứng dụng
-Mở trình duyệt và truy cập: `http://localhost:5000`
+5️⃣ Truy cập ứng dụng
 
-## 🔐 Tính năng chính
+Mở trình duyệt: 👉 http://localhost:5000
 
-### Authentication
-- ✅ Đăng ký tài khoản mới với email
-- ✅ Kiểm tra email hợp lệ khi đăng ký
-- ✅ Đăng nhập/đăng xuất
-- ✅ Session-based authentication
-- ✅ Bảo vệ các trang nhạy cảm
+🔐 Tính năng nổi bật
+🧑‍💻 Authentication
 
-### Sự kiện
-- ✅ Xem danh sách sự kiện
-- ✅ Tìm kiếm sự kiện
-- ✅ Xem chi tiết sự kiện
-- ✅ Tạo sự kiện mới (cho người tổ chức)
+Đăng ký tài khoản qua email (có kiểm tra hợp lệ).
 
-### Đặt vé
-- ✅ Chọn loại vé và số lượng
-- ✅ Chọn ghế ngồi
-- ✅ Thanh toán với QR code
-- ✅ Xem vé đã mua
+Đăng nhập/đăng xuất, bảo mật bằng session.
 
-### QR Code
-- ✅ Tạo QR code cho thanh toán
-- ✅ Tạo QR code cho vé đã mua
-- ✅ Hỗ trợ nhiều phương thức thanh toán
+Hash mật khẩu với MD5.
 
-## 🏗️ Cấu trúc project
+Redirect & flash message hỗ trợ UX tốt hơn.
 
-```
+🎉 Sự kiện
+
+Xem, tìm kiếm và phân loại sự kiện (online/offline).
+
+Chi tiết sự kiện đầy đủ thông tin.
+
+CRUD sự kiện cho event organizer.
+
+Upload ảnh sự kiện qua Cloudinary.
+
+Quản lý trạng thái sự kiện: đang duyệt / đã duyệt / từ chối.
+
+🎟️ Đặt vé
+
+Chọn loại vé & số lượng.
+
+Chọn ghế ngồi trực quan.
+
+Tính toán tổng tiền tự động.
+
+Lưu booking vào database.
+
+💳 Thanh toán & QR Code
+
+Thanh toán bằng QR code (Momo, Bank, …).
+
+Tạo QR code riêng cho mỗi vé.
+
+Hỗ trợ xác thực vé qua QR code.
+
+🖥️ Giao diện người dùng
+
+Responsive design, hỗ trợ mobile & desktop.
+
+UI hiện đại với CSS & JS.
+
+Tích hợp QR code trực tiếp trên giao diện vé.
+
+🏗️ Cấu trúc dự án
 OnlineTicketProject/
 ├── app/
-│   ├── __init__.py          # Flask app factory
-│   ├── run.py               # App runner
+│   ├── __init__.py             # Flask app factory
+│   ├── run.py                  # App runner
 │   ├── data/
-│   │   ├── models.py        # Database models
-│   │   └── create_db.py     # Database initialization
+│   │   ├── models.py           # Database models
+│   │   └── create_db.py        # Database initialization
 │   ├── routes/
-│   │   ├── auth.py          # Authentication routes
-│   │   ├── events.py        # Event routes
-│   │   ├── event_organizer.py # Event organizer routes
-│   │   └── admin.py         # Admin routes
-│   ├── templates/           # HTML templates
-│   └── static/              # CSS, JS, images
-├── run.py                   # Main runner
-└── README.md               # This file
-```
+│   │   ├── auth.py             # Authentication routes
+│   │   ├── events.py           # Event routes
+│   │   ├── event_organizer.py  # Event organizer routes
+│   │   └── admin.py            # Admin routes
+│   ├── templates/              # HTML templates
+│   └── static/                 # CSS, JS, images
+├── run.py                      # Main runner
+└── README.md                   # Project documentation
 
-## 🔧 Cấu hình
+⚙️ Cấu hình
+Database
 
-### Database
-- **Host**: localhost
-- **Port**: 3306
-- **Database**: ticket_db
-- **Username**: root
-- **Password**: 12345
+Host: localhost
 
-### Cloudinary
-- **Cloud Name**: dgqx9xde1
-- **API Key**: 455275651816759
-- **API Secret**: 4ouN8Z8Hjj1ahlD7lH8sU21MWwA
+Port: 3306
 
-## 🎯 Tính năng đã hoàn thành
+Database: ticket_db
 
-### ✅ Authentication System
-- Session-based authentication
-- Email validation khi đăng ký
-- Password hashing với MD5
-- Flash messages cho thông báo
-- Redirect sau đăng nhập/đăng xuất
+Username: root
 
-### ✅ Event Management
-- CRUD operations cho sự kiện
-- Upload ảnh lên Cloudinary
-- Phân loại sự kiện (online/offline)
-- Trạng thái sự kiện (đang duyệt/đã duyệt/từ chối)
+Password: 12345
 
-### ✅ Ticket Booking System
-- Chọn loại vé và số lượng
-- Chọn ghế ngồi tương tác
-- Tính toán giá tiền
-- Lưu trữ booking vào database
+Cloudinary
 
-### ✅ Payment System
-- QR code cho thanh toán
-- Hỗ trợ nhiều phương thức (Bank, Momo)
-- Xử lý thanh toán và tạo booking
+Cloud Name: dgqx9xde1
 
-### ✅ User Interface
-- Responsive design
-- Modern UI với CSS
-- Interactive JavaScript
-- QR code generation
+API Key: 455275651816759
 
-## 🐛 Troubleshooting
+API Secret: 4ouN8Z8Hjj1ahlD7lH8sU21MWwA
 
-### Lỗi "ModuleNotFoundError: No module named 'app'"
-**Giải pháp**: Sử dụng `python -m app.run` thay vì `python app/run.py`
+⚠️ Khuyến nghị: Không commit thông tin API/Secret trực tiếp lên repo public. Hãy sử dụng .env để bảo mật.
 
-### Lỗi database connection
-**Giải pháp**: 
-1. Kiểm tra MySQL server đang chạy
-2. Kiểm tra thông tin kết nối trong `app/__init__.py`
-3. Chạy lại `python -m app.data.create_db`
+🎯 Tính năng đã hoàn thiện
 
-### Lỗi Flask-Login
-**Giải pháp**: Đã chuyển sang session-based authentication, không còn sử dụng Flask-Login
+ Authentication (session-based, email validation, password hashing)
 
-## 👥 Team
-**Phát triển bởi QLDAPM Team**
+ Event management (CRUD, Cloudinary, status)
 
-## 📄 License
-© 2024 TicketBox Clone. Tất cả quyền được bảo lưu.
+ Ticket booking (seat selection, price calculation, DB persistence)
+
+ Payment system (QR code, nhiều phương thức thanh toán)
+
+ UI/UX (responsive, QR integration, JS interactive)
+
+🐞 Troubleshooting
+❌ Lỗi ModuleNotFoundError: No module named 'app'
+
+👉 Giải pháp: Sử dụng python -m app.run thay vì python app/run.py.
+
+❌ Lỗi kết nối Database
+
+👉 Kiểm tra:
+
+MySQL server có đang chạy không.
+
+Thông tin kết nối trong app/__init__.py.
+
+Đã chạy python -m app.data.create_db chưa.
+
+❌ Lỗi Flask-Login
+
+👉 Hệ thống đã chuyển sang session-based auth, không còn dùng Flask-Login.
+
+📚 Tài liệu hỗ trợ
+
+Flask Documentation
+
+SQLAlchemy ORM
+
+Cloudinary API Docs
+
+QRCode Python Library
+
+MySQL Official Docs
+
+👥 Team phát triển
+
+QLDAPM Team – Nhóm nghiên cứu và phát triển hệ thống đặt vé trực tuyến.
+Vai trò bao gồm:
+
+Backend Development
+
+Frontend Development
+
+Database Design
+
+UI/UX Design
+
+📄 License
+
+© 2024 TicketBox Clone. All rights reserved.
+Phần mềm phát triển nhằm mục đích học tập & nghiên cứu, không sử dụng cho mục đích thương mại.
