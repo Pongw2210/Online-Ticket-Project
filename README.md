@@ -15,7 +15,7 @@ Dự án được thiết kế theo mô hình **MVC (Model–View–Controller)*
 ## 🚀 Hướng dẫn chạy ứng dụng
 
 ### 1️⃣ Cài đặt môi trường & dependencies
-```bash
+
 pip install flask flask-sqlalchemy pymysql qrcode[pil] cloudinary
 2️⃣ Cấu hình Database
 Đảm bảo MySQL server đang chạy.
@@ -25,21 +25,13 @@ Tạo database ticket_db với charset utf8mb4.
 Nếu cần, cập nhật thông tin kết nối tại app/__init__.py.
 
 3️⃣ Khởi tạo Database
-bash
-Sao chép mã
 python -m app.data.create_db
 4️⃣ Chạy ứng dụng
 Có 2 cách chạy:
 
 Cách 1: File run.py tại thư mục gốc
-
-bash
-Sao chép mã
 python run.py
 Cách 2: Module app
-
-bash
-Sao chép mã
 python -m app.run
 5️⃣ Truy cập ứng dụng
 Mở trình duyệt: 👉 http://localhost:5000
@@ -143,14 +135,8 @@ Hãy sử dụng file .env để bảo mật.
 🐞 Troubleshooting
 ❌ Lỗi ModuleNotFoundError: No module named 'app'
 👉 Giải pháp: Sử dụng:
-
-bash
-Sao chép mã
 python -m app.run
 thay vì:
-
-bash
-Sao chép mã
 python app/run.py
 ❌ Lỗi kết nối Database
 👉 Kiểm tra:
@@ -192,5 +178,3 @@ UI/UX Design
 © 2024 TicketBox Clone. All rights reserved.
 Phần mềm phát triển nhằm mục đích học tập & nghiên cứu, không sử dụng cho mục đích thương mại.
 
-yaml
-Sao chép mã
