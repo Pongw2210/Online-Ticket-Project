@@ -19,18 +19,21 @@ TicketBox Clone là một hệ thống đặt vé sự kiện trực tuyến đ�
 ```bash
 pip install flask flask-sqlalchemy pymysql qrcode[pil] cloudinary
 ```
-
-### 2. Cấu hình database
+### 2. **Cài đặt requirements.txt
+```bash
+pip install -r requiremnets.txt
+```
+### 3. Cấu hình database
 - Đảm bảo MySQL server đang chạy
 - Tạo database `ticket_db` với charset `utf8mb4`
 - Cập nhật thông tin kết nối trong `app/__init__.py` nếu cần
 
-### 3. Khởi tạo database
+### 4. Khởi tạo database
 ```bash
 python -m app.data.create_db
 ```
 
-### 4. Chạy ứng dụng
+### 5. Chạy ứng dụng
 Có 2 cách:
 
 **Cách 1: Sử dụng file run.py ở thư mục gốc**
@@ -43,7 +46,7 @@ python run.py
 python -m app.run
 ```
 
-### 5. Truy cập ứng dụng
+### 6. Truy cập ứng dụng
 Mở trình duyệt và truy cập: `http://localhost:5000`
 
 ## 🔐 Tính năng chính
