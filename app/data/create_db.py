@@ -34,7 +34,7 @@ def seed_customer_user():
     db.session.add(cus1)
     ucus1 = User(
         username="userKhachHang",
-        email="2254052006bong@ou.edu.vn",
+        email="bongly.221004@gmail.com",
         password=str(hashlib.md5("123".encode('utf-8')).hexdigest()),
         avatar="https://res.cloudinary.com/dgqx9xde1/image/upload/v1744900183/User3_byutxj.jpg",
         role=UserEnum.KHACH_HANG

@@ -330,34 +330,12 @@ header {
 
 /* ==== TRANG CHI TIẾT SỰ KIỆN ==== */
 /* ==== Ticket Card ==== */
-.ticket-card {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    border: 2px solid #f48fb1;
-    border-radius: 12px;
-    padding: 20px;
-    max-width: 1200px;
-    width: 70%;
-    margin: 20px auto;
-    background-color: #fefefe;
-    min-height: 220px;
-    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.15);
-    transition: box-shadow 0.3s ease;
-}
+
 
 .ticket-card:hover {
     box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
 }
 
-/* ==== Ảnh sự kiện ==== */
-.ticket-card .ticket-image img {
-    width: 450px;
-    height: 280px;
-    object-fit: cover;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
 
 /* Thông tin vé */
 .ticket-info {
@@ -480,21 +458,9 @@ header {
     color: #f48fb1;
 }
 
-.ticket-selection {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-}
 
-.ticket-card {
-    display: flex;
-    justify-content: space-between;
-    background-color: white;
-    color: black;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
+
+
 
 .ticket-left {
     width: 60%;
@@ -561,14 +527,7 @@ header {
     cursor: pointer;
 }
 
-.ticket-summary {
-    background: white;
-    padding: 20px;
-    border: 2px solid #f48fb1;
-    border-radius: 10px;
-    width: 300px;
-    margin-left: auto;
-}
+
 
 .ticket-summary ul {
     padding-left: 0;
@@ -583,25 +542,8 @@ header {
     font-weight: bold;
 }
 
-.continue-btn {
-    display: inline-block;
-    background-color: #f48fb1;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    font-size: 16px;
-    text-align: center;
-    text-decoration: none;
-    border-radius: 6px;
-    cursor: pointer;
-    width: 100%;
-    box-sizing: border-box;
-    transition: background-color 0.3s ease;
-}
 
-.continue-btn:hover {
-    background-color: #ad1457;
-}
+
 
 h4 {
     color: black;
@@ -979,17 +921,7 @@ h4 {
     color: #555;
     font-size: 18px;
 }
-.ticket-card {
-    display: flex;
-    flex-wrap: wrap;
-    background: #fff;
-    border-radius: 16px;
-    padding: 28px 32px;
-    margin-bottom: 30px;
-    box-shadow: 0 4px 16px rgba(40, 167, 69, 0.08);
-    border: 2px solid #f48fb1;
-    transition: box-shadow 0.2s;
-}
+
 .ticket-card:hover {
     box-shadow: 0 8px 32px rgba(40, 167, 69, 0.18);
 }
@@ -1084,19 +1016,7 @@ h4 {
     font-size: 18px;
     margin-bottom: 30px;
 }
-.back-btn {
-    background: #f48fb1;
-    color: white;
-    padding: 12px 25px;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: bold;
-    transition: all 0.3s ease;
-}
-.back-btn:hover {
-    background: #ad1457;
-    transform: translateY(-2px);
-}
+
 .status-badge {
     padding: 6px 16px;
     border-radius: 16px;
@@ -1114,7 +1034,7 @@ h4 {
     background: #6c757d;
 }
 @media (max-width: 900px) {
-    .ticket-card { flex-direction: column; }
+
     .ticket-info-left, .ticket-info-right { margin-right: 0; min-width: 0; }
     .ticket-info-right { margin-top: 18px; }
 }
@@ -1305,29 +1225,14 @@ footer {
 
 .event-card:hover img {
     transform: scale(1.05);
-}.ticket-main {
-    display: flex;
-    gap: 20px;
-    align-items: flex-start;
 }
 
-.ticket-selection {
-    flex: 2;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
 
-.ticket-summary {
-    flex: 1;
-    position: sticky;
-    top: 20px;
-}
+
+
 
 @media (max-width: 768px) {
-    .ticket-main {
-        flex-direction: column;
-    }
+
 }
 h4 {
     color: #ad1457; /* Xanh lá chủ đạo */
@@ -1800,3 +1705,253 @@ body {
     position: relative !important;
 }
 
+/* ==== Nâng cấp giao diện đặt vé ==== */
+
+
+.ticket-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(244,143,177,0.25);
+}
+
+/* Tiêu đề vé */
+.ticket-name {
+    font-size: 24px;
+    font-weight: 700;
+    color: #ad1457;
+    margin-bottom: 12px;
+}
+
+/* Lợi ích vé */
+.ticket-benefits {
+    color: #444;
+    line-height: 1.8;
+    font-size: 15px;
+}
+
+/* Giá vé nổi bật */
+.ticket-price {
+    font-size: 22px;
+    font-weight: bold;
+    color: #d81b60;
+    margin-top: 12px;
+}
+
+/* Bộ chọn số lượng */
+.quantity-selector button {
+    background: linear-gradient(135deg, #f48fb1, #ce93d8);
+    border: none;
+    color: white;
+    font-weight: bold;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.quantity-selector button:hover {
+    background: linear-gradient(135deg, #ad1457, #9c27b0);
+    transform: scale(1.1);
+}
+
+/* Khung tổng vé */
+
+
+.ticket-summary h4 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #ad1457;
+    margin-bottom: 12px;
+}
+
+/* Nút tiếp tục */
+.continue-btn {
+    background: linear-gradient(135deg, #f48fb1, #ec407a);
+    font-weight: bold;
+    font-size: 18px;
+    border-radius: 10px;
+    padding: 14px;
+    box-shadow: 0 6px 20px rgba(244,143,177,0.4);
+    transition: all 0.3s ease;
+}
+
+.continue-btn:hover {
+    background: linear-gradient(135deg, #ad1457, #9c27b0);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(156,39,176,0.4);
+}
+
+/* ==== Giao diện đặt vé chuẩn ==== */
+.ticket-main {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.ticket-selection {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 25px;
+}
+
+.ticket-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: linear-gradient(145deg, #ffffff, #fff0f5);
+    border: 1px solid #f48fb1;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    transition: all 0.3s ease-in-out;
+}
+.ticket-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(244,143,177,0.25);
+}
+
+.ticket-name {
+    font-size: 24px;
+    font-weight: 700;
+    color: #ad1457;
+    margin-bottom: 12px;
+}
+
+.ticket-benefits {
+    color: #444;
+    line-height: 1.8;
+    font-size: 15px;
+    margin-bottom: 12px;
+}
+
+.ticket-price {
+    font-size: 22px;
+    font-weight: bold;
+    color: #d81b60;
+    margin: 8px 0;
+}
+
+.quantity-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+}
+.quantity-selector button {
+    background: linear-gradient(135deg, #f48fb1, #ce93d8);
+    border: none;
+    color: white;
+    font-weight: bold;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    width: 34px;
+    height: 34px;
+    cursor: pointer;
+}
+.quantity-selector button:hover {
+    background: linear-gradient(135deg, #ad1457, #9c27b0);
+    transform: scale(1.1);
+}
+.quantity-selector input {
+    width: 60px;
+    height: 34px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.ticket-right {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 15px;
+}
+
+.ticket-image {
+    display: flex;
+    justify-content: center;
+    margin-top: 12px;
+}
+
+.ticket-image img {
+    max-width: 260px;   /* thu nhỏ lại */
+    max-height: 180px;  /* hạn chế chiều cao */
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.ticket-summary {
+    border: 2px solid #ad1457;
+    border-radius: 14px;
+    background: #fff;
+    padding: 24px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    position: sticky;
+    top: 20px;
+    height: fit-content;
+}
+.ticket-summary h4 {
+    font-size: 20px;
+    font-weight: bold;
+    color: #ad1457;
+    margin-bottom: 12px;
+}
+.ticket-summary .total {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 16px;
+    color: #000;
+}
+
+@media (max-width: 768px) {
+    .ticket-main {
+        grid-template-columns: 1fr;
+    }
+    .ticket-summary {
+        position: relative;
+        top: 0;
+    }
+}
+
+/* ==== NÚT TIẾP TỤC + QUAY LẠI ==== */
+/* Gom 2 nút chung rule */
+.continue-btn,
+.back-btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;   /* bỏ gạch chân link */
+    box-sizing: border-box;  /* đảm bảo width tính cả padding */
+    margin-top: 14px;
+}
+
+/* Tiếp tục */
+.continue-btn {
+    background: linear-gradient(135deg, #f48fb1, #ec407a);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(244,143,177,0.4);
+}
+.continue-btn:hover {
+    background: linear-gradient(135deg, #ad1457, #9c27b0);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(156,39,176,0.4);
+}
+
+/* Quay lại */
+.back-btn {
+    background: linear-gradient(135deg, #90caf9, #42a5f5);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(66,165,245,0.4);
+}
+.back-btn:hover {
+    background: linear-gradient(135deg, #1565c0, #0d47a1);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(21,101,192,0.4);
+}

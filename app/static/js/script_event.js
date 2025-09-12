@@ -670,3 +670,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
+const currentEventId = sessionStorage.getItem('checkoutEventId');
+if (currentEventId && currentEventId !== eventId) {
+    sessionStorage.removeItem('appliedVoucher');
+}
+sessionStorage.setItem('checkoutEventId', eventId);
