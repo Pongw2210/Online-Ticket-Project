@@ -5,13 +5,13 @@ TicketBox Clone là một hệ thống đặt vé sự kiện trực tuyến đ�
 
 Ứng dụng cho phép:
 
-Người dùng đăng ký/đăng nhập, tìm kiếm, mua vé và chọn ghế ngồi.
+- Người dùng đăng ký/đăng nhập, tìm kiếm, mua vé và chọn ghế ngồi.
 
-Người tổ chức sự kiện có thể đăng tải và quản lý sự kiện.
+- Người tổ chức sự kiện có thể đăng tải và quản lý sự kiện.
 
-Thanh toán nhanh chóng bằng QR code với nhiều phương thức.
+- Thanh toán nhanh chóng bằng QR code với nhiều phương thức.
 
-Dự án được thiết kế theo mô hình MVC (Model–View–Controller), dễ bảo trì và mở rộng.
+- Dự án được thiết kế theo mô hình MVC (Model–View–Controller), dễ bảo trì và mở rộng.
 
 ## 🚀 Cách chạy ứng dụng
 
