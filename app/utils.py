@@ -129,7 +129,7 @@ def send_ticket_email(to_email, tickets):
     # Gửi email
     with current_app.app_context():
         msg = Message(
-            subject="🎫 Vé sự kiện của bạn",
+            subject="Vé sự kiện của bạn",
             recipients=[to_email],
             html=html_content,
             sender=current_app.config.get("MAIL_USERNAME")
@@ -147,6 +147,6 @@ def send_ticket_email(to_email, tickets):
 
         try:
             mail.send(msg)
-            print(f"✅ Email vé đã gửi tới {to_email}")
+            print(f"Email vé đã gửi tới {to_email}")
         except Exception as e:
-            print(f"❌ Lỗi gửi email: {e}")
+            print(f"Lỗi gửi email: {e}")

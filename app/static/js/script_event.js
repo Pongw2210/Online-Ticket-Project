@@ -597,10 +597,17 @@ function showVoucherModal(eventId) {
 }
 
 function applyVoucher(voucher) {
+    const currentEventId = sessionStorage.getItem('checkoutEventId');
+
+    // Kiểm tra eventId có khớp hay không
+    if (voucher.event_id && voucher.event_id != currentEventId) {
+        return;
+    }
+
     appliedVoucher = voucher;
 
-        // Lưu voucher vào sessionStorage để các trang / lần reload còn nhớ
-        sessionStorage.setItem('appliedVoucher', JSON.stringify(voucher));
+    // Lưu voucher vào sessionStorage để các trang / lần reload còn nhớ
+    sessionStorage.setItem('appliedVoucher', JSON.stringify(voucher));
 
     // Hiển thị voucher trên nút
     const voucherBtn = document.querySelector('.voucher .btn');
@@ -611,6 +618,7 @@ function applyVoucher(voucher) {
     closeVoucherModal();
     window.location.reload();
 }
+
 
 function updateSummary() {
     const summaryList = document.getElementById('summary-list');
@@ -670,8 +678,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-const currentEventId = sessionStorage.getItem('checkoutEventId');
-if (currentEventId && currentEventId !== eventId) {
-    sessionStorage.removeItem('appliedVoucher');
-}
-sessionStorage.setItem('checkoutEventId', eventId);
+//const currentEventId = sessionStorage.getItem('checkoutEventId');
+//if (currentEventId && currentEventId !== eventId) {
+//    sessionStorage.removeItem('appliedVoucher');
+//}
+//sessionStorage.setItem('checkoutEventId', eventId);
