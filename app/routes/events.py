@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 from flask import (
     Blueprint, render_template, request, redirect,
@@ -349,7 +349,7 @@ def my_tickets():
                         seat_display = "Sẽ được sắp xếp ghế sau khi check-in"
             else:
                 event_online = getattr(event, "event_online", None)
-                event_address = getattr(event_online, "meeting_url", "Online")
+                event_address = getattr(event_online, "livestream_url", "Online")
 
             tickets_for_user.append({
                 "booking_detail_id": detail.id,

@@ -68,7 +68,7 @@ def process_success_booking(booking: Booking, final_price=None):
                     seat_display = "Sẽ được sắp xếp ghế sau khi check-in"
         else:
             event_online = getattr(event, "event_online", None)
-            event_address = getattr(event_online, "meeting_url", "Online")
+            event_address = getattr(event_online, "livestream_url", "Online")
 
         # Thông tin vé
         ticket_info = {

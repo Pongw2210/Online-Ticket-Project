@@ -43,6 +43,46 @@ def seed_customer_user():
     db.session.add(ucus1)
     db.session.commit()
 
+def seed_customer_user1():
+    cus2 = Customer(
+        fullname="Nguyễn Ngọc Quy1",
+        email="2254052006bong@ou.edu.vn",
+        gender="Nữ",
+        dob=datetime(2000, 1, 1),
+        number_phone="0987654321"
+    )
+    db.session.add(cus2)
+    ucus2 = User(
+        username="userKhachHang1",
+        email="2254052006bong@ou.edu.vn",
+        password=str(hashlib.md5("123".encode('utf-8')).hexdigest()),
+        avatar="https://res.cloudinary.com/dgqx9xde1/image/upload/v1744900183/User3_byutxj.jpg",
+        role=UserEnum.KHACH_HANG
+    )
+    ucus2.customer = cus2
+    db.session.add(ucus2)
+    db.session.commit()
+
+def seed_customer_user2():
+    cus3 = Customer(
+        fullname="Nguyễn Ngọc Quy",
+        email="2254052006bong@ou.edu.vn",
+        gender="Nữ",
+        dob=datetime(2000, 1, 1),
+        number_phone="0987654321"
+    )
+    db.session.add(cus3)
+    ucus3 = User(
+        username="userKhachHang2",
+        email="2254052065quy@ou.edu.vn",
+        password=str(hashlib.md5("123".encode('utf-8')).hexdigest()),
+        avatar="https://res.cloudinary.com/dgqx9xde1/image/upload/v1744900183/User3_byutxj.jpg",
+        role=UserEnum.KHACH_HANG
+    )
+    ucus3.customer = cus3
+    db.session.add(ucus3)
+    db.session.commit()
+
 def seed_event_organizer_user():
     event_organizer1 = EventOrganizer(fullname="Trần Bảo Ngọc", email="tbn@gmail.com", gender="Nữ")
     db.session.add(event_organizer1)
@@ -733,13 +773,13 @@ def seed_ticket_type():
 
 if __name__ == "__main__":
     with app.app_context():
-        db.drop_all()
+        # db.drop_all()
+
         db.create_all()
-
-        seed_customer_user()
-        seed_admin_user()
-        seed_event_organizer_user()
-
-        seed_event_offline()
-        seed_event_online()
-        seed_ticket_type()
+        # seed_customer_user()
+        # seed_admin_user()
+        # seed_event_organizer_user()
+        #
+        # seed_event_offline()
+        # seed_event_online()
+        # seed_ticket_type()
